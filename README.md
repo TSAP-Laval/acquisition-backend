@@ -1,4 +1,5 @@
 # acquisition-backend
+
 ![CircleCI](https://circleci.com/gh/TSAP-Laval/acquisition-backend.svg?style=svg)
 
 ## Procédures pour PostgreSQL
@@ -58,4 +59,3 @@
 #### Dossier pour le fichier de configurations Nginx :
   `vi /usr/local/etc/nginx/nginx.conf`
   
-
