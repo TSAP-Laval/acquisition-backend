@@ -2,11 +2,12 @@ package main
 
 import (
 	"log"
-
-	"github.com/TSAP-Laval/acquisition-backend/acquisition/api"
+	"net/http"
+	"tsap/back-end/acquisition-backend/acquisition/api"
 )
 
 func main() {
-	router := api.getRouter()
-	log.Fatal()
+	router := api.GetRouter()
+
+	log.Fatal(http.ListenAndServe(":3000", router))
 }
