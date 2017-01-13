@@ -11,7 +11,7 @@
 
   - name: Upload new build
     copy:
-      src: main
+      src: ../main
       dest: /home/tsap/api
 
   - name: Switch to updated app version
