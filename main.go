@@ -1,6 +1,6 @@
-package api
+package main
 
-import "tsap/back-end/acquisition-backend/acquisition/api"
+import "github.com/TSAP-Laval/acquisition-backend/acquisition/api"
 
 // GetRouter retourne les routes de l'API
 func main() {
