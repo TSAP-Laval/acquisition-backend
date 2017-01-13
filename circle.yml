@@ -1,4 +1,7 @@
 dependencies:
+  pre:
+    - pip install ansible
+    - pip install --upgrade setuptools
   post:
     - go get -u github.com/golang/lint/golint
 
@@ -8,3 +11,17 @@ test:
     - golint ./...
     - go tool vet .
     - go test -v -race ./...
+
+machine:
+  python:
+    version: 2.7.10
+
+general:
+  artifacts:
+    - "consume-backend"
+
+deployment:  
+  prod:
+    branch: master
+    commands:
+      - ansible-playbook deployment/deploy.yml -i deployment/vars
