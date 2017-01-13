@@ -14,6 +14,9 @@
       src: ../main
       dest: /home/tsap/api
 
+  - name: Add execution to user
+    shell: chmod +x main
+
   - name: Switch to updated app version
     shell: supervisorctl restart api
     register: superout
