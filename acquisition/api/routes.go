@@ -8,8 +8,8 @@ import (
 
 // GetRouter retourne les routes de l'API
 func GetRouter() *gin.Engine {
-	// Creates a gin router with default middleware:
-	// logger and recovery (crash-free) middleware
+	// Crée un routeur gin avec un middleware par défaut:
+	// logger et recovery (crash-free) middleware
 	router := gin.Default()
 
 	router.GET("/", func(c *gin.Context) {

@@ -3,7 +3,8 @@ package main
 import (
 	"log"
 	"net/http"
-	"tsap/back-end/acquisition-backend/acquisition/api"
+
+	"github.com/TSAP-Laval/acquisition-backend/acquisition/api"
 )
 
 func main() {

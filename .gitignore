@@ -31,3 +31,9 @@ vendor/
 
 # VSCODE
 .vscode
+
+#MAC
+.DS_Store
+
+#Debug
+debug
