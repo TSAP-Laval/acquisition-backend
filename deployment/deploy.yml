@@ -11,7 +11,7 @@
 
   - name: Upload new build
     copy:
-      src: ../acquisition-backend/main
+      src: main
       dest: /home/tsap/api
 
   - name: Switch to updated app version
