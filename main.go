@@ -1,20 +1,12 @@
 package api
 
-import (
-	"net/http"
-
-	"github.com/gin-gonic/gin"
-)
+import "tsap/back-end/acquisition-backend/acquisition/api"
 
 // GetRouter retourne les routes de l'API
-func GetRouter() *gin.Engine {
+func main() {
 	// Creates a gin router with default middleware:
 	// logger and recovery (crash-free) middleware
-	router := gin.Default()
+	router := api.GetRouter()
 
-	router.GET("/", func(c *gin.Context) {
-		c.String(http.StatusOK, "aaaaa")
-	})
-
-	return router
+	router.Run(":3000")
 }
