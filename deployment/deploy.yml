@@ -14,8 +14,8 @@
       src: ../main
       dest: /home/tsap/api
 
-  - name: Add execution to user
-    shell: chmod +x main
+  - name: Mark build executable
+    file: path=/home/tsap/api/main mode=u+rwx
 
   - name: Switch to updated app version
     shell: supervisorctl restart api
