@@ -1,0 +1,21 @@
+- hosts: web
+  remote_user: tsap
+
+  tasks:
+
+  - name: Delete old API version
+    file: path=/home/tsap/api state=absent
+
+  - name: Create server directory
+    file: path=/home/tsap/api state=directory
+
+  - name: Upload new build
+    copy:
+      src: ../acquisition-backend/main
+      dest: /home/tsap/api
+
+  - name: Switch to updated app version
+    shell: supervisorctl restart api
+    register: superout
+
+  - debug: msg="{{ superout.stdout }}"
