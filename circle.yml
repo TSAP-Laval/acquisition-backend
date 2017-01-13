@@ -4,6 +4,7 @@ dependencies:
     - pip install --upgrade setuptools
   post:
     - go get -u github.com/golang/lint/golint
+    - go build main.go
 
 test:
   override:

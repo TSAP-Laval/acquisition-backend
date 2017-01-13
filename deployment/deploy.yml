@@ -11,11 +11,8 @@
 
   - name: Upload new build
     copy:
-      src: ../acquisition-backend
+      src: ../acquisition-backend/main
       dest: /home/tsap/api
-
-  - name: Mark build executable
-    file: path=/home/tsap/api/acquisition-backend mode=u+rwx
 
   - name: Switch to updated app version
     shell: supervisorctl restart api
