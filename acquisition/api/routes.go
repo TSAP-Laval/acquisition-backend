@@ -13,7 +13,12 @@ func GetRouter() *gin.Engine {
 	router := gin.Default()
 
 	router.GET("/", func(c *gin.Context) {
-		c.String(http.StatusOK, "aaaaa")
+		c.String(http.StatusOK, "okok")
+		println("okok")
+	})
+
+	router.POST("/upload", func(c *gin.Context) {
+		println("okok")
 	})
 
 	return router
