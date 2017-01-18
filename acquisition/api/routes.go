@@ -19,28 +19,40 @@ func GetRouter() *gin.Engine {
 		c.String(http.StatusOK, "bbb")
 	})
 	router.GET("/actions", func(c *gin.Context) {
-		db, err := gorm.Open("postgres", "host=localhost user=postgres dbname=tsapTest sslmode=disable password=alex1997")
+		db, err := gorm.Open("postgres", "host=localhost user=postgres dbname=tsapBack sslmode=disable password=alex1997")
 		defer db.Close()
 		fmt.Println(err)
-		types := []Actions_type{}
-		db.Find(&types)
-		fmt.Println(types)
 
+		db.AutoMigrate(&TypeAction{})
+		db.AutoMigrate(&Sport{})
+		db.AutoMigrate(&Niveau{})
+		db.AutoMigrate(&Entraineur{})
+		db.AutoMigrate(&Joueur{})
+		db.AutoMigrate(&Equipe{})
+		db.AutoMigrate(&Zone{})
+		db.AutoMigrate(&Saison{})
+		db.AutoMigrate(&Lieu{})
+		db.AutoMigrate(&Video{})
+		db.AutoMigrate(&Partie{})
+		db.AutoMigrate(&Action{})
 	})
-	router.GET("/actionsTest", func(c *gin.Context) {
-		db, err := gorm.Open("postgres", "host=localhost user=postgres dbname=tsapTest sslmode=disable password=alex1997")
+	router.GET("/getJoueurs", func(c *gin.Context) {
+		db, err := gorm.Open("postgres", "host=localhost user=postgres dbname=tsapBack sslmode=disable password=alex1997")
 		defer db.Close()
 		fmt.Println(err)
-		user := Actions_type{ID: "test", Name: "passe", Description: "une passe", Id_movement_type: 1}
-		if db.NewRecord(user) {
-			fmt.Println("Test")
-			db.Create(&user)
-			db.NewRecord(user) // => return `false` after `user` created
-		} else {
-			fmt.Println("Test22")
-		}
+		user := []Joueur{}
+		db.Find(&user)
+		c.JSON(200, &user)
 
 	})
+	router.GET("/GetActions", func(c *gin.Context) {
+		db, err := gorm.Open("postgres", "host=localhost user=postgres dbname=tsapBack sslmode=disable password=alex1997")
+		defer db.Close()
+		fmt.Println(err)
+		user := []TypeAction{}
+		db.Find(&user)
+		c.JSON(200, &user)
 
+	})
 	return router
 }
