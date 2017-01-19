@@ -18,7 +18,7 @@ import (
 type AcquisitionConfiguration struct {
 	DatabaseDriver   string
 	ConnectionString string
-	APIURL           string
+	Port             string
 	Debug            bool
 }
 
@@ -94,8 +94,8 @@ func (a *AcquisitionService) getRouter() http.Handler {
 func (a *AcquisitionService) Start() {
 	go func() {
 
-		fmt.Println(a.config.APIURL)
-		a.server.Addr = a.config.APIURL
+		fmt.Println(a.config.port)
+		a.server.Addr = a.config.port
 		a.server.Handler = a.getRouter()
 		a.server.ListenAndServe()
 		a.Info("Acquisition shutting down...")
