@@ -52,7 +52,7 @@ type Equipe struct {
 	Entraineurs []Entraineur `gorm:"many2many:entraineur_equipe;"`
 	Joueurs     []Joueur     `gorm:"many2many:joueur_equipe;"`
 }
-type Zone struct {
+type ActionZone struct {
 	gorm.Model
 	Nom string
 }
@@ -70,6 +70,10 @@ type Video struct {
 	gorm.Model
 	Path           string
 	AnalyseTermine bool
+}
+type Zone struct {
+	gorm.Model
+	Nom string
 }
 
 type Partie struct {
