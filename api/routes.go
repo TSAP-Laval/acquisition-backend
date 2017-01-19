@@ -86,6 +86,9 @@ func (a *AcquisitionService) getRouter() http.Handler {
 	r.HandleFunc("/api/seeders", a.Remplir)
 	r.HandleFunc("/api/seeders/FaireBD", a.FaireBD)
 	r.HandleFunc("/api/GetMovementType", a.GetMovementTypeHandler)
+	r.HandleFunc("/api/GetActionType", a.GetAllActionsTypes)
+	r.HandleFunc("/api/PostActionType", a.PostActionType)
+
 	return a.Middleware(r)
 }
 

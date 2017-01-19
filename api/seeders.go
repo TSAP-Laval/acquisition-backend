@@ -6,13 +6,16 @@ import (
 
 	"github.com/jinzhu/gorm"
 )
-import _ "github.com/jinzhu/gorm/dialects/postgres"
+import _ "github.com/lib/pq"
 
 func (a *AcquisitionService) FaireBD(w http.ResponseWriter, r *http.Request) {
-	db, err := gorm.Open("postgres", "host=localhost user=postgres dbname=tsapBack sslmode=disable password=tsaplaval")
+	db, err := gorm.Open("postgres", "port=5432 host=localhost user=postgres dbname=tsapBack password=tsaplaval sslmode=disable")
 	defer db.Close()
 	fmt.Println(err)
 
+	fmt.Println()
+	fmt.Println(a.config.DatabaseDriver)
+	fmt.Println(a.config.ConnectionString)
 	db.AutoMigrate(&TypeAction{})
 	db.AutoMigrate(&Sport{})
 	db.AutoMigrate(&Niveau{})
@@ -26,6 +29,7 @@ func (a *AcquisitionService) FaireBD(w http.ResponseWriter, r *http.Request) {
 	db.AutoMigrate(&Partie{})
 	db.AutoMigrate(&Action{})
 }
+
 func (a *AcquisitionService) Remplir(w http.ResponseWriter, r *http.Request) {
 	fmt.Println(a.config.DatabaseDriver)
 	fmt.Println(a.config.ConnectionString)
