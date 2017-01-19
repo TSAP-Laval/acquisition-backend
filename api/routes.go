@@ -82,10 +82,10 @@ func (a *AcquisitionService) Middleware(h http.Handler) http.Handler {
 func (a *AcquisitionService) getRouter() http.Handler {
 	r := mux.NewRouter()
 
-	r.HandleFunc("/api/video", a.VideoHandler).Methods("GET, POST")
-	r.HandleFunc("/api/edition", a.GetJoeurs).Methods("GET, POST")
-
-	//r.HandleFunc("seed", c.SeedHandler)
+	r.HandleFunc("/api/video", a.VideoHandler)
+	r.HandleFunc("/api/edition/GetJoueurs", a.GetJoueurs)
+	r.HandleFunc("/api/seeders", a.Remplir)
+	r.HandleFunc("/api/edition/GetActions", a.GetActions)
 
 	return a.Middleware(r)
 }
@@ -93,14 +93,14 @@ func (a *AcquisitionService) getRouter() http.Handler {
 // Start démarre le service
 func (a *AcquisitionService) Start() {
 	go func() {
-
-		fmt.Println(a.config.port)
-		a.server.Addr = a.config.port
+		fmt.Println(a.config.Port)
+		a.server.Addr = a.config.Port
 		a.server.Handler = a.getRouter()
 		a.server.ListenAndServe()
 		a.Info("Acquisition shutting down...")
 	}()
-	a.logger.Printf("TSAP-Acquisiton started on %s... \n", a.config.APIURL)
+
+	a.logger.Printf("TSAP-Acquisiton started on %s... \n", a.config.Port)
 }
 
 // Stop arrête le service
