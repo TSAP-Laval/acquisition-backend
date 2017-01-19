@@ -4,10 +4,9 @@ import (
 	"fmt"
 	"net/http"
 
-	_ "github.com/jinzhu/gorm/dialects/postgres"
-
 	"github.com/jinzhu/gorm"
 )
+import _ "github.com/jinzhu/gorm/dialects/postgres"
 
 func (a *AcquisitionService) FaireBD(w http.ResponseWriter, r *http.Request) {
 	db, err := gorm.Open("postgres", "host=localhost user=postgres dbname=tsapBack sslmode=disable password=tsaplaval")
