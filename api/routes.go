@@ -1,7 +1,6 @@
 package api
 
 import (
-	"fmt"
 	"io"
 	"log"
 
@@ -18,7 +17,7 @@ import (
 type AcquisitionConfiguration struct {
 	DatabaseDriver   string
 	ConnectionString string
-	PORT             string
+	Port             string
 	Debug            bool
 }
 
@@ -84,7 +83,9 @@ func (a *AcquisitionService) getRouter() http.Handler {
 
 	r.HandleFunc("/api/video", a.VideoHandler).Methods("GET", "POST")
 	//r.HandleFunc("/api/seed", c.SeedHandler)
-
+	r.HandleFunc("/api/seeders", a.Remplir)
+	r.HandleFunc("/api/seeders/FaireBD", a.FaireBD)
+	r.HandleFunc("/api/GetMovementType", a.GetMovementTypeHandler)
 	return a.Middleware(r)
 }
 
@@ -92,13 +93,12 @@ func (a *AcquisitionService) getRouter() http.Handler {
 func (a *AcquisitionService) Start() {
 	go func() {
 
-		fmt.Println(a.config.PORT)
-		a.server.Addr = a.config.PORT
+		a.server.Addr = a.config.Port
 		a.server.Handler = a.getRouter()
 		a.server.ListenAndServe()
 		a.Info("Acquisition shutting down...")
 	}()
-	a.logger.Printf("TSAP-Acquisiton started on localhost%s... \n", a.config.PORT)
+	a.logger.Printf("TSAP-Acquisiton started on localhost%s... \n", a.config.Port)
 }
 
 // Stop arrête le service
