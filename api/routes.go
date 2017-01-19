@@ -81,8 +81,7 @@ func (a *AcquisitionService) Middleware(h http.Handler) http.Handler {
 func (a *AcquisitionService) getRouter() http.Handler {
 	r := mux.NewRouter()
 
-	r.HandleFunc("/api/video", a.VideoHandler).Methods("GET", "POST")
-	//r.HandleFunc("/api/seed", c.SeedHandler)
+	r.HandleFunc("/api/video", a.VideoHandler)
 
 	return a.Middleware(r)
 }
