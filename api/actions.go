@@ -13,15 +13,6 @@ import (
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 )
 
-//MovementType represent Movement type entity
-//1: Offensive
-//2: Defensive
-//Neutral
-type MovementType struct {
-	Id   int    `json:"id,omitempty"`
-	Name string `json:"name,omitempty"`
-}
-
 // GetMovementTypeHandler Gestion du select des types de mouvements
 func (a *AcquisitionService) GetMovementTypeHandler(w http.ResponseWriter, r *http.Request) {
 	db, err := gorm.Open("postgres", "host=localhost user=postgres dbname=tsapBack sslmode=disable password=tsaplaval")
@@ -77,12 +68,14 @@ func (a *AcquisitionService) PostActionType(w http.ResponseWriter, r *http.Reque
 	}
 	log.Println(newActionType.ID)
 	if db.NewRecord(newActionType) {
-		fmt.Println("Add fonctionnel")
 		db.Create(&newActionType)
 		db.NewRecord(newActionType) // => return `false` after `user` created
 	} else {
-		fmt.Println("ERREUURRRRRR!!!!!!!!!!!!!!")
+		fmt.Println("erreur")
 	}
+	w.Header().Add("Content-Type", "Application/json")
+	actionTypeJSON, _ := json.Marshal(&newActionType)
+	w.Write(actionTypeJSON)
 }
 
 /*func (a *AcquisitionService) DeleteActionType(w http.ResponseWriter, r *http.Request, pId *int) {

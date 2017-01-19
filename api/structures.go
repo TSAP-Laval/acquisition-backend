@@ -41,6 +41,15 @@ type Joueur struct {
 	Equipes               []Equipe `gorm:"many2many:joueur_equipe;"`
 }
 
+//MovementType represent Movement type entity
+//1: Offensive
+//2: Defensive
+//3: Neutral
+type MovementType struct {
+	gorm.Model
+	Name string `gorm:"unique"`
+}
+
 type Equipe struct {
 	gorm.Model
 	Nom         string
