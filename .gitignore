@@ -37,3 +37,6 @@ vendor/
 
 #Debug
 debug
+
+#Main (compilé)
+main

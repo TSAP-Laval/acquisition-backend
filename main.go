@@ -1,13 +1,37 @@
 package main
 
-import "github.com/TSAP-Laval/acquisition-backend/acquisition/api"
+import (
+	"bufio"
+	"fmt"
+	"os"
 
-// GetRouter retourne les routes de l'API
+	"github.com/TSAP-Laval/acquisition-backend/api"
+	"github.com/kelseyhightower/envconfig"
+)
+
 func main() {
-	// Creates a gin router with default middleware:
-	// logger and recovery (crash-free) middleware
-	router := api.GetRouter()
 
-	router.Run(":3000")
+	// On récupère la configuration
+	// de l'environnement & on la passe au service
+	var a api.AcquisitionConfiguration
+
+	err := envconfig.Process("tsap", &a)
+
+	if err != nil {
+		panic(err)
+	}
+
+	service := api.New(os.Stdout, &a)
+	service.Start()
+
+	reader := bufio.NewReader(os.Stdin)
+	fmt.Print("Press enter to stop server...")
+	reader.ReadString('\n')
+
+	service.Stop()
+
+	if err != nil {
+		panic(err)
+	}
 
 }
