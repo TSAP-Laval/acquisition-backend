@@ -8,8 +8,8 @@ import (
 )
 
 // VideoHandler Gère l'upload de video sur le serveur
-func (c *AcquisitionService) VideoHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("method:", r.Method)
+func (a *AcquisitionService) VideoHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("\nmethod:", r.Method)
 
 	r.ParseMultipartForm(32 << 20)
 	file, handler, err := r.FormFile("file")
@@ -19,7 +19,7 @@ func (c *AcquisitionService) VideoHandler(w http.ResponseWriter, r *http.Request
 	}
 	defer file.Close()
 	fmt.Fprintf(w, "%v", handler.Header)
-	f, err := os.OpenFile("./test/"+handler.Filename, os.O_WRONLY|os.O_CREATE, 0666)
+	f, err := os.OpenFile("../video/"+handler.Filename, os.O_WRONLY|os.O_CREATE, 0666)
 	if err != nil {
 		fmt.Println(err)
 		return

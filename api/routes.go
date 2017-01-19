@@ -82,8 +82,8 @@ func (a *AcquisitionService) Middleware(h http.Handler) http.Handler {
 func (a *AcquisitionService) getRouter() http.Handler {
 	r := mux.NewRouter()
 
-	r.HandleFunc("/api/video", a.VideoHandler)
-	//r.HandleFunc("seed", c.SeedHandler)
+	r.HandleFunc("/api/video", a.VideoHandler).Methods("GET", "POST")
+	//r.HandleFunc("/api/seed", c.SeedHandler)
 
 	return a.Middleware(r)
 }
@@ -98,7 +98,7 @@ func (a *AcquisitionService) Start() {
 		a.server.ListenAndServe()
 		a.Info("Acquisition shutting down...")
 	}()
-	a.logger.Printf("TSAP-Acquisiton started on %s... \n", a.config.PORT)
+	a.logger.Printf("TSAP-Acquisiton started on localhost%s... \n", a.config.PORT)
 }
 
 // Stop arrête le service
