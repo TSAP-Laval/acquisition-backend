@@ -1,6 +1,7 @@
 package api
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 
@@ -40,9 +41,15 @@ func GetRouter() *gin.Engine {
 		db, err := gorm.Open("postgres", "host=localhost user=postgres dbname=tsapBack sslmode=disable password=alex1997")
 		defer db.Close()
 		fmt.Println(err)
+
 		user := []Joueur{}
 		db.Find(&user)
-		c.JSON(200, &user)
+
+		userJSON, _ := json.Marshal(user)
+		fmt.Println(string(userJSON))
+
+		c.Header().Set("Content-Type", "application/json")
+		c.Write(userJSON)
 
 	})
 	router.GET("/GetActions", func(c *gin.Context) {
@@ -55,4 +62,7 @@ func GetRouter() *gin.Engine {
 
 	})
 	return router
+}
+func foo(w http.ResponseWriter, r *http.Request) {
+
 }

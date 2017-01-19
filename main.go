@@ -9,4 +9,5 @@ func main() {
 	router := api.GetRouter()
 
 	router.Run(":3000")
+
 }
