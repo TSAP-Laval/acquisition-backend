@@ -10,12 +10,7 @@ import (
 // VideoHandler Gère l'upload de video sur le serveur
 func (a *AcquisitionService) VideoHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("\nmethod:", r.Method)
-	fmt.Println(r.Header)
-
-	//if _, err := os.Stat("./video/"); os.IsExist(err) {
-	//	fmt.Fprintf(w, "EXIST")
-	//	return
-	//}
+	//fmt.Println(r.Header)
 
 	file, handler, err := r.FormFile("file")
 
