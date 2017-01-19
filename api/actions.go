@@ -3,7 +3,6 @@ package api
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 
 	"github.com/jinzhu/gorm"
@@ -55,6 +54,9 @@ func (a *AcquisitionService) PostActionType(w http.ResponseWriter, r *http.Reque
 	fmt.Println(err)
 
 	body, err := ioutil.ReadAll(r.Body)
+	fmt.Printf("-----------------------")
+	fmt.Println(body)
+	fmt.Printf("-----------------------")
 	if err != nil {
 		panic(err)
 	}
@@ -63,19 +65,20 @@ func (a *AcquisitionService) PostActionType(w http.ResponseWriter, r *http.Reque
 	var newActionType TypeAction
 
 	err = json.Unmarshal(body, &newActionType)
+
+	fmt.Println(err)
+
 	if err != nil {
 		panic(err)
 	}
-	log.Println(newActionType.ID)
 	if db.NewRecord(newActionType) {
 		db.Create(&newActionType)
 		db.NewRecord(newActionType) // => return `false` after `user` created
 	} else {
 		fmt.Println("erreur")
 	}
-	w.Header().Add("Content-Type", "Application/json")
-	actionTypeJSON, _ := json.Marshal(&newActionType)
-	w.Write(actionTypeJSON)
+	w.Header().Set("Content-Type", "application/json")
+
 }
 
 /*func (a *AcquisitionService) DeleteActionType(w http.ResponseWriter, r *http.Request, pId *int) {
