@@ -11,10 +11,13 @@ import (
 
 func main() {
 
-	// On récupère la configuration
-	// de l'environnement & on la passe au service
+	// Récupération de la structure des
+	// configurations de l'api
 	var a api.AcquisitionConfiguration
 
+	// Récupération des configurations
+	// dans les variables d'environnement
+	// du système d'exploitation
 	err := envconfig.Process("tsap", &a)
 
 	if err != nil {

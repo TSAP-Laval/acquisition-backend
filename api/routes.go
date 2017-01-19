@@ -83,6 +83,8 @@ func (a *AcquisitionService) getRouter() http.Handler {
 	r := mux.NewRouter()
 
 	r.HandleFunc("/api/video", a.VideoHandler).Methods("GET, POST")
+	r.HandleFunc("/api/edition", a.GetJoeurs).Methods("GET, POST")
+
 	//r.HandleFunc("seed", c.SeedHandler)
 
 	return a.Middleware(r)
