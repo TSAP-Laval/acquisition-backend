@@ -26,7 +26,7 @@
   $ cd jusqu'au dossier bin de postgres
   $ plsql -U Prostgres
   ```
-#### Pour importer/exporter un script PGSQL en invite de commande :
+#### Pour importer/exporter un script PG-SQL en invite de commande :
 ##### Importer
   ```
   $ psql <nom de la BD> < fichier.pgsql
@@ -56,6 +56,6 @@
   ```
   $ sudo nginx -s stop
   ```
-#### Dossier pour le fichier de configurations Nginx :
+#### Dossier pour les configurations Nginx :
   `vi /usr/local/etc/nginx/nginx.conf`
   
