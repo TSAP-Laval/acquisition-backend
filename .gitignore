@@ -37,3 +37,9 @@ vendor/
 
 #Debug
 debug
+
+#Main (compilé)
+main
+
+#Le dossier contenant les videos
+video
