@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 
+	//Import DB driver
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 
 	"github.com/jinzhu/gorm"
