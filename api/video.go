@@ -9,6 +9,7 @@ import (
 
 // VideoHandler Gère l'upload de video sur le serveur
 func (a *AcquisitionService) VideoHandler(w http.ResponseWriter, r *http.Request) {
+
 	fmt.Println("\nmethod:", r.Method)
 	//fmt.Println(r.Header)
 
