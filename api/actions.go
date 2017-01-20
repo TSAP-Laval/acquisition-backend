@@ -50,7 +50,6 @@ func (a *AcquisitionService) GetAllActionsTypes(w http.ResponseWriter, r *http.R
 func (a *AcquisitionService) PostActionType(w http.ResponseWriter, r *http.Request) {
 	db, err := gorm.Open("postgres", "host=localhost user=postgres dbname=tsapBack sslmode=disable password=tsaplaval")
 
-	defer db.Close()
 	fmt.Println(err)
 
 	body, err := ioutil.ReadAll(r.Body)
@@ -60,7 +59,12 @@ func (a *AcquisitionService) PostActionType(w http.ResponseWriter, r *http.Reque
 	if err != nil {
 		panic(err)
 	}
+
+	defer db.Close()
 	fmt.Println(string(body))
+
+	var tfype TypeAction
+	test := json.NewDecoder(r.Body).Decode(tfype)
 
 	var newActionType TypeAction
 
@@ -77,8 +81,10 @@ func (a *AcquisitionService) PostActionType(w http.ResponseWriter, r *http.Reque
 	} else {
 		fmt.Println("erreur")
 	}
-	w.Header().Set("Content-Type", "application/json")
 
+	defer r.Body.Close()
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(body)
 }
 
 /*func (a *AcquisitionService) DeleteActionType(w http.ResponseWriter, r *http.Request, pId *int) {
