@@ -63,9 +63,6 @@ func (a *AcquisitionService) PostActionType(w http.ResponseWriter, r *http.Reque
 	defer db.Close()
 	fmt.Println(string(body))
 
-	var tfype TypeAction
-	test := json.NewDecoder(r.Body).Decode(tfype)
-
 	var newActionType TypeAction
 
 	err = json.Unmarshal(body, &newActionType)
