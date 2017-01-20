@@ -3,7 +3,8 @@ package api
 import (
 	"fmt"
 	"net/http"
-  
+
+	//Import DB driver
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 
 	"github.com/jinzhu/gorm"

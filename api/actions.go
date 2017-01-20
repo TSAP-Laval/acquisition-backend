@@ -9,6 +9,7 @@ import (
 
 	"io/ioutil"
 
+	//Import DB driver
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 )
 
@@ -83,26 +84,3 @@ func (a *AcquisitionService) PostActionType(w http.ResponseWriter, r *http.Reque
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(body)
 }
-
-/*func (a *AcquisitionService) DeleteActionType(w http.ResponseWriter, r *http.Request, pId *int) {
-
-	db, err := gorm.Open("postgres", "host=localhost user=postgres dbname=tsapBack sslmode=disable password=tsaplaval")
-
-	defer db.Close()
-	fmt.Println(err)
-
-	if err != nil {
-		db.Where("Id LIKE ?", pId).Delete(TypeAction{})
-	} else {
-		log.Fatal(err)
-	}
-}
-
-func (a *AcquisitionService) UpdateActionType(w http.ResponseWriter, r *http.Request, pId *int, name *string, description *string) {
-
-	db, err := gorm.Open("postgres", "host=localhost user=postgres dbname=tsapBack sslmode=disable password=tsaplaval")
-	defer db.Close()
-	fmt.Println(err)
-
-	actionUpdate := TypeAction{ID: pId, Nom: &name, Description: description}
-}*/
