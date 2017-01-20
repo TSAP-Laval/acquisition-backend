@@ -1,0 +1,40 @@
+	user := TypeAction{Nom: "passe", Description: "une passe"}
+		if db.NewRecord(user) {
+			fmt.Println("Test")
+			db.Create(&user)
+			db.NewRecord(user) // => return `false` after `user` created
+		} else {
+			fmt.Println("Test22")
+		}
+		entraineur := Entraineur{Prenom: "alex", Nom: "Des", Email: "alex@hotmail.com", PassHash: "test", Token: "test"}
+		if db.NewRecord(entraineur) {
+			fmt.Println("Test")
+			db.Create(&entraineur)
+			db.NewRecord(entraineur) // => return `false` after `user` created
+		} else {
+			fmt.Println("Test22")
+		}
+		joueur := Joueur{Prenom: "alex", Nom: "Des", Numero: 1, Email: "alex@hotmail.com", PassHash: "test", TokenInvitation: "test", TokenReinitialisation: "test", TokenConnexion: "test"}
+		if db.NewRecord(joueur) {
+			fmt.Println("Test")
+			db.Create(&joueur)
+			db.NewRecord(joueur) // => return `false` after `user` created
+		} else {
+			fmt.Println("Test22")
+		}
+			Sport := Sport{Nom: "soccer"}
+		if db.NewRecord(Sport) {
+			fmt.Println("Test")
+			db.Create(&Sport)
+			db.NewRecord(Sport) // => return `false` after `user` created
+		} else {
+			fmt.Println("Test22")
+		}
+		Niveau := Niveau{Nom: "AA"}
+		if db.NewRecord(Niveau) {
+			fmt.Println("Test")
+			db.Create(&Niveau)
+			db.NewRecord(Niveau) // => return `false` after `user` created
+		} else {
+			fmt.Println("Test22")
+		}
