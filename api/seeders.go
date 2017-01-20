@@ -3,7 +3,7 @@ package api
 import (
 	"fmt"
 	"net/http"
-
+  
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 
 	"github.com/jinzhu/gorm"
@@ -89,5 +89,4 @@ func (a *AcquisitionService) Remplir(w http.ResponseWriter, r *http.Request) {
 	} else {
 		fmt.Println("Test22")
 	}
-
 }
