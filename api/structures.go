@@ -41,6 +41,14 @@ type Joueur struct {
 	Equipes               []Equipe `gorm:"many2many:joueur_equipe;"`
 }
 
+//MovementType represent Movement type entity
+//1: Offensive
+//2: Defensive
+//3: Neutral
+type MovementType struct {
+	gorm.Model
+	Name string `gorm:"unique"`
+}
 type Equipe struct {
 	gorm.Model
 	Nom         string
@@ -52,7 +60,7 @@ type Equipe struct {
 	Entraineurs []Entraineur `gorm:"many2many:entraineur_equipe;"`
 	Joueurs     []Joueur     `gorm:"many2many:joueur_equipe;"`
 }
-type ActionZone struct {
+type Zone struct {
 	gorm.Model
 	Nom string
 }
@@ -70,10 +78,6 @@ type Video struct {
 	gorm.Model
 	Path           string
 	AnalyseTermine bool
-}
-type Zone struct {
-	gorm.Model
-	Nom string
 }
 
 type Partie struct {
