@@ -43,3 +43,9 @@ main
 
 #Le dossier contenant les videos
 video
+
+# SQL
+*.sql
+
+#TXT
+*.txt

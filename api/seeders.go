@@ -4,13 +4,17 @@ import (
 	"fmt"
 	"net/http"
 
+	//Import DB driver
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 
 	"github.com/jinzhu/gorm"
 )
 
 func (a *AcquisitionService) FaireBD(w http.ResponseWriter, r *http.Request) {
+<<<<<<< HEAD
 
+=======
+>>>>>>> 9a0cab33f0bdf108302a9dc72005a8fd4abbfb44
 	db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
 
 	defer db.Close()
@@ -30,7 +34,10 @@ func (a *AcquisitionService) FaireBD(w http.ResponseWriter, r *http.Request) {
 	db.AutoMigrate(&Action{})
 }
 func (a *AcquisitionService) Remplir(w http.ResponseWriter, r *http.Request) {
+<<<<<<< HEAD
 
+=======
+>>>>>>> 9a0cab33f0bdf108302a9dc72005a8fd4abbfb44
 	db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
 	defer db.Close()
 	fmt.Println(err)
@@ -91,5 +98,4 @@ func (a *AcquisitionService) Remplir(w http.ResponseWriter, r *http.Request) {
 	} else {
 		fmt.Println("Test22")
 	}
-
 }
