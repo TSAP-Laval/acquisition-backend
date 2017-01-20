@@ -16,7 +16,7 @@ func (a *AcquisitionService) GetJoueurs(w http.ResponseWriter, r *http.Request) 
 	fmt.Println("method:", r.Method)
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 
-	db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
+	db, err := gorm.Open("postgres", "host=localhost user=postgres dbname=tsapBack sslmode=disable password=alex1997")
 	defer db.Close()
 	fmt.Println(err)
 
@@ -31,7 +31,7 @@ func (a *AcquisitionService) GetJoueurs(w http.ResponseWriter, r *http.Request) 
 }
 func (a *AcquisitionService) GetActions(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
-	db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
+	db, err := gorm.Open("postgres", "host=localhost user=postgres dbname=tsapBack sslmode=disable password=alex1997")
 
 	defer db.Close()
 	fmt.Println(err)
@@ -46,7 +46,7 @@ func (a *AcquisitionService) GetActions(w http.ResponseWriter, r *http.Request) 
 }
 func (a *AcquisitionService) PostJoueur(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
-	db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
+	db, err := gorm.Open("postgres", "host=localhost user=postgres dbname=tsapBack sslmode=disable password=alex1997")
 
 	defer db.Close()
 	fmt.Println(r.Body)
