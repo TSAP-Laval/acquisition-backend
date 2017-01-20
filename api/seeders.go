@@ -10,7 +10,9 @@ import (
 )
 
 func (a *AcquisitionService) FaireBD(w http.ResponseWriter, r *http.Request) {
-	db, err := gorm.Open("postgres", "host=localhost user=postgres dbname=tsapBack sslmode=disable password=alex1997")
+
+	db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
+
 	defer db.Close()
 	fmt.Println(err)
 
@@ -28,7 +30,8 @@ func (a *AcquisitionService) FaireBD(w http.ResponseWriter, r *http.Request) {
 	db.AutoMigrate(&Action{})
 }
 func (a *AcquisitionService) Remplir(w http.ResponseWriter, r *http.Request) {
-	db, err := gorm.Open("postgres", "host=localhost user=postgres dbname=tsapBack sslmode=disable password=alex1997")
+
+	db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
 	defer db.Close()
 	fmt.Println(err)
 	user := TypeAction{Nom: "PO", Description: "Passe offensive"}
