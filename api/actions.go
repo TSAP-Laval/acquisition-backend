@@ -14,7 +14,7 @@ import (
 
 // GetMovementTypeHandler Gestion du select des types de mouvements
 func (a *AcquisitionService) GetMovementTypeHandler(w http.ResponseWriter, r *http.Request) {
-	db, err := gorm.Open("postgres", "host=localhost user=postgres dbname=tsapBack sslmode=disable password=tsaplaval")
+	db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
 
 	defer db.Close()
 	fmt.Println(err)
@@ -32,7 +32,7 @@ func (a *AcquisitionService) GetMovementTypeHandler(w http.ResponseWriter, r *ht
 //GetAllActionsTypes gestion du select des types d'actions
 func (a *AcquisitionService) GetAllActionsTypes(w http.ResponseWriter, r *http.Request) {
 
-	db, err := gorm.Open("postgres", "host=localhost user=postgres dbname=tsapBack sslmode=disable password=tsaplaval")
+	db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
 
 	defer db.Close()
 	fmt.Println(err)
@@ -48,7 +48,7 @@ func (a *AcquisitionService) GetAllActionsTypes(w http.ResponseWriter, r *http.R
 }
 
 func (a *AcquisitionService) PostActionType(w http.ResponseWriter, r *http.Request) {
-	db, err := gorm.Open("postgres", "host=localhost user=postgres dbname=tsapBack sslmode=disable password=tsaplaval")
+	db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
 
 	fmt.Println(err)
 
