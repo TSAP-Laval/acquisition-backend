@@ -19,7 +19,7 @@ machine:
 
 general:
   artifacts:
-    - "consume-backend"
+    - "acquisition-backend"
 
 deployment:  
   prod:

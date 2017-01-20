@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 
+	//Import DB driver
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 
 	"github.com/jinzhu/gorm"
@@ -14,6 +15,8 @@ import (
 
 func (a *AcquisitionService) GetJoueurs(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("method:", r.Method)
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+
 	db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
 	defer db.Close()
 	fmt.Println(err)
@@ -28,7 +31,9 @@ func (a *AcquisitionService) GetJoueurs(w http.ResponseWriter, r *http.Request) 
 	w.Write(userJSON)
 }
 func (a *AcquisitionService) GetActions(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
+
 	defer db.Close()
 	fmt.Println(err)
 	user := []TypeAction{}
@@ -41,7 +46,9 @@ func (a *AcquisitionService) GetActions(w http.ResponseWriter, r *http.Request) 
 	w.Write(userJSON)
 }
 func (a *AcquisitionService) PostJoueur(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
+
 	defer db.Close()
 	fmt.Println(r.Body)
 	body, err := ioutil.ReadAll(r.Body)

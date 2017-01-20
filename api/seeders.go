@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
+	//Import DB driver
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 
 	"github.com/jinzhu/gorm"
@@ -11,6 +12,7 @@ import (
 
 func (a *AcquisitionService) FaireBD(w http.ResponseWriter, r *http.Request) {
 	db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
+
 	defer db.Close()
 	fmt.Println(err)
 
@@ -88,5 +90,4 @@ func (a *AcquisitionService) Remplir(w http.ResponseWriter, r *http.Request) {
 	} else {
 		fmt.Println("Test22")
 	}
-
 }
