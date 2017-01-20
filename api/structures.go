@@ -49,7 +49,6 @@ type MovementType struct {
 	gorm.Model
 	Name string `gorm:"unique"`
 }
-
 type Equipe struct {
 	gorm.Model
 	Nom         string
