@@ -3,14 +3,19 @@ package api
 import (
 	"fmt"
 	"net/http"
-
+  
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 
 	"github.com/jinzhu/gorm"
 )
 
 func (a *AcquisitionService) FaireBD(w http.ResponseWriter, r *http.Request) {
+<<<<<<< HEAD
 	db, err := gorm.Open("postgres", "host=localhost user=postgres dbname=tsap_dev sslmode=disable password=")
+=======
+	db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
+
+>>>>>>> 0b02044ad79ea84a15a4314b264bdf8701d704f9
 	defer db.Close()
 	fmt.Println(err)
 
@@ -28,7 +33,11 @@ func (a *AcquisitionService) FaireBD(w http.ResponseWriter, r *http.Request) {
 	db.AutoMigrate(&Action{})
 }
 func (a *AcquisitionService) Remplir(w http.ResponseWriter, r *http.Request) {
+<<<<<<< HEAD
 	db, err := gorm.Open("postgres", "host=localhost user=postgres dbname=tsap_dev sslmode=disable password=")
+=======
+	db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
+>>>>>>> 0b02044ad79ea84a15a4314b264bdf8701d704f9
 	defer db.Close()
 	fmt.Println(err)
 	user := TypeAction{Nom: "PO", Description: "Passe offensive"}
@@ -88,5 +97,4 @@ func (a *AcquisitionService) Remplir(w http.ResponseWriter, r *http.Request) {
 	} else {
 		fmt.Println("Test22")
 	}
-
 }

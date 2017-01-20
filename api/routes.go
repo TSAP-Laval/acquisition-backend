@@ -1,7 +1,6 @@
 package api
 
 import (
-	"fmt"
 	"io"
 	"log"
 
@@ -82,6 +81,9 @@ func (a *AcquisitionService) Middleware(h http.Handler) http.Handler {
 func (a *AcquisitionService) getRouter() http.Handler {
 	r := mux.NewRouter()
 
+	r.HandleFunc("/api/GetMovementType", a.GetMovementTypeHandler)
+	r.HandleFunc("/api/GetActionType", a.GetAllActionsTypes)
+	r.HandleFunc("/api/PostActionType", a.PostActionType)
 	r.HandleFunc("/api/video", a.VideoHandler)
 	r.HandleFunc("/api/edition/GetJoueurs", a.GetJoueurs)
 	r.HandleFunc("/api/seeders", a.Remplir)
@@ -95,14 +97,12 @@ func (a *AcquisitionService) getRouter() http.Handler {
 // Start démarre le service
 func (a *AcquisitionService) Start() {
 	go func() {
-		fmt.Println(a.config.Port)
 		a.server.Addr = a.config.Port
 		a.server.Handler = a.getRouter()
 		a.server.ListenAndServe()
 		a.Info("Acquisition shutting down...")
 	}()
-
-	a.logger.Printf("TSAP-Acquisiton started on %s... \n", a.config.Port)
+	a.logger.Printf("TSAP-Acquisiton started on localhost%s... \n", a.config.Port)
 }
 
 // Stop arrête le service
