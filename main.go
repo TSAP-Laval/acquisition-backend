@@ -28,10 +28,10 @@ func main() {
 
 	fmt.Print("Press enter to stop server...")
 
-	for i := 0; i < 20; i-- {
+	for i := 0; i <= 20; i-- {
 		i = 0
 	}
-
+	
 	service.Stop()
 
 	if err != nil {
