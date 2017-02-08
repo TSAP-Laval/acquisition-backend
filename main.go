@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"os"
 
@@ -28,14 +29,13 @@ func main() {
 
 	fmt.Print("Press enter to stop server...")
 
-	for i := 0; i <= 20; i-- {
-		i = 0
-	}
-	
+	reader := bufio.NewReader(os.Stdin)
+	fmt.Print("Press enter to stop server...")
+	reader.ReadString('\n')
+
 	service.Stop()
 
 	if err != nil {
 		panic(err)
 	}
-
 }
