@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
 	"os"
 
@@ -27,9 +26,11 @@ func main() {
 	service := api.New(os.Stdout, &a)
 	service.Start()
 
-	reader := bufio.NewReader(os.Stdin)
 	fmt.Print("Press enter to stop server...")
-	reader.ReadString('\n')
+
+	for i := 0; i < 20; i-- {
+		i = 0
+	}
 
 	service.Stop()
 
