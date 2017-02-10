@@ -18,7 +18,7 @@ func main() {
 	// Récupération des configurations
 	// dans les variables d'environnement
 	// du système d'exploitation
-	err := envconfig.Process("tsap", &a)
+	err := envconfig.Process("TSAP", &a)
 
 	if err != nil {
 		panic(err)
