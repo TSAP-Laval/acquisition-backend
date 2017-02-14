@@ -99,8 +99,13 @@ func (a *AcquisitionService) Start() {
 	go func() {
 		a.server.Addr = a.config.Port
 		a.server.Handler = a.getRouter()
-		a.server.ListenAndServe()
+		err := a.server.ListenAndServe()
 		a.Info("Acquisition shutting down...")
+
+		if err != nil {
+			panic(err)
+		}
+
 	}()
 	a.logger.Printf("TSAP-Acquisiton started on localhost%s... \n", a.config.Port)
 }
