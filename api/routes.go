@@ -97,7 +97,7 @@ func (a *AcquisitionService) getRouter() http.Handler {
 // Start démarre le service
 func (a *AcquisitionService) Start() {
 	go func() {
-		a.server.Addr = ":3000"
+		a.server.Addr = a.config.Port
 		a.server.Handler = a.getRouter()
 		err := a.server.ListenAndServe()
 		a.Info("Acquisition shutting down...")

@@ -24,6 +24,11 @@ func main() {
 		panic(err)
 	}
 
+	fmt.Println(a.ConnectionString)
+	fmt.Println(a.DatabaseDriver)
+	fmt.Println(a.Debug)
+	fmt.Println(a.Port)
+
 	service := api.New(os.Stdout, &a)
 	service.Start()
 
