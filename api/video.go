@@ -16,16 +16,16 @@ func (a *AcquisitionService) VideoHandler(w http.ResponseWriter, r *http.Request
 	file, handler, err := r.FormFile("file")
 
 	if err != nil {
-		fmt.Print("\nERROR :")
+		fmt.Print("\nERROR : ")
 		fmt.Println(err)
 		return
 	}
 	defer file.Close()
 
-	//fmt.Fprintf(w, "\nOK %v", handler.Header)
-
-	if _, err := os.Stat("./video/"); os.IsNotExist(err) {
-		os.MkdirAll("./video/", 0777)
+	// On regarde si le dossier videos existe déjà.
+	// Dans le cas contraire, on le crée
+	if _, err := os.Stat("./videos/"); os.IsNotExist(err) {
+		os.MkdirAll("./videos/", 0777)
 	}
 
 	f, err := os.OpenFile("./video/"+handler.Filename, os.O_WRONLY|os.O_CREATE, 0666)
