@@ -81,15 +81,15 @@ func (a *AcquisitionService) Middleware(h http.Handler) http.Handler {
 func (a *AcquisitionService) getRouter() http.Handler {
 	r := mux.NewRouter()
 
-	r.HandleFunc("/api/GetMovementType", a.GetMovementTypeHandler)
-	r.HandleFunc("/api/GetActionType", a.GetAllActionsTypes)
-	r.HandleFunc("/api/PostActionType", a.PostActionType)
+	r.HandleFunc("/api/mouvement_types", a.GetMovementTypeHandler)
+	r.HandleFunc("/api/action_types", a.GetAllActionsTypes)
+	r.HandleFunc("/api/action_types/nouveau", a.PostActionType)
 	r.HandleFunc("/api/video", a.VideoHandler)
-	r.HandleFunc("/api/edition/GetJoueurs", a.GetJoueurs)
+	r.HandleFunc("/api/edition/joueurs", a.GetJoueurs)
 	r.HandleFunc("/api/seeders", a.Remplir)
-	r.HandleFunc("/api/seeders/FaireBD", a.FaireBD)
-	r.HandleFunc("/api/edition/GetActions", a.GetActions)
-	r.HandleFunc("/api/edition/PostJoueur", a.PostJoueur)
+	r.HandleFunc("/api/seeders/faire_bd", a.FaireBD)
+	r.HandleFunc("/api/edition/actions", a.GetActions)
+	r.HandleFunc("/api/edition/joueurs/nouveau", a.PostJoueur)
 
 	return a.Middleware(r)
 }
