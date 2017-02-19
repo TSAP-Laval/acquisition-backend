@@ -81,6 +81,22 @@ func (a *AcquisitionService) Remplir(w http.ResponseWriter, r *http.Request) {
 	} else {
 		fmt.Println("Test22")
 	}
+	Lieu1 := Lieu{Nom: "SSF", Ville: "St-Augustin", Adresse: "1223 rue Truc"}
+	if db.NewRecord(Lieu1) {
+		fmt.Println("Lieu1")
+		db.Create(&Lieu1)
+		db.NewRecord(Lieu1) // => return `false` after `user` created
+	} else {
+		fmt.Println("Test22")
+	}
+	Lieu2 := Lieu{Nom: "Stade Leclerc", Ville: "St-Augustin", Adresse: "1224 rue Leclerc"}
+	if db.NewRecord(Lieu2) {
+		fmt.Println("Lieu2")
+		db.Create(&Lieu2)
+		db.NewRecord(Lieu2) // => return `false` after `user` created
+	} else {
+		fmt.Println("Test22")
+	}
 
 	Action := Action{TypeActionID: 1, ActionPositive: true, ZoneID: 1, PartieID: 1, X1: 0, Y1: 0, X2: 0, Y2: 0, Temps: 10, PointageMaison: 0, PointageAdverse: 0, JoueurID: 1}
 	if db.NewRecord(Action) {

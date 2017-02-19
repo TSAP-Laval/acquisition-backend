@@ -7,8 +7,8 @@ import (
 	"os"
 )
 
-// VideoHandler Gère l'upload de video sur le serveur
-func (a *AcquisitionService) VideoHandler(w http.ResponseWriter, r *http.Request) {
+// UploadHandler Gère l'upload de video sur le serveur
+func (a *AcquisitionService) UploadHandler(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Println("\nmethod:", r.Method)
 	//fmt.Println(r.Header)
@@ -28,7 +28,7 @@ func (a *AcquisitionService) VideoHandler(w http.ResponseWriter, r *http.Request
 		os.MkdirAll("./videos/", 0777)
 	}
 
-	f, err := os.OpenFile("./video/"+handler.Filename, os.O_WRONLY|os.O_CREATE, 0666)
+	f, err := os.OpenFile("./videos/"+handler.Filename, os.O_WRONLY|os.O_CREATE, 0666)
 
 	if err != nil {
 		fmt.Println(err)
