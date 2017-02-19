@@ -72,7 +72,7 @@ func (a *AcquisitionService) TerrainsHandler(w http.ResponseWriter, r *http.Requ
 					o += "Adresse, "
 				}
 
-				db.Model(&lieu).Omit(o).Updates(l)
+				db.Model(&lieu).Where("ID = ?", id).Omit(o).Updates(l)
 
 				// Le lieu modifié
 				var nl Lieu
@@ -184,6 +184,6 @@ func ErrorHandler(w http.ResponseWriter, err error) {
 	if err != nil {
 		fmt.Print("\nERROR : ")
 		fmt.Println(err)
-		w.WriteHeader(http.StatusInternalServerError)
+		//w.WriteHeader(http.StatusInternalServerError)
 	}
 }

@@ -24,6 +24,10 @@ func (a *AcquisitionService) GetEquipeHandler(w http.ResponseWriter, r *http.Req
 		nom := strings.ToLower(strings.TrimSpace(vars["nom"]))
 		db.Where("LOWER(Nom) LIKE LOWER(?)", "%"+nom+"%").Find(&equipe)
 
+		for i := 0; i < len(equipe); i++ {
+			equipe[i] = AjoutNiveauSport(db, equipe[i])
+		}
+
 		equipeJSON, _ := json.Marshal(equipe)
 
 		Message(w, equipeJSON, false)
@@ -66,12 +70,14 @@ func (a *AcquisitionService) EquipesHandler(w http.ResponseWriter, r *http.Reque
 				if e.Ville == "" {
 					o += "Ville, "
 				}
-
-				db.Model(&equipe).Omit(o).Updates(e)
+				db.Model(&equipe).Where("ID = ?", id).Omit(o).Updates(e)
 
 				// L'équipe modifiée
 				var ne Equipe
 				db.Where("ID = ?", id).Find(&ne)
+
+				ne = AjoutNiveauSport(db, e)
+
 				equipeJSON, _ := json.Marshal(ne)
 				Message(w, equipeJSON, false)
 
@@ -110,6 +116,10 @@ func (a *AcquisitionService) GetEquipesHandler(w http.ResponseWriter, r *http.Re
 
 	equipe := []Equipe{}
 	db.Find(&equipe)
+
+	for i := 0; i < len(equipe); i++ {
+		equipe[i] = AjoutNiveauSport(db, equipe[i])
+	}
 
 	equipeJSON, _ := json.Marshal(equipe)
 
@@ -155,7 +165,7 @@ func (a *AcquisitionService) CreerEquipeHandler(w http.ResponseWriter, r *http.R
 						errorJSON, _ := json.Marshal(msg)
 						Message(w, errorJSON, true)
 					} else {
-
+						e = AjoutNiveauSport(db, e)
 						succesJSON, _ := json.Marshal(e)
 						Message(w, succesJSON, false)
 					}
@@ -184,4 +194,23 @@ func Message(w http.ResponseWriter, msg []byte, isErr bool) {
 		w.WriteHeader(http.StatusOK)
 	}
 	w.Write(msg)
+}
+
+// AjoutNiveauSport permet d'ajouter les informations sur le sport et le niveau lors de l'affchage des infos
+func AjoutNiveauSport(db *gorm.DB, e Equipe) Equipe {
+	// Ajout du sport pour l'affichage
+	var s Sport
+	db.Where("ID = ?", e.SportID).Find(&s)
+	if s.Nom != "" {
+		e.Sport = s
+	}
+
+	// Ajout du niveau pour l'affichage
+	var n Niveau
+	db.Where("ID = ?", e.NiveauID).Find(&n)
+	if n.Nom != "" {
+		e.Niveau = n
+	}
+
+	return e
 }
