@@ -82,6 +82,12 @@ func (a *AcquisitionService) TerrainsHandler(w http.ResponseWriter, r *http.Requ
 				}
 
 				db.Model(&lieu).Omit(o).Updates(l)
+
+				// Le lieu modifié
+				var nl Lieu
+				db.Where("ID = ?", id).Find(&nl)
+				equipeJSON, _ := json.Marshal(nl)
+				Message(w, equipeJSON, false)
 			} else if err != nil {
 				panic(err)
 			} else {
@@ -191,15 +197,4 @@ func (a *AcquisitionService) CreerTerrainHandler(w http.ResponseWriter, r *http.
 		errorJSON, _ := json.Marshal(msg)
 		Message(w, errorJSON, true)
 	}
-}
-
-// Message Gère les messages (erreurs, messages de succès) à envoyer au client
-func Message(w http.ResponseWriter, msg []byte, isErr bool) {
-	w.Header().Set("Content-Type", "application/json")
-	if isErr {
-		w.WriteHeader(http.StatusBadRequest)
-	} else {
-		w.WriteHeader(http.StatusOK)
-	}
-	w.Write(msg)
 }

@@ -126,39 +126,6 @@ func (a *AcquisitionService) PostJoueur(w http.ResponseWriter, r *http.Request) 
 	}
 
 }
-func (a *AcquisitionService) PostEquipe(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-
-	db, err := gorm.Open("postgres", "host=localhost user=postgres dbname=tsapBack sslmode=disable password=alex1997")
-
-	defer db.Close()
-	fmt.Println(r.Body)
-	body, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		panic(err)
-	}
-	log.Println(string(body))
-	var t Equipe
-	err = json.Unmarshal(body, &t)
-
-	if err != nil {
-		panic(err)
-	}
-	log.Println(t.ID)
-	if db.NewRecord(t) {
-
-		db.Create(&t)
-		db.NewRecord(t)
-		w.Header().Set("Content-Type", "application/text")
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("ok"))
-	} else {
-		fmt.Println("Test22")
-		w.Header().Set("Content-Type", "application/text")
-		w.Write([]byte("erreur"))
-	}
-
-}
 func (a *AcquisitionService) GetSeasons(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 
@@ -227,20 +194,4 @@ func (a *AcquisitionService) GetNiveau(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write(NiveauJSON)
-}
-func (a *AcquisitionService) GetEquipes(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-
-	db, err := gorm.Open("postgres", "host=localhost user=postgres dbname=tsapBack sslmode=disable password=alex1997")
-
-	defer db.Close()
-	fmt.Println(err)
-	strucEquipe := []Equipe{}
-	db.Find(&strucEquipe)
-
-	EquipeJSON, _ := json.Marshal(strucEquipe)
-	fmt.Println(string(EquipeJSON))
-	w.WriteHeader(http.StatusOK)
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(EquipeJSON)
 }
