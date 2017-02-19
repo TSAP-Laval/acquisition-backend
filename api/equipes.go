@@ -2,7 +2,6 @@ package api
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"strings"
@@ -19,11 +18,7 @@ func (a *AcquisitionService) GetEquipeHandler(w http.ResponseWriter, r *http.Req
 		db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
 		defer db.Close()
 
-		if err != nil {
-			fmt.Print("\nERROR : ")
-			fmt.Println(err)
-			return
-		}
+		ErrorHandler(w, err)
 
 		equipe := []Equipe{}
 		nom := strings.ToLower(strings.TrimSpace(vars["nom"]))
@@ -46,11 +41,7 @@ func (a *AcquisitionService) EquipesHandler(w http.ResponseWriter, r *http.Reque
 		db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
 		defer db.Close()
 
-		if err != nil {
-			fmt.Print("\nERROR : ")
-			fmt.Println(err)
-			return
-		}
+		ErrorHandler(w, err)
 
 		equipe := []Equipe{}
 		id := strings.ToLower(strings.TrimSpace(vars["id"]))
@@ -62,9 +53,7 @@ func (a *AcquisitionService) EquipesHandler(w http.ResponseWriter, r *http.Reque
 			if len(body) > 0 {
 				var e Equipe
 				err = json.Unmarshal(body, &e)
-				if err != nil {
-					panic(err)
-				}
+				ErrorHandler(w, err)
 
 				e.Nom = strings.TrimSpace(e.Nom)
 				e.Ville = strings.TrimSpace(e.Ville)
@@ -87,7 +76,7 @@ func (a *AcquisitionService) EquipesHandler(w http.ResponseWriter, r *http.Reque
 				Message(w, equipeJSON, false)
 
 			} else if err != nil {
-				panic(err)
+				ErrorHandler(w, err)
 			} else {
 				msg := map[string]string{"error": "Veuillez choisir au moins un champs à modifier."}
 				errorJSON, _ := json.Marshal(msg)
@@ -117,11 +106,7 @@ func (a *AcquisitionService) GetEquipesHandler(w http.ResponseWriter, r *http.Re
 	db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
 	defer db.Close()
 
-	if err != nil {
-		fmt.Print("\nERROR : ")
-		fmt.Println(err)
-		return
-	}
+	ErrorHandler(w, err)
 
 	equipe := []Equipe{}
 	db.Find(&equipe)
@@ -138,17 +123,11 @@ func (a *AcquisitionService) CreerEquipeHandler(w http.ResponseWriter, r *http.R
 		db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
 		defer db.Close()
 
-		if err != nil {
-			fmt.Print("\nERROR : ")
-			fmt.Println(err)
-			return
-		}
+		ErrorHandler(w, err)
 
 		var e Equipe
 		err = json.Unmarshal(body, &e)
-		if err != nil {
-			panic(err)
-		}
+		ErrorHandler(w, err)
 
 		// On enlève les espaces superflues
 		e.Nom = strings.TrimSpace(e.Nom)
@@ -188,7 +167,7 @@ func (a *AcquisitionService) CreerEquipeHandler(w http.ResponseWriter, r *http.R
 			}
 		}
 	} else if err != nil {
-		panic(err)
+		ErrorHandler(w, err)
 	} else {
 		msg := map[string]string{"error": "Veuillez remplir tous les champs."}
 		errorJSON, _ := json.Marshal(msg)

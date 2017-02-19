@@ -19,11 +19,7 @@ func (a *AcquisitionService) GetTerrainHandler(w http.ResponseWriter, r *http.Re
 		db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
 		defer db.Close()
 
-		if err != nil {
-			fmt.Print("\nERROR : ")
-			fmt.Println(err)
-			return
-		}
+		ErrorHandler(w, err)
 
 		lieu := []Lieu{}
 		nom := strings.ToLower(strings.TrimSpace(vars["nom"]))
@@ -46,11 +42,7 @@ func (a *AcquisitionService) TerrainsHandler(w http.ResponseWriter, r *http.Requ
 		db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
 		defer db.Close()
 
-		if err != nil {
-			fmt.Print("\nERROR : ")
-			fmt.Println(err)
-			return
-		}
+		ErrorHandler(w, err)
 
 		lieu := []Lieu{}
 		id := strings.ToLower(strings.TrimSpace(vars["id"]))
@@ -62,9 +54,8 @@ func (a *AcquisitionService) TerrainsHandler(w http.ResponseWriter, r *http.Requ
 			if len(body) > 0 {
 				var l Lieu
 				err = json.Unmarshal(body, &l)
-				if err != nil {
-					panic(err)
-				}
+				ErrorHandler(w, err)
+
 				l.Nom = strings.TrimSpace(l.Nom)
 				l.Ville = strings.TrimSpace(l.Ville)
 				l.Adresse = strings.TrimSpace(l.Adresse)
@@ -89,7 +80,7 @@ func (a *AcquisitionService) TerrainsHandler(w http.ResponseWriter, r *http.Requ
 				equipeJSON, _ := json.Marshal(nl)
 				Message(w, equipeJSON, false)
 			} else if err != nil {
-				panic(err)
+				ErrorHandler(w, err)
 			} else {
 				msg := map[string]string{"error": "Veuillez choisir au moins un champs à modifier."}
 				errorJSON, _ := json.Marshal(msg)
@@ -119,11 +110,7 @@ func (a *AcquisitionService) GetTerrainsHandler(w http.ResponseWriter, r *http.R
 	db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
 	defer db.Close()
 
-	if err != nil {
-		fmt.Print("\nERROR : ")
-		fmt.Println(err)
-		return
-	}
+	ErrorHandler(w, err)
 
 	lieu := []Lieu{}
 	db.Find(&lieu)
@@ -140,17 +127,10 @@ func (a *AcquisitionService) CreerTerrainHandler(w http.ResponseWriter, r *http.
 		db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
 		defer db.Close()
 
-		if err != nil {
-			fmt.Print("\nERROR : ")
-			fmt.Println(err)
-			return
-		}
+		ErrorHandler(w, err)
 
 		var l Lieu
 		err = json.Unmarshal(body, &l)
-		if err != nil {
-			panic(err)
-		}
 
 		// On enlève les espaces superflues
 		l.Nom = strings.TrimSpace(l.Nom)
@@ -191,10 +171,19 @@ func (a *AcquisitionService) CreerTerrainHandler(w http.ResponseWriter, r *http.
 			}
 		}
 	} else if err != nil {
-		panic(err)
+		ErrorHandler(w, err)
 	} else {
 		msg := map[string]string{"error": "Veuillez remplir tous les champs."}
 		errorJSON, _ := json.Marshal(msg)
 		Message(w, errorJSON, true)
+	}
+}
+
+// ErrorHandler gère les erreurs côté serveur
+func ErrorHandler(w http.ResponseWriter, err error) {
+	if err != nil {
+		fmt.Print("\nERROR : ")
+		fmt.Println(err)
+		w.WriteHeader(http.StatusInternalServerError)
 	}
 }
