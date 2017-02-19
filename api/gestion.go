@@ -36,7 +36,7 @@ func (a *AcquisitionService) PostSaison(w http.ResponseWriter, r *http.Request) 
 		db.Create(&t)
 		db.NewRecord(t)
 		w.Header().Set("Content-Type", "application/text")
-
+		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("ok"))
 	} else {
 		fmt.Println("Test22")
@@ -78,7 +78,7 @@ func (a *AcquisitionService) PostTeam(w http.ResponseWriter, r *http.Request) {
 		fmt.Println(string(SportJSON2))
 
 		w.Header().Set("Content-Type", "application/text")
-
+		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("ok"))
 	} else {
 		fmt.Println("Test22")
@@ -117,7 +117,7 @@ func (a *AcquisitionService) PostJoueur(w http.ResponseWriter, r *http.Request) 
 		db.Create(&t)
 		db.NewRecord(t)
 		w.Header().Set("Content-Type", "application/text")
-
+		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("ok"))
 	} else {
 		fmt.Println("Test22")
@@ -150,7 +150,7 @@ func (a *AcquisitionService) PostEquipe(w http.ResponseWriter, r *http.Request) 
 		db.Create(&t)
 		db.NewRecord(t)
 		w.Header().Set("Content-Type", "application/text")
-
+		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("ok"))
 	} else {
 		fmt.Println("Test22")
@@ -173,6 +173,7 @@ func (a *AcquisitionService) GetSeasons(w http.ResponseWriter, r *http.Request) 
 	fmt.Println(string(SaisonJSON))
 
 	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
 	w.Write(SaisonJSON)
 }
 func (a *AcquisitionService) GetSports(w http.ResponseWriter, r *http.Request) {
@@ -189,6 +190,7 @@ func (a *AcquisitionService) GetSports(w http.ResponseWriter, r *http.Request) {
 	fmt.Println(string(SportJSON))
 
 	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
 	w.Write(SportJSON)
 }
 
@@ -206,6 +208,7 @@ func (a *AcquisitionService) GetUnNiveauTest(w http.ResponseWriter, r *http.Requ
 	fmt.Println(string(SportJSON))
 
 	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
 	w.Write(SportJSON)
 }
 func (a *AcquisitionService) GetNiveau(w http.ResponseWriter, r *http.Request) {
@@ -222,6 +225,7 @@ func (a *AcquisitionService) GetNiveau(w http.ResponseWriter, r *http.Request) {
 	fmt.Println(string(NiveauJSON))
 
 	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
 	w.Write(NiveauJSON)
 }
 func (a *AcquisitionService) GetEquipes(w http.ResponseWriter, r *http.Request) {
@@ -236,7 +240,7 @@ func (a *AcquisitionService) GetEquipes(w http.ResponseWriter, r *http.Request) 
 
 	EquipeJSON, _ := json.Marshal(strucEquipe)
 	fmt.Println(string(EquipeJSON))
-
+	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(EquipeJSON)
 }
