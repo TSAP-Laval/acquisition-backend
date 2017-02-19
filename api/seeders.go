@@ -32,7 +32,7 @@ func (a *AcquisitionService) FaireBD(w http.ResponseWriter, r *http.Request) {
 }
 func (a *AcquisitionService) Remplir(w http.ResponseWriter, r *http.Request) {
 
-	db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
+	db, err := gorm.Open("postgres", "host=localhost user=postgres dbname=tsapBack sslmode=disable password=alex1997")
 	defer db.Close()
 	fmt.Println(err)
 	user := TypeAction{Nom: "PO", Description: "Passe offensive"}
@@ -59,6 +59,15 @@ func (a *AcquisitionService) Remplir(w http.ResponseWriter, r *http.Request) {
 	} else {
 		fmt.Println("Test22")
 	}
+	Saison := Saison{Annees: "1997"}
+	if db.NewRecord(Saison) {
+		fmt.Println("Test")
+		db.Create(&Saison)
+		db.NewRecord(Saison) // => return `false` after `user` created
+	} else {
+		fmt.Println("Test22")
+	}
+
 	Sport := Sport{Nom: "soccer"}
 	if db.NewRecord(Sport) {
 		fmt.Println("Test")

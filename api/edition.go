@@ -47,7 +47,7 @@ func (a *AcquisitionService) GetActions(w http.ResponseWriter, r *http.Request) 
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(userJSON)
 }
-func (a *AcquisitionService) PostJoueur(w http.ResponseWriter, r *http.Request) {
+func (a *AcquisitionService) PostAction(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 
 	db, err := gorm.Open("postgres", "host=localhost user=postgres dbname=tsapBack sslmode=disable password=alex1997")
