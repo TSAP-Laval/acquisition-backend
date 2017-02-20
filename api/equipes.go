@@ -22,7 +22,7 @@ func (a *AcquisitionService) GetEquipeHandler(w http.ResponseWriter, r *http.Req
 
 		team := []Teams{}
 		name := strings.ToLower(strings.TrimSpace(vars["nom"]))
-		db.Where("LOWER(Nom) LIKE LOWER(?)", "%"+name+"%").Find(&team)
+		db.Where("LOWER(Name) LIKE LOWER(?)", name+"%").Find(&team)
 
 		for i := 0; i < len(team); i++ {
 			team[i] = AjoutNiveauSport(db, team[i])
@@ -65,10 +65,10 @@ func (a *AcquisitionService) EquipesHandler(w http.ResponseWriter, r *http.Reque
 				var o string
 
 				if t.Name == "" {
-					o += "Nom, "
+					o += "Name, "
 				}
 				if t.City == "" {
-					o += "Ville, "
+					o += "City, "
 				}
 				db.Model(&team).Where("ID = ?", id).Omit(o).Updates(t)
 
@@ -151,7 +151,7 @@ func (a *AcquisitionService) CreerEquipeHandler(w http.ResponseWriter, r *http.R
 
 			team := []Teams{}
 			name := strings.ToLower(strings.TrimSpace(t.Name))
-			db.Where("LOWER(Nom) = LOWER(?)", name).Find(&team)
+			db.Where("LOWER(Name) = LOWER(?)", name).Find(&team)
 
 			if len(team) > 0 {
 				msg := map[string]string{"error": "Une équipe de même nom existe déjà. Veuillez choisir une autre nom."}

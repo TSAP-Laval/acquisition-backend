@@ -11,9 +11,23 @@ import (
 	"github.com/TSAP-Laval/acquisition-backend/api"
 )
 
+func TestBD(t *testing.T) {
+	reader = strings.NewReader("")
+	request, err := http.NewRequest("POST", baseURL+"/api/bd", reader)
+	res, err := http.DefaultClient.Do(request)
+
+	if err != nil {
+		t.Error(err) //Something is wrong while sending request
+	}
+
+	if res.StatusCode != 200 {
+		t.Errorf("Success expected: %d", res.StatusCode)
+	}
+}
+
 func TestSeed(t *testing.T) {
 	reader = strings.NewReader("")
-	request, err := http.NewRequest("GET", baseURL+"/api/seeders", reader)
+	request, err := http.NewRequest("POST", baseURL+"/api/seed", reader)
 	res, err := http.DefaultClient.Do(request)
 
 	if err != nil {
@@ -40,7 +54,7 @@ func TestGetEquipes(t *testing.T) {
 }
 
 func TestCreerEquipe(t *testing.T) {
-	reader = strings.NewReader(`{"Nom": "Lequipe", "Ville": "Quebec", "NiveauID": 1, "SportID": 1}`)
+	reader = strings.NewReader(`{"Name": "Lequipe", "City": "Quebec", "CategoryID": 1, "SportID": 1}`)
 	request, err := http.NewRequest("POST", baseURL+"/api/equipes", reader)
 	res, err := http.DefaultClient.Do(request)
 
@@ -51,7 +65,7 @@ func TestCreerEquipe(t *testing.T) {
 	bodyBuffer, _ := ioutil.ReadAll(res.Body)
 	t.Logf("Res: --> %s\n\n", bodyBuffer)
 
-	var l api.Lieu
+	var l api.Locations
 	err = json.Unmarshal(bodyBuffer, &l)
 	if err != nil {
 		t.Logf("ERR: --> %s\n\n", err)
@@ -80,7 +94,7 @@ func TestCreerEquipeErrEmpty(t *testing.T) {
 }
 
 func TestCreerEquipeErrExiste(t *testing.T) {
-	reader = strings.NewReader(`{"Name": "Lequipe", "Ville": "Quebec", "CategoryID": 1, "SportID": 1}`)
+	reader = strings.NewReader(`{"Name": "Lequipe", "City": "Quebec", "CategoryID": 1, "SportID": 1}`)
 	request, err := http.NewRequest("POST", baseURL+"/api/equipes", reader)
 	res, err := http.DefaultClient.Do(request)
 
@@ -135,8 +149,8 @@ func TestGetEquipeModifie(t *testing.T) {
 	t.Logf("Res: --> %s\n\n", bodyBuffer)
 
 	// Ve receive an array of Equipe
-	t := []api.Teams{}
-	err = json.Unmarshal(bodyBuffer, &t)
+	te := []api.Teams{}
+	err = json.Unmarshal(bodyBuffer, &te)
 	if err != nil {
 		t.Logf("ERR: --> %s\n\n", err)
 	}
@@ -145,8 +159,8 @@ func TestGetEquipeModifie(t *testing.T) {
 		t.Errorf("Success expected: %d", res.StatusCode)
 	}
 	// We only look at the first element of the array
-	if t[0].City != "Montreal" {
-		t.Errorf("City expected: %s", e[0].Ville)
+	if te[0].City != "Montreal" {
+		t.Errorf("City expected: %s", te[0].City)
 	}
 }
 

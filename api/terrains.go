@@ -21,13 +21,13 @@ func (a *AcquisitionService) GetTerrainHandler(w http.ResponseWriter, r *http.Re
 
 		ErrorHandler(w, err)
 
-		lieu := []Locations{}
-		nom := strings.ToLower(strings.TrimSpace(vars["nom"]))
-		db.Where("LOWER(Nom) LIKE LOWER(?)", "%"+nom+"%").Find(&lieu)
+		location := []Locations{}
+		name := strings.ToLower(strings.TrimSpace(vars["nom"]))
+		db.Where("LOWER(Name) LIKE LOWER(?)", name+"%").Find(&location)
 
-		lieuJSON, _ := json.Marshal(lieu)
+		locationJSON, _ := json.Marshal(location)
 
-		Message(w, lieuJSON, 200)
+		Message(w, locationJSON, 200)
 	} else {
 		msg := map[string]string{"error": "Veuillez entrer un nom de terrain ou en créer un préalablement"}
 		errorJSON, _ := json.Marshal(msg)
@@ -145,7 +145,7 @@ func (a *AcquisitionService) CreerTerrainHandler(w http.ResponseWriter, r *http.
 
 			locations := []Locations{}
 			name := strings.ToLower(strings.TrimSpace(l.Name))
-			db.Where("LOWER(Nom) = LOWER(?)", name).Find(&locations)
+			db.Where("LOWER(Name) = LOWER(?)", name).Find(&locations)
 
 			if len(locations) > 0 {
 				msg := map[string]string{"error": "Un terrain de même nom existe déjà. Veuillez choisir un autre nom."}

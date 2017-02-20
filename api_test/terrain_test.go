@@ -131,11 +131,11 @@ func TestGetTerrainModifie(t *testing.T) {
 		t.Errorf("Success expected: %d", res.StatusCode)
 	}
 	// We only look at the first element of the array
-	if l[0].City != "Montreal" {
-		t.Errorf("City expected: %s", l[0].Ville)
+	if l[len(l)-1].City != "Montreal" {
+		t.Errorf("City expected: %s", l[0].City)
 	}
-	if l[0].Address != "1231 une rue" {
-		t.Errorf("Address expected: %s", l[0].Adresse)
+	if l[len(l)-1].Address != "1231 une rue" {
+		t.Errorf("Address expected: %s", l[0].Address)
 	}
 }
 
