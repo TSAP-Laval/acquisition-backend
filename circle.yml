@@ -2,6 +2,12 @@ dependencies:
   pre:
     - createdb 'tsap_acquisition'
     - psql 'tsap_acquisition' < postgres.pgsql
+    - sudo -i -u postgres
+    - psql -l
+    - \q
+    - psql -c "\du"
+    - \q
+    - exit
     - pip install ansible
     - pip install --upgrade setuptools
   post:
