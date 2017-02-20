@@ -60,4 +60,5 @@
   `vi /usr/local/etc/nginx/nginx.conf`
   
 ## Procédure pour tester l'API
-  `$ go test github.com/TSAP-Laval/acquisition-backend/api_test`
+  `$ go test -v -race ./...`
+  enlever le -v pour un résultat abrégé

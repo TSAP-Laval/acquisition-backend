@@ -2,7 +2,6 @@ package api
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"strings"
@@ -19,19 +18,16 @@ func (a *AcquisitionService) GetTerrainHandler(w http.ResponseWriter, r *http.Re
 		db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
 		defer db.Close()
 
-		ErrorHandler(w, err)
+		a.ErrorHandler(w, err)
 
 		location := []Locations{}
 		name := strings.ToLower(strings.TrimSpace(vars["nom"]))
 		db.Where("LOWER(Name) LIKE LOWER(?)", name+"%").Find(&location)
 
-		locationJSON, _ := json.Marshal(location)
-
-		Message(w, locationJSON, 200)
+		Message(w, location, http.StatusOK)
 	} else {
 		msg := map[string]string{"error": "Veuillez entrer un nom de terrain ou en créer un préalablement"}
-		errorJSON, _ := json.Marshal(msg)
-		Message(w, errorJSON, 400)
+		Message(w, msg, http.StatusBadRequest)
 	}
 }
 
@@ -42,7 +38,7 @@ func (a *AcquisitionService) TerrainsHandler(w http.ResponseWriter, r *http.Requ
 		db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
 		defer db.Close()
 
-		ErrorHandler(w, err)
+		a.ErrorHandler(w, err)
 
 		location := []Locations{}
 		id := strings.ToLower(strings.TrimSpace(vars["id"]))
@@ -54,7 +50,7 @@ func (a *AcquisitionService) TerrainsHandler(w http.ResponseWriter, r *http.Requ
 			if len(body) > 0 {
 				var l Locations
 				err = json.Unmarshal(body, &l)
-				ErrorHandler(w, err)
+				a.ErrorHandler(w, err)
 
 				l.Name = strings.TrimSpace(l.Name)
 				l.City = strings.TrimSpace(l.City)
@@ -77,31 +73,26 @@ func (a *AcquisitionService) TerrainsHandler(w http.ResponseWriter, r *http.Requ
 				// Le lieu modifié
 				var nl Locations
 				db.Where("ID = ?", id).Find(&nl)
-				equipeJSON, _ := json.Marshal(nl)
-				Message(w, equipeJSON, 201)
+				Message(w, nl, http.StatusCreated)
 			} else if err != nil {
-				ErrorHandler(w, err)
+				a.ErrorHandler(w, err)
 			} else {
 				msg := map[string]string{"error": "Veuillez choisir au moins un champs à modifier."}
-				errorJSON, _ := json.Marshal(msg)
-				Message(w, errorJSON, 400)
+				Message(w, msg, http.StatusBadRequest)
 			}
 		case "DELETE":
 			if len(location) == 0 {
 				msg := map[string]string{"error": "Aucun terrain ne correspond. Il doit déjà avoir été supprimé!"}
-				errorJSON, _ := json.Marshal(msg)
-				Message(w, errorJSON, 204)
+				Message(w, msg, http.StatusNoContent)
 			} else {
 				db.Where("ID = ?", id).Delete(&location)
 				msg := map[string]string{"succes": "Le terrain a été supprimé avec succès!"}
-				succesJSON, _ := json.Marshal(msg)
-				Message(w, succesJSON, 204)
+				Message(w, msg, http.StatusNoContent)
 			}
 		}
 	} else {
 		msg := map[string]string{"error": "Veuillez entrer un nom de terrain ou en créer un préalablement."}
-		errorJSON, _ := json.Marshal(msg)
-		Message(w, errorJSON, 404)
+		Message(w, msg, http.StatusNotFound)
 	}
 }
 
@@ -110,14 +101,12 @@ func (a *AcquisitionService) GetTerrainsHandler(w http.ResponseWriter, r *http.R
 	db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
 	defer db.Close()
 
-	ErrorHandler(w, err)
+	a.ErrorHandler(w, err)
 
 	locations := []Locations{}
 	db.Find(&locations)
 
-	locationsJSON, _ := json.Marshal(locations)
-
-	Message(w, locationsJSON, 200)
+	Message(w, locations, http.StatusOK)
 }
 
 // CreerTerrainHandler Gère la création de terrain dans la base de donnée
@@ -127,10 +116,11 @@ func (a *AcquisitionService) CreerTerrainHandler(w http.ResponseWriter, r *http.
 		db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
 		defer db.Close()
 
-		ErrorHandler(w, err)
+		a.ErrorHandler(w, err)
 
 		var l Locations
 		err = json.Unmarshal(body, &l)
+		a.ErrorHandler(w, err)
 
 		// On enlève les espaces superflues
 		l.Name = strings.TrimSpace(l.Name)
@@ -139,8 +129,7 @@ func (a *AcquisitionService) CreerTerrainHandler(w http.ResponseWriter, r *http.
 
 		if l.Name == "" || l.Address == "" || l.City == "" {
 			msg := map[string]string{"error": "Veuillez remplir tous les champs."}
-			errorJSON, _ := json.Marshal(msg)
-			Message(w, errorJSON, 400)
+			Message(w, msg, http.StatusBadRequest)
 		} else {
 
 			locations := []Locations{}
@@ -149,41 +138,26 @@ func (a *AcquisitionService) CreerTerrainHandler(w http.ResponseWriter, r *http.
 
 			if len(locations) > 0 {
 				msg := map[string]string{"error": "Un terrain de même nom existe déjà. Veuillez choisir un autre nom."}
-				errorJSON, _ := json.Marshal(msg)
-				Message(w, errorJSON, 401)
+				Message(w, msg, http.StatusUnauthorized)
 			} else {
 				if db.NewRecord(l) {
 					db.Create(&l)
 					if db.NewRecord(l) {
 						msg := map[string]string{"error": "Une erreur est survenue lors de la création du terrain. Veuillez réessayer!"}
-						errorJSON, _ := json.Marshal(msg)
-						Message(w, errorJSON, 500)
+						Message(w, msg, http.StatusInternalServerError)
 					} else {
-
-						succesJSON, _ := json.Marshal(l)
-						Message(w, succesJSON, 201)
+						Message(w, l, http.StatusCreated)
 					}
 				} else {
 					msg := map[string]string{"error": "Le terrain existe déjà dans la base de donnée!"}
-					errorJSON, _ := json.Marshal(msg)
-					Message(w, errorJSON, 401)
+					Message(w, msg, http.StatusUnauthorized)
 				}
 			}
 		}
 	} else if err != nil {
-		ErrorHandler(w, err)
+		a.ErrorHandler(w, err)
 	} else {
 		msg := map[string]string{"error": "Veuillez remplir tous les champs."}
-		errorJSON, _ := json.Marshal(msg)
-		Message(w, errorJSON, 400)
-	}
-}
-
-// ErrorHandler gère les erreurs côté serveur
-func ErrorHandler(w http.ResponseWriter, err error) {
-	if err != nil {
-		fmt.Print("\nERROR : ")
-		fmt.Println(err)
-		//w.WriteHeader(http.StatusInternalServerError)
+		Message(w, msg, http.StatusBadRequest)
 	}
 }

@@ -1,8 +1,6 @@
 package api
 
 import (
-	"encoding/json"
-	"fmt"
 	"io"
 	"net/http"
 	"os"
@@ -15,19 +13,14 @@ func (a *AcquisitionService) UploadHandler(w http.ResponseWriter, r *http.Reques
 	file, handler, err := r.FormFile("file")
 	defer file.Close()
 
-	if err != nil {
-		fmt.Print("\nERROR : ")
-		fmt.Println(err)
-		return
-	}
+	a.ErrorHandler(w, err)
 
 	db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
 	defer db.Close()
 
-	ErrorHandler(w, err)
+	a.ErrorHandler(w, err)
 
 	var v Videos
-
 	v.Completed = false
 	v.Path = "home/tsap/api/videos/" + handler.Filename
 
@@ -35,8 +28,7 @@ func (a *AcquisitionService) UploadHandler(w http.ResponseWriter, r *http.Reques
 		db.Create(&v)
 		if db.NewRecord(v) {
 			msg := map[string]string{"error": "Une erreur est survenue lors de la création de la video dans la base de données. Veuillez réessayer!"}
-			errorJSON, _ := json.Marshal(msg)
-			Message(w, errorJSON, 500)
+			Message(w, msg, http.StatusInternalServerError)
 		} else {
 
 			// On regarde si le dossier videos existe déjà.
@@ -48,22 +40,16 @@ func (a *AcquisitionService) UploadHandler(w http.ResponseWriter, r *http.Reques
 			f, err := os.OpenFile("./videos/"+handler.Filename, os.O_WRONLY|os.O_CREATE, 0666)
 			defer f.Close()
 
-			if err != nil {
-				fmt.Print("ERROR : ")
-				fmt.Println(err)
-				return
-			}
+			a.ErrorHandler(w, err)
 
 			io.Copy(f, file)
 
 			msg := map[string]string{"succes": "Le video a été envoyé avec succès!"}
-			succesJSON, _ := json.Marshal(msg)
-			Message(w, succesJSON, 201)
+			Message(w, msg, http.StatusCreated)
 		}
 	} else {
 		msg := map[string]string{"error": "Une vidéo avec le même nom existe déjà. Veuillez renommer cette vidéo."}
-		errorJSON, _ := json.Marshal(msg)
-		Message(w, errorJSON, 500)
+		Message(w, msg, http.StatusInternalServerError)
 		return
 	}
 }

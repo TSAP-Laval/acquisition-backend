@@ -96,6 +96,9 @@ func (a *AcquisitionService) getRouter() http.Handler {
 	r.HandleFunc("/api/equipes/{nom}", a.GetEquipeHandler).Methods("GET")
 	r.HandleFunc("/api/equipes/{id}", a.EquipesHandler).Methods("DELETE", "PUT")
 	r.HandleFunc("/api/equipes", a.CreerEquipeHandler).Methods("POST")
+	// Parties
+	r.HandleFunc("/api/parties", a.PartiesHandler).Methods("GET", "POST")
+	r.HandleFunc("/api/parties/{id}", a.SupprimerPartiesHandler).Methods("DELETE")
 	// BD
 	r.HandleFunc("/api/seed", a.RemplirBD).Methods("POST")
 	r.HandleFunc("/api/bd", a.FaireBD).Methods("POST")

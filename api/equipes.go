@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"strings"
@@ -18,7 +19,7 @@ func (a *AcquisitionService) GetEquipeHandler(w http.ResponseWriter, r *http.Req
 		db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
 		defer db.Close()
 
-		ErrorHandler(w, err)
+		a.ErrorHandler(w, err)
 
 		team := []Teams{}
 		name := strings.ToLower(strings.TrimSpace(vars["nom"]))
@@ -28,13 +29,10 @@ func (a *AcquisitionService) GetEquipeHandler(w http.ResponseWriter, r *http.Req
 			team[i] = AjoutNiveauSport(db, team[i])
 		}
 
-		teamJSON, _ := json.Marshal(team)
-
-		Message(w, teamJSON, 200)
+		Message(w, team, http.StatusOK)
 	} else {
 		msg := map[string]string{"error": "Veuillez entrer un nom d'équipe ou en créer une préalablement"}
-		errorJSON, _ := json.Marshal(msg)
-		Message(w, errorJSON, 404)
+		Message(w, msg, http.StatusNotFound)
 	}
 }
 
@@ -45,7 +43,7 @@ func (a *AcquisitionService) EquipesHandler(w http.ResponseWriter, r *http.Reque
 		db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
 		defer db.Close()
 
-		ErrorHandler(w, err)
+		a.ErrorHandler(w, err)
 
 		team := []Teams{}
 		id := strings.ToLower(strings.TrimSpace(vars["id"]))
@@ -57,13 +55,13 @@ func (a *AcquisitionService) EquipesHandler(w http.ResponseWriter, r *http.Reque
 			if len(body) > 0 {
 				var t Teams
 				err = json.Unmarshal(body, &t)
-				ErrorHandler(w, err)
+				a.ErrorHandler(w, err)
 
 				t.Name = strings.TrimSpace(t.Name)
 				t.City = strings.TrimSpace(t.City)
 
+				// Omit
 				var o string
-
 				if t.Name == "" {
 					o += "Name, "
 				}
@@ -72,38 +70,35 @@ func (a *AcquisitionService) EquipesHandler(w http.ResponseWriter, r *http.Reque
 				}
 				db.Model(&team).Where("ID = ?", id).Omit(o).Updates(t)
 
-				// L'équipe modifiée
+				// L'équipe modifiée (new team)
 				var nt Teams
 				db.Where("ID = ?", id).Find(&nt)
 
 				nt = AjoutNiveauSport(db, t)
 
-				teamJSON, _ := json.Marshal(nt)
-				Message(w, teamJSON, 201)
+				Message(w, nt, http.StatusCreated)
 
 			} else if err != nil {
-				ErrorHandler(w, err)
+				a.ErrorHandler(w, err)
 			} else {
 				msg := map[string]string{"error": "Veuillez choisir au moins un champs à modifier."}
-				errorJSON, _ := json.Marshal(msg)
-				Message(w, errorJSON, 400)
+				Message(w, msg, http.StatusBadRequest)
 			}
 		case "DELETE":
+			// Erreur
 			if len(team) == 0 {
 				msg := map[string]string{"error": "Aucune equipe ne correspond. Elle doit déjà avoir été supprimée!"}
-				errorJSON, _ := json.Marshal(msg)
-				Message(w, errorJSON, 204)
+				Message(w, msg, http.StatusNoContent)
 			} else {
+				// On supprime l'équipe
 				db.Where("ID = ?", id).Delete(&team)
 				msg := map[string]string{"succes": "L'équipe a été supprimée avec succès!"}
-				succesJSON, _ := json.Marshal(msg)
-				Message(w, succesJSON, 204)
+				Message(w, msg, http.StatusNoContent)
 			}
 		}
 	} else {
 		msg := map[string]string{"error": "Veuillez entrer un nom d'équipe ou en créer une préalablement."}
-		errorJSON, _ := json.Marshal(msg)
-		Message(w, errorJSON, 404)
+		Message(w, msg, http.StatusBadRequest)
 	}
 }
 
@@ -112,7 +107,7 @@ func (a *AcquisitionService) GetEquipesHandler(w http.ResponseWriter, r *http.Re
 	db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
 	defer db.Close()
 
-	ErrorHandler(w, err)
+	a.ErrorHandler(w, err)
 
 	team := []Teams{}
 	db.Find(&team)
@@ -121,9 +116,7 @@ func (a *AcquisitionService) GetEquipesHandler(w http.ResponseWriter, r *http.Re
 		team[i] = AjoutNiveauSport(db, team[i])
 	}
 
-	teamJSON, _ := json.Marshal(team)
-
-	Message(w, teamJSON, 200)
+	Message(w, team, http.StatusOK)
 }
 
 // CreerEquipeHandler Gère la création d'une équipe dans la base de donnée
@@ -133,11 +126,11 @@ func (a *AcquisitionService) CreerEquipeHandler(w http.ResponseWriter, r *http.R
 		db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
 		defer db.Close()
 
-		ErrorHandler(w, err)
+		a.ErrorHandler(w, err)
 
 		var t Teams
 		err = json.Unmarshal(body, &t)
-		ErrorHandler(w, err)
+		a.ErrorHandler(w, err)
 
 		// On enlève les espaces superflues
 		t.Name = strings.TrimSpace(t.Name)
@@ -145,8 +138,7 @@ func (a *AcquisitionService) CreerEquipeHandler(w http.ResponseWriter, r *http.R
 
 		if t.Name == "" || t.City == "" {
 			msg := map[string]string{"error": "Veuillez remplir tous les champs."}
-			errorJSON, _ := json.Marshal(msg)
-			Message(w, errorJSON, 400)
+			Message(w, msg, http.StatusBadRequest)
 		} else {
 
 			team := []Teams{}
@@ -155,41 +147,39 @@ func (a *AcquisitionService) CreerEquipeHandler(w http.ResponseWriter, r *http.R
 
 			if len(team) > 0 {
 				msg := map[string]string{"error": "Une équipe de même nom existe déjà. Veuillez choisir une autre nom."}
-				errorJSON, _ := json.Marshal(msg)
-				Message(w, errorJSON, 401)
+				Message(w, msg, http.StatusUnauthorized)
 			} else {
 				if db.NewRecord(t) {
 					db.Create(&t)
 					if db.NewRecord(t) {
 						msg := map[string]string{"error": "Une erreur est survenue lors de la création de l'équipe. Veuillez réessayer!"}
-						errorJSON, _ := json.Marshal(msg)
-						Message(w, errorJSON, 500)
+						Message(w, msg, http.StatusInternalServerError)
 					} else {
 						t = AjoutNiveauSport(db, t)
-						succesJSON, _ := json.Marshal(t)
-						Message(w, succesJSON, 201)
+						Message(w, t, http.StatusCreated)
 					}
 				} else {
 					msg := map[string]string{"error": "L'équipe existe déjà dans la base de donnée!"}
-					errorJSON, _ := json.Marshal(msg)
-					Message(w, errorJSON, 400)
+					Message(w, msg, http.StatusBadRequest)
 				}
 			}
 		}
 	} else if err != nil {
-		ErrorHandler(w, err)
+		a.ErrorHandler(w, err)
 	} else {
 		msg := map[string]string{"error": "Veuillez remplir tous les champs."}
-		errorJSON, _ := json.Marshal(msg)
-		Message(w, errorJSON, 400)
+		Message(w, msg, http.StatusBadRequest)
 	}
 }
 
 // Message Gère les messages (erreurs, messages de succès) à envoyer au client
-func Message(w http.ResponseWriter, msg []byte, code int) {
+func Message(w http.ResponseWriter, msg interface{}, code int) {
+	message, _ := json.Marshal(msg)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)
-	w.Write(msg)
+	w.Write(message)
+
+	return
 }
 
 // AjoutNiveauSport permet d'ajouter les informations sur le sport et le niveau lors de l'affchage des infos
@@ -209,4 +199,14 @@ func AjoutNiveauSport(db *gorm.DB, t Teams) Teams {
 	}
 
 	return t
+}
+
+// ErrorHandler gère les erreurs côté serveur
+func (a *AcquisitionService) ErrorHandler(w http.ResponseWriter, err error) {
+	if err != nil {
+		a.Error(fmt.Sprintf("ERROR : %s", err))
+		w.WriteHeader(http.StatusNotFound)
+		a.ErrorWrite(err.Error(), w)
+		return
+	}
 }
