@@ -68,7 +68,7 @@ func (a *AcquisitionService) PostTeam(w http.ResponseWriter, r *http.Request) {
 		t.Sport = x
 		Niv := Categories{}
 		db.First(&Niv, t.CategoryID)
-		t.Niveau = Niv
+		t.Category = Niv
 
 		SportJSON, _ := json.Marshal(t)
 		fmt.Println(string(SportJSON))

@@ -199,14 +199,14 @@ type Metrics struct {
 // Expand effectue un fetch de tous les children de l'action
 // (has-many, has-one, pas belongs-to)
 func (a *Actions) Expand(db *gorm.DB) {
-	db.Model(a).Related(&(a.ActionsType))
-	db.Model(a).Related(&(a.Zones))
+	db.Model(a).Related(&(a.ActionType))
+	db.Model(a).Related(&(a.Zone))
 }
 
 // Expand effectue un fetch de tous les children de la partie
 // (has-many, has-one, pas belongs-to)
 func (g *Games) Expand(db *gorm.DB) {
-	db.Model(g).Related(&(g.Actions))
+	db.Model(g).Related(&(g.Action))
 	db.Model(g).Related(&(g.HomeTeam), "HomeTeamID")
 	db.Model(g).Related(&(g.OpposingTeam), "OpposingTeamID")
 }
