@@ -52,7 +52,7 @@ func TestCreerEquipe(t *testing.T) {
 }
 
 func TestCreerEquipeErrEmpty(t *testing.T) {
-	reader = strings.NewReader(`{"Nom": "UNE equipe", "": "NiveauID": 1, "SportID": 1}`)
+	reader = strings.NewReader(`{"Nom": "UNE equipe", "":"", "NiveauID": 1, "SportID": 1}`)
 	request, err := http.NewRequest("POST", baseURL+"/api/equipes", reader)
 	res, err := http.DefaultClient.Do(request)
 
