@@ -11,6 +11,20 @@ import (
 	"github.com/TSAP-Laval/acquisition-backend/api"
 )
 
+func TestSeed(t *testing.T) {
+	reader = strings.NewReader("")
+	request, err := http.NewRequest("GET", baseURL+"/api/seeders", reader)
+	res, err := http.DefaultClient.Do(request)
+
+	if err != nil {
+		t.Error(err) //Something is wrong while sending request
+	}
+
+	if res.StatusCode != 200 {
+		t.Errorf("Success expected: %d", res.StatusCode)
+	}
+}
+
 func TestGetEquipes(t *testing.T) {
 	reader = strings.NewReader("")
 	request, err := http.NewRequest("GET", baseURL+"/api/equipes", reader)
