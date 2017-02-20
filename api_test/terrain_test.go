@@ -26,7 +26,7 @@ func TestGetTerrains(t *testing.T) {
 }
 
 func TestCreerTerrain(t *testing.T) {
-	reader = strings.NewReader(`{"Nom": "LE terrain", "Ville": "Quebec", "Adresse": "1231 une rue"}`)
+	reader = strings.NewReader(`{"Name": "LE terrain", "City": "Quebec", "Address": "1231 une rue"}`)
 	request, err := http.NewRequest("POST", baseURL+"/api/terrains", reader)
 	res, err := http.DefaultClient.Do(request)
 
@@ -37,7 +37,7 @@ func TestCreerTerrain(t *testing.T) {
 	bodyBuffer, _ := ioutil.ReadAll(res.Body)
 	t.Logf("Res: --> %s\n\n", bodyBuffer)
 
-	var l api.Lieu
+	var l api.Locations
 	err = json.Unmarshal(bodyBuffer, &l)
 	if err != nil {
 		t.Logf("ERR: --> %s\n\n", err)
@@ -52,7 +52,7 @@ func TestCreerTerrain(t *testing.T) {
 }
 
 func TestCreerTerrainErrEmpty(t *testing.T) {
-	reader = strings.NewReader(`{"Nom": "UN terrain", "Ville": "Quebec", "Adresse": ""}`)
+	reader = strings.NewReader(`{"Name": "UN terrain", "City": "Quebec", "Addrese": ""}`)
 	request, err := http.NewRequest("POST", baseURL+"/api/terrains", reader)
 	res, err := http.DefaultClient.Do(request)
 
@@ -66,7 +66,7 @@ func TestCreerTerrainErrEmpty(t *testing.T) {
 }
 
 func TestCreerTerrainErrExiste(t *testing.T) {
-	reader = strings.NewReader(`{"Nom": "LE terrain", "Ville": "Quebec", "Adresse": ""}`)
+	reader = strings.NewReader(`{"Name": "LE terrain", "City": "Quebec", "Address": ""}`)
 	request, err := http.NewRequest("POST", baseURL+"/api/terrains", reader)
 	res, err := http.DefaultClient.Do(request)
 
@@ -94,7 +94,7 @@ func TestGetTerrain(t *testing.T) {
 }
 
 func TestModifierTerrain(t *testing.T) {
-	reader = strings.NewReader(`{"Nom": "LE terrain", "Ville": "Montreal", "Adresse": ""}`)
+	reader = strings.NewReader(`{"Name": "LE terrain", "City": "Montreal", "Address": ""}`)
 	request, err := http.NewRequest("PUT", baseURL+"/api/terrains/"+rmID, reader)
 	res, err := http.DefaultClient.Do(request)
 
@@ -121,7 +121,7 @@ func TestGetTerrainModifie(t *testing.T) {
 	t.Logf("Res: --> %s\n\n", bodyBuffer)
 
 	// Ve receive an array of Lieu
-	l := []api.Lieu{}
+	l := []api.Locations{}
 	err = json.Unmarshal(bodyBuffer, &l)
 	if err != nil {
 		t.Logf("ERR: --> %s\n\n", err)
@@ -131,10 +131,10 @@ func TestGetTerrainModifie(t *testing.T) {
 		t.Errorf("Success expected: %d", res.StatusCode)
 	}
 	// We only look at the first element of the array
-	if l[0].Ville != "Montreal" {
+	if l[0].City != "Montreal" {
 		t.Errorf("City expected: %s", l[0].Ville)
 	}
-	if l[0].Adresse != "1231 une rue" {
+	if l[0].Address != "1231 une rue" {
 		t.Errorf("Address expected: %s", l[0].Adresse)
 	}
 }

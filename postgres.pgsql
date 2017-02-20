@@ -95,7 +95,7 @@ CREATE TABLE "players" (
   "pass_hash" VARCHAR(256) NULL,
   "token_request" VARCHAR(256) NULL,
   "token_reset" VARCHAR(256) NULL,
-  "token_connection" VARCHAR(256) NULL);
+  "token_login" VARCHAR(256) NULL);
 
 
 -- -----------------------------------------------------
@@ -106,7 +106,7 @@ CREATE TABLE "locations" (
   "id" SERIAL PRIMARY KEY,
   "name" VARCHAR(256) NOT NULL,
   "city" VARCHAR(256) NOT NULL,
-  "adress" VARCHAR(256) NULL);
+  "address" VARCHAR(256) NULL);
 
 
 
@@ -290,8 +290,6 @@ CREATE TABLE "player_team" (
   "id" SERIAL PRIMARY KEY ,
   "id_player" INT NOT NULL,
   "id_team" INT NOT NULL,
-  "created" TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
-  "updated" TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT "fk_player"
     FOREIGN KEY ("id_player")
     REFERENCES "players" ("id")
@@ -317,7 +315,7 @@ CREATE TABLE "coaches" (
   "pass_hash" VARCHAR(256) NULL,
   "token_request" VARCHAR(256) NULL,
   "token_reset" VARCHAR(256) NULL,
-  "token_connection" VARCHAR(256) NULL);
+  "token_login" VARCHAR(256) NULL);
 
 
 
@@ -329,7 +327,6 @@ CREATE TABLE "coach_team" (
   "id" SERIAL PRIMARY KEY ,
   "id_coach" INT NOT NULL,
   "id_team" INT NOT NULL,
-  "created" TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT "fk_mandat_coach"
     FOREIGN KEY ("id_coach")
     REFERENCES "coaches" ("id")

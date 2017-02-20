@@ -66,7 +66,7 @@ func TestCreerEquipe(t *testing.T) {
 }
 
 func TestCreerEquipeErrEmpty(t *testing.T) {
-	reader = strings.NewReader(`{"Nom": "UNE equipe", "":"", "NiveauID": 1, "SportID": 1}`)
+	reader = strings.NewReader(`{"Name": "UNE equipe", "":"", "CategoryID": 1, "SportID": 1}`)
 	request, err := http.NewRequest("POST", baseURL+"/api/equipes", reader)
 	res, err := http.DefaultClient.Do(request)
 
@@ -80,7 +80,7 @@ func TestCreerEquipeErrEmpty(t *testing.T) {
 }
 
 func TestCreerEquipeErrExiste(t *testing.T) {
-	reader = strings.NewReader(`{"Nom": "Lequipe", "Ville": "Quebec", "NiveauID": 1, "SportID": 1}`)
+	reader = strings.NewReader(`{"Name": "Lequipe", "Ville": "Quebec", "CategoryID": 1, "SportID": 1}`)
 	request, err := http.NewRequest("POST", baseURL+"/api/equipes", reader)
 	res, err := http.DefaultClient.Do(request)
 
@@ -108,7 +108,7 @@ func TestGetEquipe(t *testing.T) {
 }
 
 func TestModifierEquipe(t *testing.T) {
-	reader = strings.NewReader(`{"Nom": "LE equipe", "Ville": "Montreal", "NiveauID": 1, "SportID": 1}`)
+	reader = strings.NewReader(`{"Name": "LE equipe", "City": "Montreal", "CategoryID": 1, "SportID": 1}`)
 	request, err := http.NewRequest("PUT", baseURL+"/api/equipes/"+rmID, reader)
 	res, err := http.DefaultClient.Do(request)
 
@@ -135,8 +135,8 @@ func TestGetEquipeModifie(t *testing.T) {
 	t.Logf("Res: --> %s\n\n", bodyBuffer)
 
 	// Ve receive an array of Equipe
-	e := []api.Equipe{}
-	err = json.Unmarshal(bodyBuffer, &e)
+	t := []api.Teams{}
+	err = json.Unmarshal(bodyBuffer, &t)
 	if err != nil {
 		t.Logf("ERR: --> %s\n\n", err)
 	}
@@ -145,7 +145,7 @@ func TestGetEquipeModifie(t *testing.T) {
 		t.Errorf("Success expected: %d", res.StatusCode)
 	}
 	// We only look at the first element of the array
-	if e[0].Ville != "Montreal" {
+	if t[0].City != "Montreal" {
 		t.Errorf("City expected: %s", e[0].Ville)
 	}
 }

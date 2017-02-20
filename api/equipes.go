@@ -20,17 +20,17 @@ func (a *AcquisitionService) GetEquipeHandler(w http.ResponseWriter, r *http.Req
 
 		ErrorHandler(w, err)
 
-		equipe := []Equipe{}
-		nom := strings.ToLower(strings.TrimSpace(vars["nom"]))
-		db.Where("LOWER(Nom) LIKE LOWER(?)", "%"+nom+"%").Find(&equipe)
+		team := []Teams{}
+		name := strings.ToLower(strings.TrimSpace(vars["nom"]))
+		db.Where("LOWER(Nom) LIKE LOWER(?)", "%"+name+"%").Find(&team)
 
-		for i := 0; i < len(equipe); i++ {
-			equipe[i] = AjoutNiveauSport(db, equipe[i])
+		for i := 0; i < len(team); i++ {
+			team[i] = AjoutNiveauSport(db, team[i])
 		}
 
-		equipeJSON, _ := json.Marshal(equipe)
+		teamJSON, _ := json.Marshal(team)
 
-		Message(w, equipeJSON, 200)
+		Message(w, teamJSON, 200)
 	} else {
 		msg := map[string]string{"error": "Veuillez entrer un nom d'équipe ou en créer une préalablement"}
 		errorJSON, _ := json.Marshal(msg)
@@ -47,39 +47,39 @@ func (a *AcquisitionService) EquipesHandler(w http.ResponseWriter, r *http.Reque
 
 		ErrorHandler(w, err)
 
-		equipe := []Equipe{}
+		team := []Teams{}
 		id := strings.ToLower(strings.TrimSpace(vars["id"]))
-		db.First(&equipe, "ID = ?", id)
+		db.First(&team, "ID = ?", id)
 
 		switch r.Method {
 		case "PUT":
 			body, err := ioutil.ReadAll(r.Body)
 			if len(body) > 0 {
-				var e Equipe
-				err = json.Unmarshal(body, &e)
+				var t Teams
+				err = json.Unmarshal(body, &t)
 				ErrorHandler(w, err)
 
-				e.Nom = strings.TrimSpace(e.Nom)
-				e.Ville = strings.TrimSpace(e.Ville)
+				t.Name = strings.TrimSpace(t.Name)
+				t.City = strings.TrimSpace(t.City)
 
 				var o string
 
-				if e.Nom == "" {
+				if t.Name == "" {
 					o += "Nom, "
 				}
-				if e.Ville == "" {
+				if t.City == "" {
 					o += "Ville, "
 				}
-				db.Model(&equipe).Where("ID = ?", id).Omit(o).Updates(e)
+				db.Model(&team).Where("ID = ?", id).Omit(o).Updates(t)
 
 				// L'équipe modifiée
-				var ne Equipe
-				db.Where("ID = ?", id).Find(&ne)
+				var nt Teams
+				db.Where("ID = ?", id).Find(&nt)
 
-				ne = AjoutNiveauSport(db, e)
+				nt = AjoutNiveauSport(db, t)
 
-				equipeJSON, _ := json.Marshal(ne)
-				Message(w, equipeJSON, 201)
+				teamJSON, _ := json.Marshal(nt)
+				Message(w, teamJSON, 201)
 
 			} else if err != nil {
 				ErrorHandler(w, err)
@@ -89,12 +89,12 @@ func (a *AcquisitionService) EquipesHandler(w http.ResponseWriter, r *http.Reque
 				Message(w, errorJSON, 400)
 			}
 		case "DELETE":
-			if len(equipe) == 0 {
+			if len(team) == 0 {
 				msg := map[string]string{"error": "Aucune equipe ne correspond. Elle doit déjà avoir été supprimée!"}
 				errorJSON, _ := json.Marshal(msg)
 				Message(w, errorJSON, 204)
 			} else {
-				db.Where("ID = ?", id).Delete(&equipe)
+				db.Where("ID = ?", id).Delete(&team)
 				msg := map[string]string{"succes": "L'équipe a été supprimée avec succès!"}
 				succesJSON, _ := json.Marshal(msg)
 				Message(w, succesJSON, 204)
@@ -114,16 +114,16 @@ func (a *AcquisitionService) GetEquipesHandler(w http.ResponseWriter, r *http.Re
 
 	ErrorHandler(w, err)
 
-	equipe := []Equipe{}
-	db.Find(&equipe)
+	team := []Teams{}
+	db.Find(&team)
 
-	for i := 0; i < len(equipe); i++ {
-		equipe[i] = AjoutNiveauSport(db, equipe[i])
+	for i := 0; i < len(team); i++ {
+		team[i] = AjoutNiveauSport(db, team[i])
 	}
 
-	equipeJSON, _ := json.Marshal(equipe)
+	teamJSON, _ := json.Marshal(team)
 
-	Message(w, equipeJSON, 200)
+	Message(w, teamJSON, 200)
 }
 
 // CreerEquipeHandler Gère la création d'une équipe dans la base de donnée
@@ -135,38 +135,38 @@ func (a *AcquisitionService) CreerEquipeHandler(w http.ResponseWriter, r *http.R
 
 		ErrorHandler(w, err)
 
-		var e Equipe
-		err = json.Unmarshal(body, &e)
+		var t Teams
+		err = json.Unmarshal(body, &t)
 		ErrorHandler(w, err)
 
 		// On enlève les espaces superflues
-		e.Nom = strings.TrimSpace(e.Nom)
-		e.Ville = strings.TrimSpace(e.Ville)
+		t.Name = strings.TrimSpace(t.Name)
+		t.City = strings.TrimSpace(t.City)
 
-		if e.Nom == "" || e.Ville == "" {
+		if t.Name == "" || t.City == "" {
 			msg := map[string]string{"error": "Veuillez remplir tous les champs."}
 			errorJSON, _ := json.Marshal(msg)
 			Message(w, errorJSON, 400)
 		} else {
 
-			equipe := []Equipe{}
-			nom := strings.ToLower(strings.TrimSpace(e.Nom))
-			db.Where("LOWER(Nom) = LOWER(?)", nom).Find(&equipe)
+			team := []Teams{}
+			name := strings.ToLower(strings.TrimSpace(t.Name))
+			db.Where("LOWER(Nom) = LOWER(?)", name).Find(&team)
 
-			if len(equipe) > 0 {
+			if len(team) > 0 {
 				msg := map[string]string{"error": "Une équipe de même nom existe déjà. Veuillez choisir une autre nom."}
 				errorJSON, _ := json.Marshal(msg)
 				Message(w, errorJSON, 401)
 			} else {
-				if db.NewRecord(e) {
-					db.Create(&e)
-					if db.NewRecord(e) {
+				if db.NewRecord(t) {
+					db.Create(&t)
+					if db.NewRecord(t) {
 						msg := map[string]string{"error": "Une erreur est survenue lors de la création de l'équipe. Veuillez réessayer!"}
 						errorJSON, _ := json.Marshal(msg)
 						Message(w, errorJSON, 500)
 					} else {
-						e = AjoutNiveauSport(db, e)
-						succesJSON, _ := json.Marshal(e)
+						t = AjoutNiveauSport(db, t)
+						succesJSON, _ := json.Marshal(t)
 						Message(w, succesJSON, 201)
 					}
 				} else {
@@ -193,20 +193,20 @@ func Message(w http.ResponseWriter, msg []byte, code int) {
 }
 
 // AjoutNiveauSport permet d'ajouter les informations sur le sport et le niveau lors de l'affchage des infos
-func AjoutNiveauSport(db *gorm.DB, e Equipe) Equipe {
+func AjoutNiveauSport(db *gorm.DB, t Teams) Teams {
 	// Ajout du sport pour l'affichage
-	var s Sport
-	db.Where("ID = ?", e.SportID).Find(&s)
-	if s.Nom != "" {
-		e.Sport = s
+	var s Sports
+	db.Where("ID = ?", t.SportID).Find(&s)
+	if s.Name != "" {
+		t.Sport = s
 	}
 
 	// Ajout du niveau pour l'affichage
-	var n Niveau
-	db.Where("ID = ?", e.NiveauID).Find(&n)
-	if n.Nom != "" {
-		e.Niveau = n
+	var c Categories
+	db.Where("ID = ?", t.CategoryID).Find(&c)
+	if c.Name != "" {
+		t.Category = c
 	}
 
-	return e
+	return t
 }

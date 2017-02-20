@@ -6,129 +6,207 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
-type TypeAction struct {
+// Admins les administrateurs
+type Admins struct {
 	gorm.Model
-	Nom         string `gorm:"unique"`
-	Description string
-}
-type Sport struct {
-	gorm.Model
-	Nom string
-}
-type Niveau struct {
-	gorm.Model
-	Nom string
-}
-type Entraineur struct {
-	gorm.Model
-	Prenom   string
-	Nom      string
-	Email    string
-	PassHash string
-	Token    string
-	Equipes  []Equipe `gorm:"many2many:entraineur_equipe;"`
-}
-type Joueur struct {
-	gorm.Model
-	Prenom                string
-	Nom                   string
-	Numero                int
-	Email                 string
-	PassHash              string
-	TokenInvitation       string
-	TokenReinitialisation string
-	TokenConnexion        string
-	Equipes               []Equipe `gorm:"many2many:joueur_equipe;"`
+	Email      string
+	PassHash   string
+	TokenReset string
+	TokenLogin string
 }
 
-//MovementType represent Movement type entity
+// Seasons Les saisons
+type Seasons struct {
+	gorm.Model
+	Years string `gorm:"size:10"`
+}
+
+// Sports les sports
+type Sports struct {
+	gorm.Model
+	Name string
+}
+
+// Categories les categories
+type Categories struct {
+	gorm.Model
+	Name string
+}
+
+// Teams les équipes
+type Teams struct {
+	gorm.Model
+	Name       string
+	City       string
+	Sport      Sports
+	SportID    int
+	Category   Categories
+	CategoryID int
+	Coaches    []Coaches `gorm:"many2many:coach_team;"`
+	Players    []Players `gorm:"many2many:players_team;"`
+}
+
+// Players les joueurs
+type Players struct {
+	gorm.Model
+	Number       int
+	Fname        string
+	Lname        string
+	Email        string
+	PassHash     string
+	TokenRequest string
+	TokenReset   string
+	TokenLogin   string
+	Teams        []Teams `gorm:"many2many:joueur_equipe;"`
+}
+
+// Locations les lieux
+type Locations struct {
+	gorm.Model
+	Name    string
+	City    string
+	Address string
+}
+
+// Videos les videos
+type Videos struct {
+	gorm.Model
+	Path      string
+	Completed bool
+}
+
+// Games les parties
+type Games struct {
+	gorm.Model
+	HomeTeam        Teams
+	HomeTeamID      int
+	OpposingTeam    Teams
+	EquipeAdverseID int
+	Season          Seasons
+	SeasonID        int
+	Location        Locations
+	LocationID      int
+	Video           Videos
+	VideoID         int
+	Date            string
+	Action          []Actions
+}
+
+// Positions les positions des joueurs
+type Positions struct {
+	gorm.Model
+	Name string
+}
+
+// PlayerPositionGameTeam table de relations entre
+// les joueurs, les positions, les parties et les équipes
+type PlayerPositionGameTeam struct {
+	gorm.Model
+	Player     Players
+	PlayerID   int
+	Game       Games
+	GameID     int
+	Position   Positions
+	PositionID int
+	Team       Teams
+	TeamID     int
+}
+
+// Zones les zones de terrain
+type Zones struct {
+	gorm.Model
+	Name string
+}
+
+//MovementsType represent Movement type entity
 //1: Offensive
 //2: Defensive
 //3: Neutral
-type MovementType struct {
+type MovementsType struct {
 	gorm.Model
 	Name string `gorm:"unique"`
 }
-type Equipe struct {
+
+// ActionsType les types d'actions
+type ActionsType struct {
 	gorm.Model
-	Nom         string
-	Ville       string
-	Sport       Sport
-	SportID     int
-	Niveau      Niveau
-	NiveauID    int
-	Entraineurs []Entraineur `gorm:"many2many:entraineur_equipe;"`
-	Joueurs     []Joueur     `gorm:"many2many:joueur_equipe;"`
-}
-type Zone struct {
-	gorm.Model
-	Nom string
-}
-type Saison struct {
-	gorm.Model
-	Annees string `gorm:"size:10"`
-}
-type Lieu struct {
-	gorm.Model
-	Nom     string
-	Ville   string
-	Adresse string
-}
-type Video struct {
-	gorm.Model
-	Path           string
-	AnalyseTermine bool
+	Name           string
+	Description    string
+	MovementType   MovementsType
+	MovementTypeID int
 }
 
-type Partie struct {
-	gorm.Model
-	EquipeMaison    Equipe
-	EquipeMaisonID  int
-	EquipeAdverse   Equipe
-	EquipeAdverseID int
-	Saison          Saison
-	SaisonID        int
-	Lieu            Lieu
-	LieuID          int
-	Video           Video
-	VideoID         int
-	Date            string
-	Actions         []Action
-}
-
-// Expand effectue un fetch de tous les children de la partie
-// (has-many, has-one, pas belongs-to)
-func (p *Partie) Expand(db *gorm.DB) {
-	db.Model(p).Related(&(p.Actions))
-	db.Model(p).Related(&(p.EquipeMaison), "EquipeMaisonID")
-	db.Model(p).Related(&(p.EquipeAdverse), "EquipeAdverseID")
-}
-
-// Action est une modélisation des informations sur une
+// Actions est une modélisation des informations sur une
 // action exécutée par un joueur
-type Action struct {
+type Actions struct {
 	gorm.Model
-	TypeAction      TypeAction
-	TypeActionID    int
-	ActionPositive  bool
-	Zone            Zone
-	ZoneID          int
-	Partie          Partie
-	PartieID        int
-	X1              float64
-	Y1              float64
-	X2              float64
-	Y2              float64
-	Temps           time.Duration
-	PointageMaison  int
-	PointageAdverse int
-	Joueur          Joueur
-	JoueurID        int
+	ActionType   ActionsType
+	ActionTypeID int
+	IsPositive   bool
+	Zone         Zones
+	ZoneID       int
+	Game         Games
+	GameID       int
+	X1           float64
+	Y1           float64
+	X2           float64
+	Y2           float64
+	Time         time.Duration
+	HomeScore    int
+	GuestScore   int
+	PLayer       Players
+	PlayerID     int
+}
+
+// PlayersTeam table de relations joueurs et équipe
+type PlayersTeam struct {
+	Player   Players
+	PlayerID int
+	Team     Teams
+	TeamID   int
+}
+
+// Coaches les entraineurs
+type Coaches struct {
+	gorm.Model
+	Fname        string
+	Lname        string
+	Email        string
+	PassHash     string
+	TokenRequest string
+	TokenReset   string
+	TokenLogin   string
+	Teams        []Teams `gorm:"many2many:entraineur_equipe;"`
+}
+
+// CoachTeam table de relations entre entraineurs et équipes
+type CoachTeam struct {
+	gorm.Model
+	Coach   Coaches
+	CoachID int
+	Team    Teams
+	TeamID  int
+}
+
+// Metrics les métriques
+type Metrics struct {
+	Name     string
+	Equation string
+	Team     Teams
+	TeamID   int
 }
 
 // Expand effectue un fetch de tous les children de l'action
 // (has-many, has-one, pas belongs-to)
-func (a *Action) Expand(db *gorm.DB) {
-	db.Model(a).Related(&(a.TypeAction))
-	db.Model(a).Related(&(a.Zone))
+func (a *Actions) Expand(db *gorm.DB) {
+	db.Model(a).Related(&(a.ActionsType))
+	db.Model(a).Related(&(a.Zones))
+}
+
+// Expand effectue un fetch de tous les children de la partie
+// (has-many, has-one, pas belongs-to)
+func (g *Games) Expand(db *gorm.DB) {
+	db.Model(g).Related(&(g.Actions))
+	db.Model(g).Related(&(g.HomeTeam), "HomeTeamID")
+	db.Model(g).Related(&(g.OpposingTeam), "OpposingTeamID")
 }
