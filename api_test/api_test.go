@@ -2,8 +2,11 @@ package api_test
 
 import (
 	"io"
+	"net/http"
 	"net/http/httptest"
 	"os"
+	"strings"
+	"testing"
 
 	"github.com/TSAP-Laval/acquisition-backend/api"
 	"github.com/kelseyhightower/envconfig"
@@ -29,4 +32,18 @@ func init() {
 	service.Start()
 
 	baseURL = "http://localhost:3000"
+}
+
+func Seed(t *testing.T) {
+	reader = strings.NewReader("")
+	request, err := http.NewRequest("GET", baseURL+"/api/seeders", reader)
+	res, err := http.DefaultClient.Do(request)
+
+	if err != nil {
+		t.Error(err) //Something is wrong while sending request
+	}
+
+	if res.StatusCode != 200 {
+		t.Errorf("Success expected: %d", res.StatusCode)
+	}
 }
