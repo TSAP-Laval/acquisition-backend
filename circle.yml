@@ -2,7 +2,10 @@ dependencies:
   pre:
     - createdb 'tsap_acquisition'
     - psql 'tsap_acquisition' < postgres.pgsql
-    - psql -c "\du" tsap_acquisition
+    - psql 'tsap_acquisition'
+    - SELECT * FROM sports;
+    - \dt
+    - \q
     - pip install ansible
     - pip install --upgrade setuptools
   post:
