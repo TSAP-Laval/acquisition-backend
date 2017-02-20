@@ -1,13 +1,5 @@
-machine:
-  python:
-    version: 2.7.10
-
-  services:
-    - postgresql
-
 dependencies:
   pre:
-    - psql 'tsap_acquisition' < postgres.pgsql
     - psql -c "\dt" tsap_acquisition
     - pip install ansible
     - pip install --upgrade setuptools
@@ -15,24 +7,31 @@ dependencies:
     - go get -u github.com/golang/lint/golint
     - go build main.go
 
-  # Add some environment variables
-  environment:
-    TSAP_DATABASEDRIVER: "postgres"
-    TSAP_CONNECTIONSTRING: "host=localhost user=postgres dbname=tsap_acquisition sslmode=disable password="
-    TSAP_PORT: ":3000"
-    TSAP_DEBUG: "true"
-
-database:
-  override:
-    - createuser -s -d postgres
-    - createdb 'tsap_acquisition'
-
 test:
   override:
     - if [[ -n $(gofmt -l .) ]]; then echo "Please run gofmt"; exit 1; fi
     - golint ./...
     - go tool vet .
     - go test -v -race ./...
+
+database:
+  override:
+    - createdb tsap_acquisition
+    - psql -U postgres 'tsap_acquisition' < postgres.pgsql
+
+machine:
+  python:
+    version: 2.7.10
+
+  services:
+    - postgresql
+
+  # Add some environment variables
+  environment:
+    TSAP_DATABASEDRIVER: "postgres"
+    TSAP_CONNECTIONSTRING: "host=localhost user=postgres dbname=tsap_acquisition sslmode=disable password="
+    TSAP_PORT: ":3000"
+    TSAP_DEBUG: "true"
 
 general:
   artifacts:
