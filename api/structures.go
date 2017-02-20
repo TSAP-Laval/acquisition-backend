@@ -78,18 +78,18 @@ type Videos struct {
 // Games les parties
 type Games struct {
 	gorm.Model
-	HomeTeam        Teams
-	HomeTeamID      int
-	OpposingTeam    Teams
-	EquipeAdverseID int
-	Season          Seasons
-	SeasonID        int
-	Location        Locations
-	LocationID      int
-	Video           Videos
-	VideoID         int
-	Date            string
-	Action          []Actions
+	HomeTeam       Teams
+	HomeTeamID     int
+	OpposingTeam   Teams
+	OpposingTeamID int
+	Season         Seasons
+	SeasonID       int
+	Location       Locations
+	LocationID     int
+	Video          Videos
+	VideoID        int
+	Date           string
+	Action         []Actions
 }
 
 // Positions les positions des joueurs
