@@ -27,11 +27,11 @@ func (a *AcquisitionService) GetTerrainHandler(w http.ResponseWriter, r *http.Re
 
 		lieuJSON, _ := json.Marshal(lieu)
 
-		Message(w, lieuJSON, false)
+		Message(w, lieuJSON, 200)
 	} else {
 		msg := map[string]string{"error": "Veuillez entrer un nom de terrain ou en créer un préalablement"}
 		errorJSON, _ := json.Marshal(msg)
-		Message(w, errorJSON, true)
+		Message(w, errorJSON, 400)
 	}
 }
 
@@ -78,30 +78,30 @@ func (a *AcquisitionService) TerrainsHandler(w http.ResponseWriter, r *http.Requ
 				var nl Lieu
 				db.Where("ID = ?", id).Find(&nl)
 				equipeJSON, _ := json.Marshal(nl)
-				Message(w, equipeJSON, false)
+				Message(w, equipeJSON, 201)
 			} else if err != nil {
 				ErrorHandler(w, err)
 			} else {
 				msg := map[string]string{"error": "Veuillez choisir au moins un champs à modifier."}
 				errorJSON, _ := json.Marshal(msg)
-				Message(w, errorJSON, true)
+				Message(w, errorJSON, 400)
 			}
 		case "DELETE":
 			if len(lieu) == 0 {
 				msg := map[string]string{"error": "Aucun terrain ne correspond. Il doit déjà avoir été supprimé!"}
 				errorJSON, _ := json.Marshal(msg)
-				Message(w, errorJSON, true)
+				Message(w, errorJSON, 204)
 			} else {
 				db.Where("ID = ?", id).Delete(&lieu)
 				msg := map[string]string{"succes": "Le terrain a été supprimé avec succès!"}
 				succesJSON, _ := json.Marshal(msg)
-				Message(w, succesJSON, false)
+				Message(w, succesJSON, 204)
 			}
 		}
 	} else {
 		msg := map[string]string{"error": "Veuillez entrer un nom de terrain ou en créer un préalablement."}
 		errorJSON, _ := json.Marshal(msg)
-		Message(w, errorJSON, true)
+		Message(w, errorJSON, 404)
 	}
 }
 
@@ -117,7 +117,7 @@ func (a *AcquisitionService) GetTerrainsHandler(w http.ResponseWriter, r *http.R
 
 	lieuJSON, _ := json.Marshal(lieu)
 
-	Message(w, lieuJSON, false)
+	Message(w, lieuJSON, 200)
 }
 
 // CreerTerrainHandler Gère la création de terrain dans la base de donnée
@@ -140,7 +140,7 @@ func (a *AcquisitionService) CreerTerrainHandler(w http.ResponseWriter, r *http.
 		if l.Nom == "" || l.Adresse == "" || l.Ville == "" {
 			msg := map[string]string{"error": "Veuillez remplir tous les champs."}
 			errorJSON, _ := json.Marshal(msg)
-			Message(w, errorJSON, true)
+			Message(w, errorJSON, 400)
 		} else {
 
 			lieu := []Lieu{}
@@ -150,23 +150,23 @@ func (a *AcquisitionService) CreerTerrainHandler(w http.ResponseWriter, r *http.
 			if len(lieu) > 0 {
 				msg := map[string]string{"error": "Un terrain de même nom existe déjà. Veuillez choisir un autre nom."}
 				errorJSON, _ := json.Marshal(msg)
-				Message(w, errorJSON, true)
+				Message(w, errorJSON, 401)
 			} else {
 				if db.NewRecord(l) {
 					db.Create(&l)
 					if db.NewRecord(l) {
 						msg := map[string]string{"error": "Une erreur est survenue lors de la création du terrain. Veuillez réessayer!"}
 						errorJSON, _ := json.Marshal(msg)
-						Message(w, errorJSON, true)
+						Message(w, errorJSON, 500)
 					} else {
 
 						succesJSON, _ := json.Marshal(l)
-						Message(w, succesJSON, false)
+						Message(w, succesJSON, 201)
 					}
 				} else {
 					msg := map[string]string{"error": "Le terrain existe déjà dans la base de donnée!"}
 					errorJSON, _ := json.Marshal(msg)
-					Message(w, errorJSON, true)
+					Message(w, errorJSON, 401)
 				}
 			}
 		}
@@ -175,7 +175,7 @@ func (a *AcquisitionService) CreerTerrainHandler(w http.ResponseWriter, r *http.
 	} else {
 		msg := map[string]string{"error": "Veuillez remplir tous les champs."}
 		errorJSON, _ := json.Marshal(msg)
-		Message(w, errorJSON, true)
+		Message(w, errorJSON, 400)
 	}
 }
 

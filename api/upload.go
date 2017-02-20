@@ -1,6 +1,7 @@
 package api
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -9,18 +10,13 @@ import (
 
 // UploadHandler Gère l'upload de video sur le serveur
 func (a *AcquisitionService) UploadHandler(w http.ResponseWriter, r *http.Request) {
-
-	fmt.Println("\nmethod:", r.Method)
-	//fmt.Println(r.Header)
-
 	file, handler, err := r.FormFile("file")
-
+	defer file.Close()
 	if err != nil {
 		fmt.Print("\nERROR : ")
 		fmt.Println(err)
 		return
 	}
-	defer file.Close()
 
 	// On regarde si le dossier videos existe déjà.
 	// Dans le cas contraire, on le crée
@@ -29,12 +25,20 @@ func (a *AcquisitionService) UploadHandler(w http.ResponseWriter, r *http.Reques
 	}
 
 	f, err := os.OpenFile("./videos/"+handler.Filename, os.O_WRONLY|os.O_CREATE, 0666)
+	defer f.Close()
 
 	if err != nil {
+		fmt.Print("ERROR : ")
 		fmt.Println(err)
 		return
 	}
-	defer f.Close()
 
 	io.Copy(f, file)
+
+	msg := map[string]string{"succes": "Le video a été envoyé avec succès!"}
+	succesJSON, _ := json.Marshal(msg)
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(succesJSON)
+	w.WriteHeader(201)
 }
