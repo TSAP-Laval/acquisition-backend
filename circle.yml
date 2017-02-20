@@ -1,6 +1,5 @@
 dependencies:
   pre:
-    - postgres -D /usr/local/var/postgres
     - createdb 'tsap_acquisition'
     - psql 'tsap_acquisition' < postgres.pgsql
     - pip install ansible
