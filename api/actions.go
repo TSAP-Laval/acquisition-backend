@@ -20,7 +20,7 @@ func (a *AcquisitionService) GetMovementTypeHandler(w http.ResponseWriter, r *ht
 	defer db.Close()
 	fmt.Println(err)
 
-	mvmType := []MovementType{}
+	mvmType := []MovementsType{}
 	db.Find(&mvmType)
 
 	mvmTypeJSON, _ := json.Marshal(mvmType)
@@ -38,7 +38,7 @@ func (a *AcquisitionService) GetAllActionsTypes(w http.ResponseWriter, r *http.R
 	defer db.Close()
 	fmt.Println(err)
 
-	actionTypes := []TypeAction{}
+	actionTypes := []ActionsType{}
 	db.Find(&actionTypes)
 
 	actionTypesJSON, _ := json.Marshal(actionTypes)
@@ -64,7 +64,7 @@ func (a *AcquisitionService) PostActionType(w http.ResponseWriter, r *http.Reque
 	defer db.Close()
 	fmt.Println(string(body))
 
-	var newActionType TypeAction
+	var newActionType ActionsType
 
 	err = json.Unmarshal(body, &newActionType)
 

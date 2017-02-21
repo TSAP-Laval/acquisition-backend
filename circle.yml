@@ -13,9 +13,25 @@ test:
     - go tool vet .
     - go test -v -race ./...
 
+database:
+  override:
+    - createdb tsap_acquisition
+    - psql -U postgres 'tsap_acquisition' < postgres.pgsql
+    - psql -c "\dt" tsap_acquisition
+
 machine:
   python:
     version: 2.7.10
+
+  services:
+    - postgresql
+
+  # Add some environment variables
+  environment:
+    TSAP_DATABASEDRIVER: "postgres"
+    TSAP_CONNECTIONSTRING: "host=localhost user=postgres dbname=tsap_acquisition sslmode=disable password="
+    TSAP_PORT: ":3000"
+    TSAP_DEBUG: "true"
 
 general:
   artifacts:

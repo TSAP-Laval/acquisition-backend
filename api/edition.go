@@ -17,11 +17,12 @@ func (a *AcquisitionService) GetJoueurs(w http.ResponseWriter, r *http.Request) 
 	fmt.Println("method:", r.Method)
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 
-	db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
+	db, err := gorm.Open("postgres", "host=localhost user=postgres dbname=tsapBack sslmode=disable password=alex1997")
+
 	defer db.Close()
 	fmt.Println(err)
 
-	user := []Joueur{}
+	user := []Players{}
 	db.Find(&user)
 
 	userJSON, _ := json.Marshal(user)
@@ -32,11 +33,12 @@ func (a *AcquisitionService) GetJoueurs(w http.ResponseWriter, r *http.Request) 
 }
 func (a *AcquisitionService) GetActions(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
-	db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
+
+	db, err := gorm.Open("postgres", "host=localhost user=postgres dbname=tsapBack sslmode=disable password=alex1997")
 
 	defer db.Close()
 	fmt.Println(err)
-	user := []TypeAction{}
+	user := []ActionsType{}
 	db.Find(&user)
 
 	userJSON, _ := json.Marshal(user)
@@ -45,9 +47,10 @@ func (a *AcquisitionService) GetActions(w http.ResponseWriter, r *http.Request) 
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(userJSON)
 }
-func (a *AcquisitionService) PostJoueur(w http.ResponseWriter, r *http.Request) {
+func (a *AcquisitionService) PostAction(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
-	db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
+
+	db, err := gorm.Open("postgres", "host=localhost user=postgres dbname=tsapBack sslmode=disable password=alex1997")
 
 	defer db.Close()
 	fmt.Println(r.Body)
@@ -56,7 +59,7 @@ func (a *AcquisitionService) PostJoueur(w http.ResponseWriter, r *http.Request) 
 		panic(err)
 	}
 	log.Println(string(body))
-	var t Action
+	var t Actions
 	err = json.Unmarshal(body, &t)
 	if err != nil {
 		panic(err)

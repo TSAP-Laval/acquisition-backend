@@ -84,13 +84,34 @@ func (a *AcquisitionService) getRouter() http.Handler {
 	r.HandleFunc("/api/GetMovementType", a.GetMovementTypeHandler)
 	r.HandleFunc("/api/GetActionType", a.GetAllActionsTypes)
 	r.HandleFunc("/api/PostActionType", a.PostActionType)
-	r.HandleFunc("/api/video", a.VideoHandler)
-	r.HandleFunc("/api/edition/GetJoueurs", a.GetJoueurs)
-	r.HandleFunc("/api/seeders", a.Remplir)
-	r.HandleFunc("/api/seeders/FaireBD", a.FaireBD)
-	r.HandleFunc("/api/edition/GetActions", a.GetActions)
-	r.HandleFunc("/api/edition/PostJoueur", a.PostJoueur)
-
+	// Upload
+	r.HandleFunc("/api/upload", a.UploadHandler)
+	// Terrains
+	r.HandleFunc("/api/terrains", a.GetTerrainsHandler).Methods("GET")
+	r.HandleFunc("/api/terrains/{nom}", a.GetTerrainHandler).Methods("GET")
+	r.HandleFunc("/api/terrains/{id}", a.TerrainsHandler).Methods("DELETE", "PUT")
+	r.HandleFunc("/api/terrains", a.CreerTerrainHandler).Methods("POST")
+	// Equipes
+	r.HandleFunc("/api/equipes", a.GetEquipesHandler).Methods("GET")
+	r.HandleFunc("/api/equipes/{nom}", a.GetEquipeHandler).Methods("GET")
+	r.HandleFunc("/api/equipes/{id}", a.EquipesHandler).Methods("DELETE", "PUT")
+	r.HandleFunc("/api/equipes", a.CreerEquipeHandler).Methods("POST")
+	// Parties
+	r.HandleFunc("/api/parties", a.PartiesHandler).Methods("GET", "POST")
+	r.HandleFunc("/api/parties/{id}", a.SupprimerPartiesHandler).Methods("DELETE")
+	// BD
+	r.HandleFunc("/api/seed", a.RemplirBD).Methods("POST")
+	r.HandleFunc("/api/bd", a.FaireBD).Methods("POST")
+	// Autre
+	r.HandleFunc("/api/Actions", a.GetActions).Methods("GET")
+	r.HandleFunc("/api/Action", a.PostAction).Methods("POST")
+	r.HandleFunc("/api/Joueur", a.PostJoueur).Methods("POST")
+	r.HandleFunc("/api/Team", a.PostTeam).Methods("POST")
+	r.HandleFunc("/api/Seasons", a.GetSeasons).Methods("GET")
+	r.HandleFunc("/api/Seasons", a.PostSaison).Methods("POST")
+	r.HandleFunc("/api/Sports", a.GetSports).Methods("GET")
+	r.HandleFunc("/api/Niveau", a.GetNiveau).Methods("GET")
+	r.HandleFunc("/api/Joueur", a.GetJoueurs).Methods("GET")
 	return a.Middleware(r)
 }
 
