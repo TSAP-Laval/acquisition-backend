@@ -85,7 +85,7 @@ func (a *AcquisitionService) getRouter() http.Handler {
 	r.HandleFunc("/api/GetActionType", a.GetAllActionsTypes)
 	r.HandleFunc("/api/PostActionType", a.PostActionType)
 	// Upload
-	r.HandleFunc("/api/upload", a.UploadHandler).Methods("POST")
+	r.HandleFunc("/api/upload", a.UploadHandler)
 	// Terrains
 	r.HandleFunc("/api/terrains", a.GetTerrainsHandler).Methods("GET")
 	r.HandleFunc("/api/terrains/{nom}", a.GetTerrainHandler).Methods("GET")
