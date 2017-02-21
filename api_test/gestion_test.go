@@ -13,7 +13,7 @@ import (
 
 func TestGetSaison(t *testing.T) {
 	reader = strings.NewReader("")
-	request, err := http.NewRequest("GET", baseURL+"/api/Seasons", reader)
+	request, err := http.NewRequest("GET", baseURL+"/api/saison", reader)
 	res, err := http.DefaultClient.Do(request)
 
 	if err != nil {
@@ -27,7 +27,7 @@ func TestGetSaison(t *testing.T) {
 
 func TestCreerSaison(t *testing.T) {
 	reader = strings.NewReader(`{"Years": "2000"}`)
-	request, err := http.NewRequest("POST", baseURL+"/api/Seasons", reader)
+	request, err := http.NewRequest("POST", baseURL+"/api/saison", reader)
 	res, err := http.DefaultClient.Do(request)
 
 	if err != nil {
@@ -53,7 +53,7 @@ func TestCreerSaison(t *testing.T) {
 
 func TestGetSports(t *testing.T) {
 	reader = strings.NewReader("")
-	request, err := http.NewRequest("GET", baseURL+"/api/Sports", reader)
+	request, err := http.NewRequest("GET", baseURL+"/api/sports", reader)
 	res, err := http.DefaultClient.Do(request)
 
 	if err != nil {
@@ -66,7 +66,7 @@ func TestGetSports(t *testing.T) {
 }
 func TestGetNiveau(t *testing.T) {
 	reader = strings.NewReader("")
-	request, err := http.NewRequest("GET", baseURL+"/api/Niveau", reader)
+	request, err := http.NewRequest("GET", baseURL+"/api/niveau", reader)
 	res, err := http.DefaultClient.Do(request)
 
 	if err != nil {
@@ -79,7 +79,7 @@ func TestGetNiveau(t *testing.T) {
 }
 func TestGetJoueurs(t *testing.T) {
 	reader = strings.NewReader("")
-	request, err := http.NewRequest("GET", baseURL+"/api/Joueur", reader)
+	request, err := http.NewRequest("GET", baseURL+"/api/joueur", reader)
 	res, err := http.DefaultClient.Do(request)
 
 	if err != nil {
@@ -92,7 +92,7 @@ func TestGetJoueurs(t *testing.T) {
 }
 func TestCreerJoueur(t *testing.T) {
 	reader = strings.NewReader(` {"Lname" :"aa133","Fname" :"aa1","Number" : 55,"Email" : "ee","PassHash" : "test22" ,"TokenInvitation" : "test" ,"TokenReinitialisation" : "test ","TokenConnexion" : "test","EquipeID" : "1"}`)
-	request, err := http.NewRequest("POST", baseURL+"/api/Joueur", reader)
+	request, err := http.NewRequest("POST", baseURL+"/api/joueur", reader)
 	res, err := http.DefaultClient.Do(request)
 
 	if err != nil {
