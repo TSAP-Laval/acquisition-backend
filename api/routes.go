@@ -88,7 +88,7 @@ func (a *AcquisitionService) getRouter() http.Handler {
 	r.HandleFunc("/api/seeders", a.Remplir)
 	r.HandleFunc("/api/seeders/FaireBD", a.FaireBD)
 	r.HandleFunc("/api/Actions", a.GetActions).Methods("GET")
-	r.HandleFunc("/api/tAction", a.PostAction).Methods("POST")
+	r.HandleFunc("/api/Actions", a.PostAction).Methods("POST")
 	r.HandleFunc("/api/Joueur", a.PostJoueur).Methods("POST")
 	r.HandleFunc("/api/Team", a.PostTeam).Methods("POST")
 	r.HandleFunc("/api/Seasons", a.GetSeasons).Methods("GET")
