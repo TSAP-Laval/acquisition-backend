@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"strings"
 
@@ -115,52 +114,6 @@ func (a *AcquisitionService) EquipesHandler(w http.ResponseWriter, r *http.Reque
 		msg := map[string]string{"error": "Veuillez entrer un nom d'équipe ou en créer une préalablement."}
 		Message(w, msg, http.StatusBadRequest)
 	}
-}
-func (a *AcquisitionService) PostTeam(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-
-	db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
-
-	defer db.Close()
-	fmt.Println(r.Body)
-	body, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		a.ErrorHandler(w, err)
-		return
-	}
-
-	log.Println(string(body))
-	var t Teams
-	err = json.Unmarshal(body, &t)
-	if err != nil {
-		a.ErrorHandler(w, err)
-		return
-	}
-
-	log.Println(t.ID)
-	if db.NewRecord(t) {
-		x := Sports{}
-		db.First(&x, t.SportID)
-		t.Sport = x
-		Niv := Categories{}
-		db.First(&Niv, t.CategoryID)
-		t.Category = Niv
-
-		SportJSON, _ := json.Marshal(t)
-		fmt.Println(string(SportJSON))
-		db.Create(&t)
-		SportJSON2, _ := json.Marshal(t)
-		fmt.Println(string(SportJSON2))
-
-		w.Header().Set("Content-Type", "application/text")
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("ok"))
-	} else {
-		fmt.Println("Test22")
-		w.Header().Set("Content-Type", "application/text")
-		w.Write([]byte("erreur"))
-	}
-
 }
 
 // GetEquipesHandler Gère la récupération de toutes les équipes de la base de donnée
