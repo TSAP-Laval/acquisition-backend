@@ -1,0 +1,23 @@
+/*package api_test
+
+import (
+	"net/http"
+	"strings"
+	"testing"
+)
+
+// Test to be updated
+// Simuler avec un video, sinon le test ne passe pas !
+func TestUploadVideo(t *testing.T) {
+	reader = strings.NewReader(``)
+	request, err := http.NewRequest("POST", baseURL+"/api/upload", reader)
+	res, err := http.DefaultClient.Do(request)
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	if res.StatusCode != 201 {
+		t.Errorf("Success expected: %d", res.StatusCode)
+	}
+}*/
