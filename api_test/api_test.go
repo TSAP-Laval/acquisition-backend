@@ -28,5 +28,5 @@ func init() {
 	service := api.New(os.Stdout, &a)
 	service.Start()
 
-	baseURL = "http://localhost:3000"
+	baseURL = "http://localhost" + a.Port
 }
