@@ -90,6 +90,8 @@ func (a *AcquisitionService) getRouter() http.Handler {
 	r.HandleFunc("/api/seeders/FaireBD", a.FaireBD)
 	r.HandleFunc("/api/edition/GetActions", a.GetActions)
 	r.HandleFunc("/api/edition/PostJoueur", a.PostJoueur)
+	r.HandleFunc("/api/coachs/getAllCoachs", a.GetCoachsHandler)
+	r.HandleFunc("/api/coachs/postCoach", a.PostCoachHandler)
 
 	return a.Middleware(r)
 }
