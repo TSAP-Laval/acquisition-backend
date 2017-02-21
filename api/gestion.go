@@ -8,7 +8,6 @@ import (
 	"net/http"
 
 	//Import DB driver
-
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 
 	"github.com/jinzhu/gorm"
@@ -17,7 +16,7 @@ import (
 func (a *AcquisitionService) PostSaison(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 
-	db, err := gorm.Open("postgres", "host=localhost user=postgres dbname=tsapBack sslmode=disable password=alex1997")
+	db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
 
 	defer db.Close()
 	fmt.Println(r.Body)
@@ -26,7 +25,7 @@ func (a *AcquisitionService) PostSaison(w http.ResponseWriter, r *http.Request) 
 		panic(err)
 	}
 	log.Println(string(body))
-	var t Saison
+	var t Seasons
 	err = json.Unmarshal(body, &t)
 	if err != nil {
 		panic(err)
@@ -48,7 +47,7 @@ func (a *AcquisitionService) PostSaison(w http.ResponseWriter, r *http.Request) 
 func (a *AcquisitionService) PostTeam(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 
-	db, err := gorm.Open("postgres", "host=localhost user=postgres dbname=tsapBack sslmode=disable password=alex1997")
+	db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
 
 	defer db.Close()
 	fmt.Println(r.Body)
@@ -57,19 +56,19 @@ func (a *AcquisitionService) PostTeam(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 	log.Println(string(body))
-	var t Equipe
+	var t Teams
 	err = json.Unmarshal(body, &t)
 	if err != nil {
 		panic(err)
 	}
 	log.Println(t.ID)
 	if db.NewRecord(t) {
-		x := Sport{}
+		x := Sports{}
 		db.First(&x, t.SportID)
 		t.Sport = x
-		Niv := Niveau{}
-		db.First(&Niv, t.NiveauID)
-		t.Niveau = Niv
+		Niv := Categories{}
+		db.First(&Niv, t.CategoryID)
+		t.Category = Niv
 
 		SportJSON, _ := json.Marshal(t)
 		fmt.Println(string(SportJSON))
@@ -90,7 +89,7 @@ func (a *AcquisitionService) PostTeam(w http.ResponseWriter, r *http.Request) {
 func (a *AcquisitionService) PostJoueur(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 
-	db, err := gorm.Open("postgres", "host=localhost user=postgres dbname=tsapBack sslmode=disable password=alex1997")
+	db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
 
 	defer db.Close()
 	fmt.Println(r.Body)
@@ -99,15 +98,15 @@ func (a *AcquisitionService) PostJoueur(w http.ResponseWriter, r *http.Request) 
 		panic(err)
 	}
 	log.Println(string(body))
-	var t Joueur
+	var t Players
 	var dat map[string]interface{}
 	err = json.Unmarshal(body, &t)
 	err = json.Unmarshal(body, &dat)
 	num := dat["EquipeID"]
-	Team := Equipe{}
+	Team := Teams{}
 	db.First(&Team, num)
-	t.Equipes = append(t.Equipes, Team)
-	db.Model(&Team).Association("Equipes").Append(t)
+	t.Teams = append(t.Teams, Team)
+	db.Model(&Team).Association("Players").Append(t)
 	fmt.Println(num)
 	if err != nil {
 		panic(err)
@@ -126,47 +125,14 @@ func (a *AcquisitionService) PostJoueur(w http.ResponseWriter, r *http.Request) 
 	}
 
 }
-func (a *AcquisitionService) PostEquipe(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-
-	db, err := gorm.Open("postgres", "host=localhost user=postgres dbname=tsapBack sslmode=disable password=alex1997")
-
-	defer db.Close()
-	fmt.Println(r.Body)
-	body, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		panic(err)
-	}
-	log.Println(string(body))
-	var t Equipe
-	err = json.Unmarshal(body, &t)
-
-	if err != nil {
-		panic(err)
-	}
-	log.Println(t.ID)
-	if db.NewRecord(t) {
-
-		db.Create(&t)
-		db.NewRecord(t)
-		w.Header().Set("Content-Type", "application/text")
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("ok"))
-	} else {
-		fmt.Println("Test22")
-		w.Header().Set("Content-Type", "application/text")
-		w.Write([]byte("erreur"))
-	}
-
-}
 func (a *AcquisitionService) GetSeasons(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 
-	db, err := gorm.Open("postgres", "host=localhost user=postgres dbname=tsapBack sslmode=disable password=alex1997")
+	db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
 
 	defer db.Close()
 	fmt.Println(err)
-	strucSaison := []Saison{}
+	strucSaison := []Seasons{}
 	db.Find(&strucSaison)
 
 	SaisonJSON, _ := json.Marshal(strucSaison)
@@ -179,11 +145,11 @@ func (a *AcquisitionService) GetSeasons(w http.ResponseWriter, r *http.Request) 
 func (a *AcquisitionService) GetSports(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 
-	db, err := gorm.Open("postgres", "host=localhost user=postgres dbname=tsapBack sslmode=disable password=alex1997")
+	db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
 
 	defer db.Close()
 	fmt.Println(err)
-	strucSport := []Sport{}
+	strucSport := []Sports{}
 	db.Find(&strucSport)
 
 	SportJSON, _ := json.Marshal(strucSport)
@@ -197,11 +163,11 @@ func (a *AcquisitionService) GetSports(w http.ResponseWriter, r *http.Request) {
 func (a *AcquisitionService) GetUnNiveauTest(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 
-	db, err := gorm.Open("postgres", "host=localhost user=postgres dbname=tsapBack sslmode=disable password=alex1997")
+	db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
 
 	defer db.Close()
 	fmt.Println(err)
-	strucSport := Equipe{}
+	strucSport := Teams{}
 	db.Last(&strucSport)
 
 	SportJSON, _ := json.Marshal(strucSport)
@@ -214,11 +180,11 @@ func (a *AcquisitionService) GetUnNiveauTest(w http.ResponseWriter, r *http.Requ
 func (a *AcquisitionService) GetNiveau(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 
-	db, err := gorm.Open("postgres", "host=localhost user=postgres dbname=tsapBack sslmode=disable password=alex1997")
+	db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
 
 	defer db.Close()
 	fmt.Println(err)
-	strucNiveau := []Niveau{}
+	strucNiveau := []Categories{}
 	db.Find(&strucNiveau)
 
 	NiveauJSON, _ := json.Marshal(strucNiveau)
@@ -227,20 +193,4 @@ func (a *AcquisitionService) GetNiveau(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write(NiveauJSON)
-}
-func (a *AcquisitionService) GetEquipes(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-
-	db, err := gorm.Open("postgres", "host=localhost user=postgres dbname=tsapBack sslmode=disable password=alex1997")
-
-	defer db.Close()
-	fmt.Println(err)
-	strucEquipe := []Equipe{}
-	db.Find(&strucEquipe)
-
-	EquipeJSON, _ := json.Marshal(strucEquipe)
-	fmt.Println(string(EquipeJSON))
-	w.WriteHeader(http.StatusOK)
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(EquipeJSON)
 }

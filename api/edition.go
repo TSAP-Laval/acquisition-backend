@@ -22,7 +22,7 @@ func (a *AcquisitionService) GetJoueurs(w http.ResponseWriter, r *http.Request) 
 	defer db.Close()
 	fmt.Println(err)
 
-	user := []Joueur{}
+	user := []Players{}
 	db.Find(&user)
 
 	userJSON, _ := json.Marshal(user)
@@ -38,7 +38,7 @@ func (a *AcquisitionService) GetActions(w http.ResponseWriter, r *http.Request) 
 
 	defer db.Close()
 	fmt.Println(err)
-	user := []TypeAction{}
+	user := []ActionsType{}
 	db.Find(&user)
 
 	userJSON, _ := json.Marshal(user)
@@ -59,7 +59,7 @@ func (a *AcquisitionService) PostAction(w http.ResponseWriter, r *http.Request) 
 		panic(err)
 	}
 	log.Println(string(body))
-	var t Action
+	var t Actions
 	err = json.Unmarshal(body, &t)
 	if err != nil {
 		panic(err)
