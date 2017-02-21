@@ -29,6 +29,7 @@ type Entraineur struct {
 	PassHash string
 	Token    string
 	Equipes  []Equipe `gorm:"many2many:entraineur_equipe;"`
+	Actif    string
 }
 type Joueur struct {
 	gorm.Model
