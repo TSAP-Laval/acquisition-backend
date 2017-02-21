@@ -186,6 +186,9 @@ func (a *AcquisitionService) GetEquipesHandler(w http.ResponseWriter, r *http.Re
 
 // CreerEquipeHandler Gère la création d'une équipe dans la base de donnée
 func (a *AcquisitionService) CreerEquipeHandler(w http.ResponseWriter, r *http.Request) {
+
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+
 	body, err := ioutil.ReadAll(r.Body)
 	if len(body) > 0 {
 		db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
