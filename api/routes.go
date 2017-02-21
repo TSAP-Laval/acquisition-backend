@@ -92,7 +92,34 @@ func (a *AcquisitionService) getRouter() http.Handler {
 	r.HandleFunc("/api/edition/PostJoueur", a.PostJoueur)
 	r.HandleFunc("/api/coachs/getAllCoachs", a.GetCoachsHandler)
 	r.HandleFunc("/api/coachs/postCoach", a.PostCoachHandler)
+	// Upload
+	r.HandleFunc("/api/upload", a.UploadHandler)
+	// Terrains
+	r.HandleFunc("/api/terrains", a.GetTerrainsHandler).Methods("GET")
+	r.HandleFunc("/api/terrains/{nom}", a.GetTerrainHandler).Methods("GET")
+	r.HandleFunc("/api/terrains/{id}", a.TerrainsHandler).Methods("DELETE", "PUT")
+	r.HandleFunc("/api/terrains", a.CreerTerrainHandler).Methods("POST")
+	// Equipes
+	r.HandleFunc("/api/equipes", a.GetEquipesHandler).Methods("GET")
+	r.HandleFunc("/api/equipes/{nom}", a.GetEquipeHandler).Methods("GET")
+	r.HandleFunc("/api/equipes/{id}", a.EquipesHandler).Methods("DELETE", "PUT")
+	r.HandleFunc("/api/equipes", a.CreerEquipeHandler).Methods("POST")
+	// Parties
+	r.HandleFunc("/api/parties", a.PartiesHandler).Methods("GET", "POST")
+	r.HandleFunc("/api/parties/{id}", a.SupprimerPartiesHandler).Methods("DELETE")
+	// BD
+	r.HandleFunc("/api/seed", a.RemplirBD).Methods("POST")
+	r.HandleFunc("/api/bd", a.FaireBD).Methods("POST")
+	// Autre
+	r.HandleFunc("/api/actions", a.GetActions).Methods("GET")
+	r.HandleFunc("/api/actions", a.PostAction).Methods("POST")
+	r.HandleFunc("/api/joueur", a.PostJoueur).Methods("POST")
 
+	r.HandleFunc("/api/saison", a.GetSeasons).Methods("GET")
+	r.HandleFunc("/api/saison", a.PostSaison).Methods("POST")
+	r.HandleFunc("/api/sports", a.GetSports).Methods("GET")
+	r.HandleFunc("/api/niveau", a.GetNiveau).Methods("GET")
+	r.HandleFunc("/api/joueur", a.GetJoueurs).Methods("GET")
 	return a.Middleware(r)
 }
 
