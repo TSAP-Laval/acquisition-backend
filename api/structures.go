@@ -8,8 +8,10 @@ import (
 
 type TypeAction struct {
 	gorm.Model
-	Nom         string `gorm:"unique"`
-	Description string
+	Nom           string `gorm:"unique"`
+	Description   string
+	TypeControl   string
+	TypeMouvement string
 }
 type Sport struct {
 	gorm.Model
