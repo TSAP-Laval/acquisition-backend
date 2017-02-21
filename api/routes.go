@@ -106,7 +106,7 @@ func (a *AcquisitionService) getRouter() http.Handler {
 	r.HandleFunc("/api/actions", a.GetActions).Methods("GET")
 	r.HandleFunc("/api/actions", a.PostAction).Methods("POST")
 	r.HandleFunc("/api/joueur", a.PostJoueur).Methods("POST")
-	r.HandleFunc("/api/equipe", a.PostTeam).Methods("POST")
+
 	r.HandleFunc("/api/saison", a.GetSeasons).Methods("GET")
 	r.HandleFunc("/api/saison", a.PostSaison).Methods("POST")
 	r.HandleFunc("/api/sports", a.GetSports).Methods("GET")
