@@ -18,7 +18,10 @@ func (a *AcquisitionService) GetMovementTypeHandler(w http.ResponseWriter, r *ht
 	db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
 
 	defer db.Close()
-	fmt.Println(err)
+	if err != nil {
+		a.ErrorHandler(w, err)
+		return
+	}
 
 	mvmType := []MovementsType{}
 	db.Find(&mvmType)
@@ -36,7 +39,10 @@ func (a *AcquisitionService) GetAllActionsTypes(w http.ResponseWriter, r *http.R
 	db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
 
 	defer db.Close()
-	fmt.Println(err)
+	if err != nil {
+		a.ErrorHandler(w, err)
+		return
+	}
 
 	actionTypes := []ActionsType{}
 	db.Find(&actionTypes)
@@ -50,15 +56,18 @@ func (a *AcquisitionService) GetAllActionsTypes(w http.ResponseWriter, r *http.R
 
 func (a *AcquisitionService) PostActionType(w http.ResponseWriter, r *http.Request) {
 	db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
-
-	fmt.Println(err)
+	if err != nil {
+		a.ErrorHandler(w, err)
+		return
+	}
 
 	body, err := ioutil.ReadAll(r.Body)
 	fmt.Printf("-----------------------")
 	fmt.Println(body)
 	fmt.Printf("-----------------------")
 	if err != nil {
-		panic(err)
+		a.ErrorHandler(w, err)
+		return
 	}
 
 	defer db.Close()
@@ -68,11 +77,11 @@ func (a *AcquisitionService) PostActionType(w http.ResponseWriter, r *http.Reque
 
 	err = json.Unmarshal(body, &newActionType)
 
-	fmt.Println(err)
-
 	if err != nil {
-		panic(err)
+		a.ErrorHandler(w, err)
+		return
 	}
+
 	if db.NewRecord(newActionType) {
 		db.Create(&newActionType)
 		db.NewRecord(newActionType) // => return `false` after `user` created
