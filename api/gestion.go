@@ -35,8 +35,8 @@ func (a *AcquisitionService) PostSaison(w http.ResponseWriter, r *http.Request) 
 		db.Create(&t)
 		db.NewRecord(t)
 		w.Header().Set("Content-Type", "application/text")
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("ok"))
+		w.WriteHeader(http.StatusCreated)
+
 	} else {
 		fmt.Println("Test22")
 		w.Header().Set("Content-Type", "application/text")
@@ -116,8 +116,8 @@ func (a *AcquisitionService) PostJoueur(w http.ResponseWriter, r *http.Request) 
 		db.Create(&t)
 		db.NewRecord(t)
 		w.Header().Set("Content-Type", "application/text")
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("ok"))
+		w.WriteHeader(http.StatusCreated)
+
 	} else {
 		fmt.Println("Test22")
 		w.Header().Set("Content-Type", "application/text")
