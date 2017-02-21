@@ -18,7 +18,7 @@ func (a *AcquisitionService) GetCoachsHandler(w http.ResponseWriter, r *http.Req
 	defer db.Close()
 	fmt.Println(err)
 
-	coach := []Entraineur{}
+	coach := []Coaches{}
 
 	db.Find(&coach)
 
@@ -49,7 +49,7 @@ func (a *AcquisitionService) PostCoachHandler(w http.ResponseWriter, r *http.Req
 
 	fmt.Println(string(body))
 
-	var newCoach Entraineur
+	var newCoach Coaches
 
 	err = json.Unmarshal(body, &newCoach)
 
