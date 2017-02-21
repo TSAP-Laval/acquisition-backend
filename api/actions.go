@@ -9,7 +9,6 @@ import (
 
 	"io/ioutil"
 
-	//Import DB driver
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 )
 
@@ -38,8 +37,9 @@ func (a *AcquisitionService) GetAllActionsTypes(w http.ResponseWriter, r *http.R
 
 	db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
 
-	defer db.Close()
-	if err != nil {
+
+	if err != nil {	
+    defer db.Close()
 		a.ErrorHandler(w, err)
 		return
 	}
@@ -52,8 +52,11 @@ func (a *AcquisitionService) GetAllActionsTypes(w http.ResponseWriter, r *http.R
 
 	w.Header().Set("Content-Type", "Application/json")
 	w.Write(actionTypesJSON)
+
+	defer db.Close()
 }
 
+//PostActionType : Create new action type
 func (a *AcquisitionService) PostActionType(w http.ResponseWriter, r *http.Request) {
 	db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
 	if err != nil {
@@ -70,7 +73,6 @@ func (a *AcquisitionService) PostActionType(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	defer db.Close()
 	fmt.Println(string(body))
 
 	var newActionType ActionsType

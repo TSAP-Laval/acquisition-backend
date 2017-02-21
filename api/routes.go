@@ -84,6 +84,14 @@ func (a *AcquisitionService) getRouter() http.Handler {
 	r.HandleFunc("/api/GetMovementType", a.GetMovementTypeHandler)
 	r.HandleFunc("/api/GetActionType", a.GetAllActionsTypes)
 	r.HandleFunc("/api/PostActionType", a.PostActionType)
+	r.HandleFunc("/api/video", a.VideoHandler)
+	r.HandleFunc("/api/edition/GetJoueurs", a.GetJoueurs)
+	r.HandleFunc("/api/seeders", a.Remplir)
+	r.HandleFunc("/api/seeders/FaireBD", a.FaireBD)
+	r.HandleFunc("/api/edition/GetActions", a.GetActions)
+	r.HandleFunc("/api/edition/PostJoueur", a.PostJoueur)
+	r.HandleFunc("/api/coachs/getAllCoachs", a.GetCoachsHandler)
+	r.HandleFunc("/api/coachs/postCoach", a.PostCoachHandler)
 	// Upload
 	r.HandleFunc("/api/upload", a.UploadHandler)
 	// Terrains
