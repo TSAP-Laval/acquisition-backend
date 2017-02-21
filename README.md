@@ -59,3 +59,6 @@
 #### Dossier pour les configurations Nginx :
   `vi /usr/local/etc/nginx/nginx.conf`
   
+## Procédure pour tester l'API
+  `$ go test -v -race ./...`
+  enlever le -v pour un résultat abrégé
