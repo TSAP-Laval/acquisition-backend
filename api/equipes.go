@@ -20,7 +20,10 @@ func (a *AcquisitionService) GetEquipeHandler(w http.ResponseWriter, r *http.Req
 		db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
 		defer db.Close()
 
-		a.ErrorHandler(w, err)
+		if err != nil {
+			a.ErrorHandler(w, err)
+			return
+		}
 
 		team := []Teams{}
 		name := strings.ToLower(strings.TrimSpace(vars["nom"]))
@@ -45,7 +48,10 @@ func (a *AcquisitionService) EquipesHandler(w http.ResponseWriter, r *http.Reque
 		db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
 		defer db.Close()
 
-		a.ErrorHandler(w, err)
+		if err != nil {
+			a.ErrorHandler(w, err)
+			return
+		}
 
 		team := []Teams{}
 		id := strings.ToLower(strings.TrimSpace(vars["id"]))
@@ -57,7 +63,10 @@ func (a *AcquisitionService) EquipesHandler(w http.ResponseWriter, r *http.Reque
 			if len(body) > 0 {
 				var t Teams
 				err = json.Unmarshal(body, &t)
-				a.ErrorHandler(w, err)
+				if err != nil {
+					a.ErrorHandler(w, err)
+					return
+				}
 
 				t.Name = strings.TrimSpace(t.Name)
 				t.City = strings.TrimSpace(t.City)
@@ -81,7 +90,10 @@ func (a *AcquisitionService) EquipesHandler(w http.ResponseWriter, r *http.Reque
 				Message(w, nt, http.StatusCreated)
 
 			} else if err != nil {
-				a.ErrorHandler(w, err)
+				if err != nil {
+					a.ErrorHandler(w, err)
+					return
+				}
 			} else {
 				msg := map[string]string{"error": "Veuillez choisir au moins un champs à modifier."}
 				Message(w, msg, http.StatusBadRequest)
@@ -110,7 +122,10 @@ func (a *AcquisitionService) GetEquipesHandler(w http.ResponseWriter, r *http.Re
 	db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
 	defer db.Close()
 
-	a.ErrorHandler(w, err)
+	if err != nil {
+		a.ErrorHandler(w, err)
+		return
+	}
 
 	team := []Teams{}
 	db.Find(&team)
@@ -129,11 +144,17 @@ func (a *AcquisitionService) CreerEquipeHandler(w http.ResponseWriter, r *http.R
 		db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
 		defer db.Close()
 
-		a.ErrorHandler(w, err)
+		if err != nil {
+			a.ErrorHandler(w, err)
+			return
+		}
 
 		var t Teams
 		err = json.Unmarshal(body, &t)
-		a.ErrorHandler(w, err)
+		if err != nil {
+			a.ErrorHandler(w, err)
+			return
+		}
 
 		// On enlève les espaces superflues
 		t.Name = strings.TrimSpace(t.Name)
@@ -169,6 +190,7 @@ func (a *AcquisitionService) CreerEquipeHandler(w http.ResponseWriter, r *http.R
 		}
 	} else if err != nil {
 		a.ErrorHandler(w, err)
+		return
 	} else {
 		msg := map[string]string{"error": "Veuillez remplir tous les champs."}
 		Message(w, msg, http.StatusBadRequest)
@@ -208,8 +230,9 @@ func AjoutNiveauSport(db *gorm.DB, t Teams) Teams {
 func (a *AcquisitionService) ErrorHandler(w http.ResponseWriter, err error) {
 	if err != nil {
 		a.Error(fmt.Sprintf("ERROR : %s", err))
+		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusNotFound)
 		a.ErrorWrite(err.Error(), w)
-		return
 	}
+	return
 }

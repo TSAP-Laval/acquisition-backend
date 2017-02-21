@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
+	"strings"
 
 	"github.com/jinzhu/gorm"
 )
@@ -15,7 +16,10 @@ func (a *AcquisitionService) PartiesHandler(w http.ResponseWriter, r *http.Reque
 		db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
 		defer db.Close()
 
-		a.ErrorHandler(w, err)
+		if err != nil {
+			a.ErrorHandler(w, err)
+			return
+		}
 
 		games := []Games{}
 		db.Find(&games)
@@ -31,19 +35,27 @@ func (a *AcquisitionService) PartiesHandler(w http.ResponseWriter, r *http.Reque
 			db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
 			defer db.Close()
 
-			a.ErrorHandler(w, err)
+			if err != nil {
+				a.ErrorHandler(w, err)
+				return
+			}
 
 			var g Games
 			err = json.Unmarshal(body, &g)
-			a.ErrorHandler(w, err)
+			if err != nil {
+				a.ErrorHandler(w, err)
+				return
+			}
+
+			g.OpposingTeam = strings.TrimSpace(g.OpposingTeam)
 
 			// On vérifie que la partie n'existe pas déjà
-			team := []Teams{}
-			db.Where("HomeTeamID = ? AND HomeTeamID = ?",
-				g.Date, g.HomeTeamID, g.OpposingTeamID).Find(&team)
+			game := []Games{}
+			db.Where("home_team_id = ? AND opposing_team = ? AND Date = ?",
+				g.HomeTeamID, g.OpposingTeam, g.Date).Find(&game)
 
-			if len(team) > 0 {
-				msg := map[string]string{"error": "Une partie à la même date avec les mêmes equipes existe déjà!"}
+			if len(game) > 0 {
+				msg := map[string]string{"error": "Une partie de même date avec les mêmes equipes existe déjà!"}
 				Message(w, msg, http.StatusUnauthorized)
 			} else {
 				if db.NewRecord(g) {
@@ -61,7 +73,10 @@ func (a *AcquisitionService) PartiesHandler(w http.ResponseWriter, r *http.Reque
 				}
 			}
 		} else if err != nil {
-			a.ErrorHandler(w, err)
+			if err != nil {
+				a.ErrorHandler(w, err)
+				return
+			}
 		} else {
 			msg := map[string]string{"error": "Veuillez remplir tous les champs."}
 			Message(w, msg, http.StatusBadRequest)
@@ -83,14 +98,6 @@ func AjoutInfosPartie(db *gorm.DB, g Games) Games {
 	if ht.Name != "" {
 		ht = AjoutNiveauSport(db, ht)
 		g.HomeTeam = ht
-	}
-
-	// Opposing team
-	var ot Teams
-	db.Where("ID = ?", g.OpposingTeamID).Find(&ot)
-	if ot.Name != "" {
-		ot = AjoutNiveauSport(db, ot)
-		g.OpposingTeam = ot
 	}
 
 	// Ajout du lieu pour l'affichage

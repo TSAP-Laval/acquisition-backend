@@ -18,7 +18,10 @@ func (a *AcquisitionService) GetTerrainHandler(w http.ResponseWriter, r *http.Re
 		db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
 		defer db.Close()
 
-		a.ErrorHandler(w, err)
+		if err != nil {
+			a.ErrorHandler(w, err)
+			return
+		}
 
 		location := []Locations{}
 		name := strings.ToLower(strings.TrimSpace(vars["nom"]))
@@ -38,7 +41,10 @@ func (a *AcquisitionService) TerrainsHandler(w http.ResponseWriter, r *http.Requ
 		db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
 		defer db.Close()
 
-		a.ErrorHandler(w, err)
+		if err != nil {
+			a.ErrorHandler(w, err)
+			return
+		}
 
 		location := []Locations{}
 		id := strings.ToLower(strings.TrimSpace(vars["id"]))
@@ -50,7 +56,10 @@ func (a *AcquisitionService) TerrainsHandler(w http.ResponseWriter, r *http.Requ
 			if len(body) > 0 {
 				var l Locations
 				err = json.Unmarshal(body, &l)
-				a.ErrorHandler(w, err)
+				if err != nil {
+					a.ErrorHandler(w, err)
+					return
+				}
 
 				l.Name = strings.TrimSpace(l.Name)
 				l.City = strings.TrimSpace(l.City)
@@ -101,7 +110,10 @@ func (a *AcquisitionService) GetTerrainsHandler(w http.ResponseWriter, r *http.R
 	db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
 	defer db.Close()
 
-	a.ErrorHandler(w, err)
+	if err != nil {
+		a.ErrorHandler(w, err)
+		return
+	}
 
 	locations := []Locations{}
 	db.Find(&locations)
@@ -116,11 +128,17 @@ func (a *AcquisitionService) CreerTerrainHandler(w http.ResponseWriter, r *http.
 		db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
 		defer db.Close()
 
-		a.ErrorHandler(w, err)
+		if err != nil {
+			a.ErrorHandler(w, err)
+			return
+		}
 
 		var l Locations
 		err = json.Unmarshal(body, &l)
-		a.ErrorHandler(w, err)
+		if err != nil {
+			a.ErrorHandler(w, err)
+			return
+		}
 
 		// On enlève les espaces superflues
 		l.Name = strings.TrimSpace(l.Name)
@@ -155,7 +173,10 @@ func (a *AcquisitionService) CreerTerrainHandler(w http.ResponseWriter, r *http.
 			}
 		}
 	} else if err != nil {
-		a.ErrorHandler(w, err)
+		if err != nil {
+			a.ErrorHandler(w, err)
+			return
+		}
 	} else {
 		msg := map[string]string{"error": "Veuillez remplir tous les champs."}
 		Message(w, msg, http.StatusBadRequest)
