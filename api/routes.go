@@ -84,6 +84,8 @@ func (a *AcquisitionService) getRouter() http.Handler {
 	r.HandleFunc("/api/GetMovementType", a.GetMovementTypeHandler)
 	r.HandleFunc("/api/GetActionType", a.GetAllActionsTypes)
 	r.HandleFunc("/api/PostActionType", a.PostActionType)
+	r.HandleFunc("/api/coachs/getAllCoachs", a.GetCoachsHandler)
+	r.HandleFunc("/api/coachs/postCoach", a.PostCoachHandler)
 	// Upload
 	r.HandleFunc("/api/upload", a.UploadHandler)
 	// Terrains
@@ -117,7 +119,7 @@ func (a *AcquisitionService) getRouter() http.Handler {
 // Start démarre le service
 func (a *AcquisitionService) Start() {
 	go func() {
-		a.server.Addr = ":3000"
+		a.server.Addr = a.config.Port
 		a.server.Handler = a.getRouter()
 		err := a.server.ListenAndServe()
 		a.Info("Acquisition shutting down...")
