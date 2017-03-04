@@ -103,22 +103,21 @@ func (a *AcquisitionService) getRouter() http.Handler {
 	r.HandleFunc("/api/seed", a.RemplirBD).Methods("POST")
 	r.HandleFunc("/api/bd", a.FaireBD).Methods("POST")
 	// Autre
-	r.HandleFunc("/api/Actions", a.GetActions).Methods("GET")
-	r.HandleFunc("/api/Action", a.PostAction).Methods("POST")
-	r.HandleFunc("/api/Joueur", a.PostJoueur).Methods("POST")
-	r.HandleFunc("/api/Team", a.PostTeam).Methods("POST")
-	r.HandleFunc("/api/Seasons", a.GetSeasons).Methods("GET")
-	r.HandleFunc("/api/Seasons", a.PostSaison).Methods("POST")
-	r.HandleFunc("/api/Sports", a.GetSports).Methods("GET")
-	r.HandleFunc("/api/Niveau", a.GetNiveau).Methods("GET")
-	r.HandleFunc("/api/Joueur", a.GetJoueurs).Methods("GET")
+	r.HandleFunc("/api/actions", a.GetActions).Methods("GET")
+	r.HandleFunc("/api/actions", a.PostAction).Methods("POST")
+	r.HandleFunc("/api/joueur", a.PostJoueur).Methods("POST")
+	r.HandleFunc("/api/saison", a.GetSeasons).Methods("GET")
+	r.HandleFunc("/api/saison", a.PostSaison).Methods("POST")
+	r.HandleFunc("/api/sports", a.GetSports).Methods("GET")
+	r.HandleFunc("/api/niveau", a.GetNiveau).Methods("GET")
+	r.HandleFunc("/api/joueur", a.GetJoueurs).Methods("GET")
 	return a.Middleware(r)
 }
 
 // Start démarre le service
 func (a *AcquisitionService) Start() {
 	go func() {
-		a.server.Addr = a.config.Port
+		a.server.Addr = ":3000"
 		a.server.Handler = a.getRouter()
 		err := a.server.ListenAndServe()
 		a.Info("Acquisition shutting down...")

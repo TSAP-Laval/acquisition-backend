@@ -17,10 +17,13 @@ func (a *AcquisitionService) GetJoueurs(w http.ResponseWriter, r *http.Request) 
 	fmt.Println("method:", r.Method)
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 
-	db, err := gorm.Open("postgres", "host=localhost user=postgres dbname=tsapBack sslmode=disable password=alex1997")
+	db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
 
 	defer db.Close()
-	fmt.Println(err)
+	if err != nil {
+		a.ErrorHandler(w, err)
+		return
+	}
 
 	user := []Players{}
 	db.Find(&user)
@@ -37,7 +40,11 @@ func (a *AcquisitionService) GetActions(w http.ResponseWriter, r *http.Request) 
 	db, err := gorm.Open("postgres", "host=localhost user=postgres dbname=tsapBack sslmode=disable password=alex1997")
 
 	defer db.Close()
-	fmt.Println(err)
+	if err != nil {
+		a.ErrorHandler(w, err)
+		return
+	}
+
 	user := []ActionsType{}
 	db.Find(&user)
 
@@ -50,29 +57,32 @@ func (a *AcquisitionService) GetActions(w http.ResponseWriter, r *http.Request) 
 func (a *AcquisitionService) PostAction(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 
-	db, err := gorm.Open("postgres", "host=localhost user=postgres dbname=tsapBack sslmode=disable password=alex1997")
+	db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
 
 	defer db.Close()
 	fmt.Println(r.Body)
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		panic(err)
+		a.ErrorHandler(w, err)
+		return
 	}
+
 	log.Println(string(body))
 	var t Actions
 	err = json.Unmarshal(body, &t)
 	if err != nil {
-		panic(err)
+		a.ErrorHandler(w, err)
+		return
 	}
+
 	log.Println(t.ZoneID)
 	if db.NewRecord(t) {
 		db.Create(&t)
 		db.NewRecord(t)
 		w.Header().Set("Content-Type", "application/text")
 
-		w.Write([]byte("ok"))
 	} else {
-		fmt.Println("Test22")
+
 		w.Header().Set("Content-Type", "application/text")
 		w.Write([]byte("erreur"))
 	}
