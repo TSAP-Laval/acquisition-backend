@@ -133,6 +133,7 @@ type ActionsType struct {
 	Description    string
 	MovementType   MovementsType
 	MovementTypeID int
+	ControlType    string
 }
 
 // Actions est une modélisation des informations sur une
