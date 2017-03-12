@@ -7,9 +7,6 @@ import (
 
 	"github.com/TSAP-Laval/acquisition-backend/api"
 	"github.com/kelseyhightower/envconfig"
-
-	_ "github.com/jinzhu/gorm/dialects/postgres"
-	_ "github.com/lib/pq"
 )
 
 func main() {
