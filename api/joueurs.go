@@ -21,6 +21,7 @@ func (a *AcquisitionService) PostJoueur(w http.ResponseWriter, r *http.Request) 
 	defer db.Close()
 	fmt.Println(r.Body)
 	body, err := ioutil.ReadAll(r.Body)
+
 	if err != nil {
 		a.ErrorHandler(w, err)
 		return

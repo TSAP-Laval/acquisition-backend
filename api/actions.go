@@ -37,13 +37,12 @@ func (a *AcquisitionService) GetAllActionsTypes(w http.ResponseWriter, r *http.R
 
 	db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
 
-
 	if err != nil {	
     defer db.Close()
 		a.ErrorHandler(w, err)
 		return
 	}
-
+  
 	actionTypes := []ActionsType{}
 	db.Find(&actionTypes)
 
