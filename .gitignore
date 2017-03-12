@@ -42,7 +42,7 @@ debug
 main
 
 #Le dossier contenant les videos
-video
+video/*
 
 # SQL
 *.sql
