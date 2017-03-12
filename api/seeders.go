@@ -106,7 +106,7 @@ func (a *AcquisitionService) RemplirBD(w http.ResponseWriter, r *http.Request) {
 	if db.NewRecord(zone) {
 		db.Create(&zone)
 	}
-  
+
 	location1 := Locations{Name: "SSF", City: "St-Augustin", Address: "1223 rue Truc"}
 	if db.NewRecord(location1) {
 		db.Create(&location1)
