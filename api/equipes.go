@@ -13,8 +13,6 @@ import (
 
 // GetEquipeHandler Gère la récupération des équipes correspondant au nom entré
 func (a *AcquisitionService) GetEquipeHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-  
 	vars := mux.Vars(r)
 
 	if vars != nil {
@@ -43,9 +41,7 @@ func (a *AcquisitionService) GetEquipeHandler(w http.ResponseWriter, r *http.Req
 
 // EquipesHandler gère la modification et la suppression des équipes
 func (a *AcquisitionService) EquipesHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	
-  vars := mux.Vars(r)
+	vars := mux.Vars(r)
 	if vars != nil {
 		db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
 		defer db.Close()
@@ -120,9 +116,7 @@ func (a *AcquisitionService) EquipesHandler(w http.ResponseWriter, r *http.Reque
 
 // GetEquipesHandler Gère la récupération de toutes les équipes de la base de donnée
 func (a *AcquisitionService) GetEquipesHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	
-  db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
+	db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
 	defer db.Close()
 
 	if err != nil {
