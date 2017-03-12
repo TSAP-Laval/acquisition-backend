@@ -9,6 +9,7 @@ import (
 
 	"io/ioutil"
 
+	//Import DB driver
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 )
 
@@ -37,9 +38,8 @@ func (a *AcquisitionService) GetAllActionsTypes(w http.ResponseWriter, r *http.R
 
 	db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
 
-
-	if err != nil {	
-    defer db.Close()
+	defer db.Close()
+	if err != nil {
 		a.ErrorHandler(w, err)
 		return
 	}
