@@ -18,6 +18,7 @@ database:
     - createdb tsap_acquisition
     - psql -U postgres 'tsap_acquisition' < postgres.pgsql
     - psql -c "\dt" tsap_acquisition
+    - ufw allow 3000
 
 machine:
   python:
