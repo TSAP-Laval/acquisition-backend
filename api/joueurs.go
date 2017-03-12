@@ -8,11 +8,10 @@ import (
 	"net/http"
 	"strings"
 
-	//Import DB driver
 	"github.com/gorilla/mux"
-	_ "github.com/jinzhu/gorm/dialects/postgres"
-
 	"github.com/jinzhu/gorm"
+	//Import DB driver
+	_ "github.com/jinzhu/gorm/dialects/postgres"
 )
 
 func (a *AcquisitionService) HandleJoueur(w http.ResponseWriter, r *http.Request) {
@@ -24,6 +23,12 @@ func (a *AcquisitionService) HandleJoueur(w http.ResponseWriter, r *http.Request
 	defer db.Close()
 	fmt.Println(r.Body)
 	body, err := ioutil.ReadAll(r.Body)
+
+	if err != nil {
+		a.ErrorHandler(w, err)
+		return
+	}
+
 	log.Println(string(body))
 	var t Players
 	var dat map[string]interface{}

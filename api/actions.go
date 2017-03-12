@@ -37,8 +37,8 @@ func (a *AcquisitionService) GetMovementTypeHandler(w http.ResponseWriter, r *ht
 func (a *AcquisitionService) GetAllActionsTypes(w http.ResponseWriter, r *http.Request) {
 
 	db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
-
 	defer db.Close()
+
 	if err != nil {
 		a.ErrorHandler(w, err)
 		return
