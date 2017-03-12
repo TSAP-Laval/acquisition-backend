@@ -11,6 +11,7 @@ test:
     - if [[ -n $(gofmt -l .) ]]; then echo "Please run gofmt"; exit 1; fi
     - golint ./...
     - go tool vet .
+    - lsof -i:3000
     - go test -v -race ./...
 
 database:
