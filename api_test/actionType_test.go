@@ -11,34 +11,6 @@ import (
 	"github.com/TSAP-Laval/acquisition-backend/api"
 )
 
-func IsDbWorking(t *testing.T) {
-	reader = strings.NewReader("")
-	request, err := http.NewRequest("POST", baseURL+"/api/bd", reader)
-	res, err := http.DefaultClient.Do(request)
-
-	if err != nil {
-		t.Error(err) //Error
-	}
-
-	if res.StatusCode != 200 {
-		t.Errorf("Is Success: %d", res.StatusCode)
-	}
-}
-
-func IsSeeded(t *testing.T) {
-	reader = strings.NewReader("")
-	request, err := http.NewRequest("POST", baseURL+"/api/seed", reader)
-	res, err := http.DefaultClient.Do(request)
-
-	if err != nil {
-		t.Error(err) //Error
-	}
-
-	if res.StatusCode != 200 {
-		t.Errorf("Is seeded: %d", res.StatusCode)
-	}
-}
-
 func PostActionType(t *testing.T) {
 	reader = strings.NewReader(`{"Name": "Passe", "Description": "Interceptée", "ControlType": "Neutre", "MovementType": "Postif"}`)
 	request, err := http.NewRequest("POST", baseURL+"/api/addactiontype", reader)
