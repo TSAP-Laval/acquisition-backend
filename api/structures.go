@@ -131,8 +131,9 @@ type ActionsType struct {
 	gorm.Model
 	Name           string
 	Description    string
-	MovementType   string
+	MovementType   MovementsType
 	MovementTypeID int
+	ControlType    string
 }
 
 // Actions est une modélisation des informations sur une
@@ -176,8 +177,9 @@ type Coaches struct {
 	TokenReset   string
 	TokenLogin   string
 	Teams        []Teams `gorm:"many2many:entraineur_equipe;"`
-  Actif    string
+	Actif        string
 }
+
 // CoachTeam table de relations entre entraineurs et équipes
 type CoachTeam struct {
 	gorm.Model

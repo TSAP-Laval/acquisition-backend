@@ -8,15 +8,13 @@ import (
 	"net/http"
 	"strings"
 
-	//Import DB driver
 	"github.com/gorilla/mux"
-	_ "github.com/jinzhu/gorm/dialects/postgres"
-
 	"github.com/jinzhu/gorm"
+	//Import DB driver
+	_ "github.com/jinzhu/gorm/dialects/postgres"
 )
 
 func (a *AcquisitionService) HandleJoueur(w http.ResponseWriter, r *http.Request) {
-
 	vars := mux.Vars(r)
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
@@ -33,6 +31,7 @@ func (a *AcquisitionService) HandleJoueur(w http.ResponseWriter, r *http.Request
 		a.ErrorHandler(w, err)
 
 	} else {
+
 		if num != "" {
 			Team := Teams{}
 			db.First(&Team, num)
@@ -40,12 +39,14 @@ func (a *AcquisitionService) HandleJoueur(w http.ResponseWriter, r *http.Request
 				a.ErrorHandler(w, err)
 				return
 			}
+
 			t.Teams = append(t.Teams, Team)
 			db.Model(&Team).Association("Players").Append(t)
 		}
 
 		switch r.Method {
 		case "POST":
+
 			if db.NewRecord(t) {
 				db.Create(&t)
 				db.NewRecord(t)
@@ -53,6 +54,7 @@ func (a *AcquisitionService) HandleJoueur(w http.ResponseWriter, r *http.Request
 				w.WriteHeader(http.StatusCreated)
 
 			} else {
+
 				Message(w, "déjà créé", http.StatusBadRequest)
 			}
 		case "PUT":
