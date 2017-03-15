@@ -81,11 +81,13 @@ func (a *AcquisitionService) Middleware(h http.Handler) http.Handler {
 func (a *AcquisitionService) getRouter() http.Handler {
 	r := mux.NewRouter()
 
-	r.HandleFunc("/api/GetMovementType", a.GetMovementTypeHandler)
-	r.HandleFunc("/api/GetActionType", a.GetAllActionsTypes)
-	r.HandleFunc("/api/PostActionType", a.PostActionType)
-	r.HandleFunc("/api/coachs/getAllCoachs", a.GetCoachsHandler)
-	r.HandleFunc("/api/coachs/postCoach", a.PostCoachHandler)
+	// Actions
+	r.HandleFunc("/api/action/movementType", a.GetMovementTypeHandler)
+	r.HandleFunc("/api/action/actiontype", a.GetAllActionsTypes)
+	r.HandleFunc("/api/action/addactiontype", a.PostActionType)
+	//Coachs
+	r.HandleFunc("/api/coachs/coachs", a.GetCoachsHandler)
+	r.HandleFunc("/api/coachs/addcoach", a.PostCoachHandler)
 	// Upload
 	r.HandleFunc("/api/upload", a.UploadHandler)
 	// Terrains
