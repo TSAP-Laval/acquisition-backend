@@ -80,7 +80,6 @@ func (a *AcquisitionService) Middleware(h http.Handler) http.Handler {
 
 func (a *AcquisitionService) getRouter() http.Handler {
 	r := mux.NewRouter()
-
 	r.HandleFunc("/api/GetMovementType", a.GetMovementTypeHandler)
 	r.HandleFunc("/api/GetActionType", a.GetAllActionsTypes)
 	r.HandleFunc("/api/PostActionType", a.PostActionType)

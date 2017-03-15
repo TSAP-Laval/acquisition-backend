@@ -26,7 +26,6 @@ func (a *AcquisitionService) HandleJoueur(w http.ResponseWriter, r *http.Request
 		a.ErrorHandler(w, err)
 		return
 	}
-
 	log.Println(string(body))
 	var t Players
 	var dat map[string]interface{}
@@ -35,9 +34,7 @@ func (a *AcquisitionService) HandleJoueur(w http.ResponseWriter, r *http.Request
 	num := dat["EquipeID"]
 	if err != nil {
 		a.ErrorHandler(w, err)
-
 	} else {
-
 		if num != "" {
 			Team := Teams{}
 			db.First(&Team, num)
@@ -45,11 +42,9 @@ func (a *AcquisitionService) HandleJoueur(w http.ResponseWriter, r *http.Request
 				a.ErrorHandler(w, err)
 				return
 			}
-
 			t.Teams = append(t.Teams, Team)
 			db.Model(&Team).Association("Players").Append(t)
 		}
-
 		switch r.Method {
 		case "POST":
 
@@ -69,7 +64,6 @@ func (a *AcquisitionService) HandleJoueur(w http.ResponseWriter, r *http.Request
 			db.Model(&t).Where("ID = ?", id).Updates(t)
 			Message(w, "ok", http.StatusOK)
 		}
-
 	}
 
 }
