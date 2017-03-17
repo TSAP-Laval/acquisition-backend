@@ -20,38 +20,47 @@ func (a *AcquisitionService) UploadHandler(w http.ResponseWriter, r *http.Reques
 		defer db.Close()
 		a.ErrorHandler(w, err)
 
-		err = r.ParseMultipartForm(2000000000) // grab the multipart form
+		err = r.ParseMultipartForm(8589934592) // 8Gb
 		a.ErrorHandler(w, err)
 
-		formdata := r.MultipartForm // ok, no problem so far, read the Form data
+		formdata := r.MultipartForm
 
 		if _, err := os.Stat("./videos/"); os.IsNotExist(err) {
 			os.MkdirAll("./videos/", 0777)
 		}
 
-		//get the *fileheaders
-		files := formdata.File["file"] // grab the filenames
+		files := formdata.File["file"]
 
 		var g Games
 		db.Create(&g)
-		for i := range files { // loop through the files one by one
+
+		for i := range files {
 			fileSplit := strings.Split(files[i].Filename, ".")
 			ext := fileSplit[len(fileSplit)-1]
 
-			re := regexp.MustCompile("^.*?([^d]*(d+)[^d]*).*$")
-			part := re.FindString(files[i].Filename)
-			part = strings.Replace(part, "(", " ", 1)
-			part = strings.Replace(part, ")", " ", 1)
+			var v Videos
+			if len(files) > 1 {
+				re := regexp.MustCompile(`\((.*?)\)`)
+				part := re.FindStringSubmatch(files[i].Filename)[1]
+				p, err := strconv.ParseInt(part, 10, 0)
 
+				if err != nil {
+					msg := map[string]string{"error": "La nomenlature des fichiers est incorrecte! Veuillez vous assurer qu'ils contiennent un (#)!"}
+					a.Error(msg["error"])
+					Message(w, msg, http.StatusInternalServerError)
+				}
+
+				// Ajout de la partie
+				v.Part = int(p)
+			}
+
+			// Le timestamp sera le nom du fichier
 			timestamp := strconv.FormatInt(time.Now().UTC().UnixNano(), 10)
 
 			filename := timestamp + "." + ext
 
-			var v Videos
 			v.Completed = false
 			v.Path = "home/tsap/api/videos/" + filename
-			p, _ := strconv.ParseInt(part, 64, 10)
-			v.Part = int(p)
 			v.Game = g
 
 			if db.NewRecord(v) {

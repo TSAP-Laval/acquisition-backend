@@ -1,7 +1,6 @@
 package api
 
 import (
-	"fmt"
 	"net/http"
 
 	//Import DB driver
@@ -16,30 +15,29 @@ func (a *AcquisitionService) FaireBD(w http.ResponseWriter, r *http.Request) {
 	db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
 	defer db.Close()
 
-	if err != nil {
-		fmt.Print("ERROR : ")
-		fmt.Println(err)
-	}
+	a.Error("ERROR : => " + err.Error())
 
-	db.DropTableIfExists(&Admins{})
-	db.DropTableIfExists(&Actions{})
-	db.DropTableIfExists(&Games{})
-	db.DropTableIfExists(&Teams{})
-	db.DropTableIfExists(&PlayersTeam{})
-	db.DropTableIfExists(&CoachTeam{})
-	db.DropTableIfExists(&Zones{})
-	db.DropTableIfExists(&Sports{})
-	db.DropTableIfExists(&Players{})
-	db.DropTableIfExists(&Locations{})
-	db.DropTableIfExists(&Categories{})
-	db.DropTableIfExists(&Coaches{})
-	db.DropTableIfExists(&ActionsType{})
-	db.DropTableIfExists(&Seasons{})
-	db.DropTableIfExists(&Positions{})
-	db.DropTableIfExists(&MovementsType{})
-	db.DropTableIfExists(&PlayerPositionGameTeam{})
-	db.DropTableIfExists(&Videos{})
-	db.DropTableIfExists(&Metrics{})
+	db.DropTableIfExists("admins")
+	db.DropTableIfExists("actions")
+	db.DropTableIfExists("videos")
+	db.DropTableIfExists("player_position_game_team")
+	db.DropTableIfExists("games")
+	db.DropTableIfExists("player_team")
+	db.DropTableIfExists("players")
+	db.DropTableIfExists("coach_team")
+	db.DropTableIfExists("metrics")
+	db.DropTableIfExists("teams")
+	db.DropTableIfExists("sports")
+	db.DropTableIfExists("categories")
+	db.DropTableIfExists("zones")
+	db.DropTableIfExists("locations")
+	db.DropTableIfExists("field_types")
+	db.DropTableIfExists("coaches")
+	db.DropTableIfExists("actions_type")
+	db.DropTableIfExists("seasons")
+	db.DropTableIfExists("positions")
+	db.DropTableIfExists("temperatures")
+	db.DropTableIfExists("movements_type")
 
 	db.AutoMigrate(&Admins{})
 	db.AutoMigrate(&Seasons{})
@@ -48,6 +46,8 @@ func (a *AcquisitionService) FaireBD(w http.ResponseWriter, r *http.Request) {
 	db.AutoMigrate(&Teams{})
 	db.AutoMigrate(&Players{})
 	db.AutoMigrate(&Locations{})
+	db.AutoMigrate(&FieldTypes{})
+	db.AutoMigrate(&Temperatures{})
 	db.AutoMigrate(&Videos{})
 	db.AutoMigrate(&Games{})
 	db.AutoMigrate(&Positions{})
@@ -67,10 +67,7 @@ func (a *AcquisitionService) RemplirBD(w http.ResponseWriter, r *http.Request) {
 	db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
 	defer db.Close()
 
-	if err != nil {
-		fmt.Println("ERROR : ")
-		fmt.Println(err)
-	}
+	a.Error("ERROR : => " + err.Error())
 
 	user := ActionsType{Name: "PO", Description: "Passe offensive"}
 	if db.NewRecord(user) {
