@@ -8,11 +8,13 @@ DROP TABLE IF EXISTS "zones" CASCADE;
 DROP TABLE IF EXISTS "sports" CASCADE;
 DROP TABLE IF EXISTS "players" CASCADE;
 DROP TABLE IF EXISTS "locations" CASCADE;
+DROP TABLE IF EXISTS "field_types" CASCADE;
 DROP TABLE IF EXISTS "categories" CASCADE;
 DROP TABLE IF EXISTS "coaches" CASCADE;
 DROP TABLE IF EXISTS "actions_type" CASCADE;
 DROP TABLE IF EXISTS "seasons" CASCADE;
 DROP TABLE IF EXISTS "positions" CASCADE;
+DROP TABLE IF EXISTS "temperatures" CASCADE;
 DROP TABLE IF EXISTS "movements_type" CASCADE;
 DROP TABLE IF EXISTS "player_position_game_team" CASCADE;
 DROP TABLE IF EXISTS "videos" CASCADE;
@@ -111,13 +113,30 @@ CREATE TABLE "locations" (
 
 
 -- -----------------------------------------------------
+-- Table "field_types"
+-- -----------------------------------------------------
+
+CREATE TABLE "field_types" (
+  "id" SERIAL PRIMARY KEY,
+  "type" VARCHAR(256) NOT NULL,
+  "description" VARCHAR(256) NULL);
+
+
+
+-- -----------------------------------------------------
 -- Table "video"
 -- -----------------------------------------------------
 
 CREATE TABLE "videos" (
   "id" SERIAL PRIMARY KEY,
   "path" TEXT NOT NULL,
-  "completed" INT NOT NULL DEFAULT 0);
+  "completed" INT NOT NULL DEFAULT 0,
+  "id_game" INT NOT NULL,
+  CONSTRAINT "fk_game_id"
+    FOREIGN KEY ("id_game")
+    REFERENCES "games" ("id")
+    ON DELETE CASCADE
+    ON UPDATE CASCADE);
 
 
 
@@ -131,7 +150,7 @@ CREATE TABLE "games" (
   "id_opposing_team" INT NOT NULL,
   "id_season" INT NOT NULL,
   "id_location" INT NOT NULL,
-  "id_video" INT NOT NULL,
+  "id_temperature" INT NOT NULL,
   "date" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT "fk_game_home_team"
     FOREIGN KEY ("id_home_team")
@@ -153,9 +172,9 @@ CREATE TABLE "games" (
     REFERENCES "seasons" ("id")
     ON DELETE CASCADE
     ON UPDATE CASCADE,
-  CONSTRAINT "fk_game_team_video"
-    FOREIGN KEY ("id_video")
-    REFERENCES "videos" ("id")
+  CONSTRAINT "fk_temperature"
+    FOREIGN KEY ("id_temperature")
+    REFERENCES "temperature" ("id")
     ON DELETE CASCADE
     ON UPDATE CASCADE);
 
@@ -168,6 +187,18 @@ CREATE TABLE "games" (
 CREATE TABLE "positions" (
   "id" SERIAL PRIMARY KEY,
   "name" VARCHAR(45) NOT NULL);
+
+
+
+-- -----------------------------------------------------
+-- Table "temperatures"
+-- -----------------------------------------------------
+
+CREATE TABLE "temperatures" (
+  "id" SERIAL PRIMARY KEY,
+  "temperature" VARCHAR(45) NULL,
+  "field_condition" VARCHAR(45) NULL,
+  "degree" VARCHAR(10) NULL);
 
 
 
