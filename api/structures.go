@@ -63,11 +63,12 @@ type Players struct {
 // Locations les lieux
 type Locations struct {
 	gorm.Model
-	Name         string
-	City         string
-	Address      string
-	FieldType    FieldTypes
-	FieldTypesID int
+	Name          string
+	City          string
+	Address       string
+	InsideOutside string
+	FieldType     FieldTypes
+	FieldTypesID  int
 }
 
 // FieldTypes les types de terrains
@@ -81,6 +82,7 @@ type FieldTypes struct {
 type Videos struct {
 	gorm.Model
 	Path      string
+	Part      int
 	Completed bool
 	Game      Games
 	GameID    int

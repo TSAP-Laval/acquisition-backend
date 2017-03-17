@@ -107,12 +107,5 @@ func AjoutInfosPartie(db *gorm.DB, g Games) Games {
 		g.Location = l
 	}
 
-	// Ajout de la vidéo
-	var v Videos
-	db.Where("ID = ?", g.VideoID).Find(&v)
-	if v.Path != "" {
-		g.Video = v
-	}
-
 	return g
 }

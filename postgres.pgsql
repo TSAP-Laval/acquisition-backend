@@ -108,7 +108,8 @@ CREATE TABLE "locations" (
   "id" SERIAL PRIMARY KEY,
   "name" VARCHAR(256) NOT NULL,
   "city" VARCHAR(256) NOT NULL,
-  "address" VARCHAR(256) NULL);
+  "address" VARCHAR(256) NULL,
+  "inside_outside" VARCHAR(256) NOT NULL);
 
 
 
@@ -130,6 +131,7 @@ CREATE TABLE "field_types" (
 CREATE TABLE "videos" (
   "id" SERIAL PRIMARY KEY,
   "path" TEXT NOT NULL,
+  "part" INT NOT NULL,
   "completed" INT NOT NULL DEFAULT 0,
   "id_game" INT NOT NULL,
   CONSTRAINT "fk_game_id"
