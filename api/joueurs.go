@@ -14,6 +14,7 @@ import (
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 )
 
+// HandleJoueur gère la modification et l'ajout de joueur
 func (a *AcquisitionService) HandleJoueur(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	w.Header().Set("Access-Control-Allow-Origin", "*")
