@@ -100,6 +100,8 @@ type Games struct {
 	Location       Locations
 	LocationID     int
 	FieldCondition string
+	Temperature    Temperatures
+	TemperatureID  int
 	Date           string
 	Action         []Actions
 }
