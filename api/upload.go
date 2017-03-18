@@ -52,6 +52,8 @@ func (a *AcquisitionService) UploadHandler(w http.ResponseWriter, r *http.Reques
 
 				// Ajout de la partie
 				v.Part = int(p)
+			} else {
+				v.Part = 1
 			}
 
 			// Le timestamp sera le nom du fichier
@@ -59,7 +61,7 @@ func (a *AcquisitionService) UploadHandler(w http.ResponseWriter, r *http.Reques
 
 			filename := timestamp + "." + ext
 
-			v.Completed = false
+			v.Completed = 0
 			v.Path = "home/tsap/api/videos/" + filename
 			v.Game = g
 

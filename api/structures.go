@@ -83,7 +83,7 @@ type Videos struct {
 	gorm.Model
 	Path      string
 	Part      int
-	Completed bool
+	Completed int
 	Game      Games
 	GameID    int
 }
