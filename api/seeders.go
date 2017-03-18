@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"net/http"
 
 	//Import DB driver
@@ -15,7 +16,10 @@ func (a *AcquisitionService) FaireBD(w http.ResponseWriter, r *http.Request) {
 	db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
 	defer db.Close()
 
-	a.Error("ERROR : => " + err.Error())
+	if err != nil {
+		fmt.Println("ERROR : ")
+		fmt.Println(err)
+	}
 
 	db.DropTableIfExists("admins")
 	db.DropTableIfExists("actions")
@@ -67,7 +71,10 @@ func (a *AcquisitionService) RemplirBD(w http.ResponseWriter, r *http.Request) {
 	db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
 	defer db.Close()
 
-	a.Error("ERROR : => " + err.Error())
+	if err != nil {
+		fmt.Println("ERROR : ")
+		fmt.Println(err)
+	}
 
 	user := ActionsType{Name: "PO", Description: "Passe offensive"}
 	if db.NewRecord(user) {
