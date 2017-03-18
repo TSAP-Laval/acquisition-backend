@@ -91,24 +91,24 @@ type Videos struct {
 // Games les parties
 type Games struct {
 	gorm.Model
-	HomeTeam      Teams
-	HomeTeamID    int
-	OpposingTeam  string
-	Season        Seasons
-	SeasonID      int
-	Location      Locations
-	LocationID    int
-	Temperature   Temperatures
-	TemperatureID int
-	Date          string
-	Action        []Actions
+	HomeTeam       Teams
+	HomeTeamID     int
+	OpposingTeam   string
+	Season         Seasons
+	SeasonID       int
+	Location       Locations
+	LocationID     int
+	FieldCondition string
+	Temperature    Temperatures
+	TemperatureID  int
+	Date           string
+	Action         []Actions
 }
 
 // Temperatures la température durant la partie
 type Temperatures struct {
 	gorm.Model
 	TemperatureType string // Rain, wind, sun, etc
-	FieldCondition  string
 	Degree          string // The temperature un degree celcius
 }
 
