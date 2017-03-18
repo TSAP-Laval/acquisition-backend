@@ -1,7 +1,6 @@
 package api
 
 import (
-	"fmt"
 	"io"
 	"net/http"
 	"os"
@@ -11,7 +10,6 @@ import (
 
 // UploadHandler Gère l'upload de video sur le serveur
 func (a *AcquisitionService) UploadHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Println(r.Method)
 	switch r.Method {
 	case "POST":
 		file, handler, err := r.FormFile("file")
