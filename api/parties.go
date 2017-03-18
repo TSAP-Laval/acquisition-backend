@@ -52,7 +52,7 @@ func (a *AcquisitionService) PartiesHandler(w http.ResponseWriter, r *http.Reque
 			// On vérifie que la partie n'existe pas déjà
 			game := []Games{}
 			db.Where("home_team_id = ? AND opposing_team = ? AND Date = ?",
-				g.HomeTeamID, g.OpposingTeam, g.Date).Find(&game)
+				g.TeamID, g.OpposingTeam, g.Date).Find(&game)
 
 			if len(game) > 0 {
 				msg := map[string]string{"error": "Une partie de même date avec les mêmes equipes existe déjà!"}
@@ -94,10 +94,10 @@ func (a *AcquisitionService) SupprimerPartiesHandler(w http.ResponseWriter, r *h
 func AjoutInfosPartie(db *gorm.DB, g Games) Games {
 	// Home team
 	var ht Teams
-	db.Where("ID = ?", g.HomeTeamID).Find(&ht)
+	db.Where("ID = ?", g.TeamID).Find(&ht)
 	if ht.Name != "" {
 		ht = AjoutNiveauSport(db, ht)
-		g.HomeTeam = ht
+		g.Team = ht
 	}
 
 	// Ajout du lieu pour l'affichage
@@ -105,13 +105,6 @@ func AjoutInfosPartie(db *gorm.DB, g Games) Games {
 	db.Where("ID = ?", g.LocationID).Find(&l)
 	if l.Name != "" {
 		g.Location = l
-	}
-
-	// Ajout de la vidéo
-	var v Videos
-	db.Where("ID = ?", g.VideoID).Find(&v)
-	if v.Path != "" {
-		g.Video = v
 	}
 
 	return g
