@@ -78,8 +78,9 @@ type Videos struct {
 // Games les parties
 type Games struct {
 	gorm.Model
-	HomeTeam     Teams
-	HomeTeamID   int
+	Team         Teams
+	TeamID       int
+	Status       string // Local/visiteur
 	OpposingTeam string
 	Season       Seasons
 	SeasonID     int
