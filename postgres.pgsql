@@ -131,7 +131,6 @@ CREATE TABLE "field_types" (
 CREATE TABLE "temperatures" (
   "id" SERIAL PRIMARY KEY,
   "temperature" VARCHAR(45) NULL,
-  "field_condition" VARCHAR(45) NULL,
   "degree" VARCHAR(10) NULL);
 
 
@@ -147,6 +146,7 @@ CREATE TABLE "games" (
   "opposing_team" VARCHAR(100) NOT NULL,
   "id_season" INT NOT NULL,
   "id_location" INT NOT NULL,
+  "field_condition" VARCHAR(45) NULL,
   "id_temperature" INT NOT NULL,
   "date" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT "fk_game_team"

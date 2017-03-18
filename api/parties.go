@@ -130,6 +130,7 @@ func (a *AcquisitionService) PartiesHandler(w http.ResponseWriter, r *http.Reque
 				game.SeasonID = g.SeasonID
 				game.LocationID = g.LocationID
 				game.Date = g.Date
+				game.FieldCondition = g.FieldCondition
 
 				db.Model(&game).Where("ID = ?", id).Updates(game)
 			}
@@ -142,6 +143,9 @@ func (a *AcquisitionService) PartiesHandler(w http.ResponseWriter, r *http.Reque
 			msg := map[string]string{"error": "Veuillez remplir tous les champs."}
 			Message(w, msg, http.StatusBadRequest)
 		}
+	case "OPTIONS":
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.WriteHeader(http.StatusOK)
 	}
 }
 
