@@ -88,7 +88,7 @@ func (a *AcquisitionService) UploadHandler(w http.ResponseWriter, r *http.Reques
 					a.ErrorHandler(w, err)
 				}
 			} else {
-				msg := map[string]string{"error": "Une vidéo avec le même nom existe déjà. Veuillez renommer cette vidéo."}
+				msg := map[string]string{"error": "Une vidéo avec le même nom existe déjà. Veuillez renommer cette vidéo.", "exist": "true"}
 				Message(w, msg, http.StatusInternalServerError)
 				return
 			}

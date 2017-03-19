@@ -91,8 +91,9 @@ type Videos struct {
 // Games les parties
 type Games struct {
 	gorm.Model
-	HomeTeam       Teams
-	HomeTeamID     int
+	Team           Teams
+	TeamID         int
+	Status         string // Local/visiteur
 	OpposingTeam   string
 	Season         Seasons
 	SeasonID       int
@@ -229,6 +230,6 @@ func (a *Actions) Expand(db *gorm.DB) {
 // (has-many, has-one, pas belongs-to)
 func (g *Games) Expand(db *gorm.DB) {
 	db.Model(g).Related(&(g.Action))
-	db.Model(g).Related(&(g.HomeTeam), "HomeTeamID")
+	db.Model(g).Related(&(g.Team), "TeamID")
 	db.Model(g).Related(&(g.OpposingTeam), "OpposingTeamID")
 }

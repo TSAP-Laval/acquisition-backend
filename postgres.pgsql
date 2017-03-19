@@ -141,20 +141,16 @@ CREATE TABLE "temperatures" (
 
 CREATE TABLE "games" (
   "id" SERIAL PRIMARY KEY,
-  "id_home_team" INT NOT NULL,
-  "id_opposing_team" INT NOT NULL,
+  "id_team" INT NOT NULL,
+  "status" VARCHAR(50) NOT NULL,
+  "opposing_team" VARCHAR(100) NOT NULL,
   "id_season" INT NOT NULL,
   "id_location" INT NOT NULL,
   "field_condition" VARCHAR(45) NULL,
   "id_temperature" INT NOT NULL,
   "date" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  CONSTRAINT "fk_game_home_team"
-    FOREIGN KEY ("id_home_team")
-    REFERENCES "teams" ("id")
-    ON DELETE CASCADE
-    ON UPDATE CASCADE,
-  CONSTRAINT "fk_game_opposing_team"
-    FOREIGN KEY ("id_opposing_team")
+  CONSTRAINT "fk_game_team"
+    FOREIGN KEY ("id_team")
     REFERENCES "teams" ("id")
     ON DELETE CASCADE
     ON UPDATE CASCADE,
