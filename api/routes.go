@@ -88,6 +88,7 @@ func (a *AcquisitionService) getRouter() http.Handler {
 	r.HandleFunc("/api/coachs/postCoach", a.PostCoachHandler)
 	// Upload
 	r.HandleFunc("/api/upload", a.UploadHandler)
+	r.HandleFunc("/api/upload/{game-id}", a.UploadHandler).Methods("DELETE", "OPTIONS")
 	// Terrains
 	r.HandleFunc("/api/terrains", a.GetTerrainsHandler).Methods("GET")
 	r.HandleFunc("/api/terrains/{nom}", a.GetTerrainHandler).Methods("GET")
