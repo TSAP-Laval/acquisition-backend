@@ -32,7 +32,6 @@ func (a *AcquisitionService) HandleJoueur(w http.ResponseWriter, r *http.Request
 	var dat map[string]interface{}
 	err = json.Unmarshal(body, &t)
 	err = json.Unmarshal(body, &dat)
-
 	switch r.Method {
 	case "POST":
 
