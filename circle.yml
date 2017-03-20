@@ -13,7 +13,7 @@ test:
     - go tool vet .
     - go get
     - ifconfig
-    - kill -9 $(lsof -t -i:3000)
+    - sudo kill $(sudo lsof -t -i:3000)
     - go test -v -race ./...
 
 database:
