@@ -63,32 +63,54 @@ type Players struct {
 // Locations les lieux
 type Locations struct {
 	gorm.Model
-	Name    string
-	City    string
-	Address string
+	Name          string
+	City          string
+	Address       string
+	InsideOutside string
+	FieldType     FieldTypes
+	FieldTypesID  int
+}
+
+// FieldTypes les types de terrains
+type FieldTypes struct {
+	gorm.Model
+	Type        string
+	Description string
 }
 
 // Videos les videos
 type Videos struct {
 	gorm.Model
 	Path      string
-	Completed bool
+	Part      int
+	Completed int
+	Game      Games
+	GameID    int
 }
 
 // Games les parties
 type Games struct {
 	gorm.Model
-	HomeTeam     Teams
-	HomeTeamID   int
-	OpposingTeam string
-	Season       Seasons
-	SeasonID     int
-	Location     Locations
-	LocationID   int
-	Video        Videos
-	VideoID      int
-	Date         string
-	Action       []Actions
+	Team           Teams
+	TeamID         int
+	Status         string // Local/visiteur
+	OpposingTeam   string
+	Season         Seasons
+	SeasonID       int
+	Location       Locations
+	LocationID     int
+	FieldCondition string
+	Temperature    Temperatures
+	TemperatureID  int
+	Date           string
+	Action         []Actions
+}
+
+// Temperatures la température durant la partie
+type Temperatures struct {
+	gorm.Model
+	TemperatureType string // Rain, wind, sun, etc
+	Degree          string // The temperature un degree celcius
 }
 
 // Positions les positions des joueurs
@@ -208,6 +230,6 @@ func (a *Actions) Expand(db *gorm.DB) {
 // (has-many, has-one, pas belongs-to)
 func (g *Games) Expand(db *gorm.DB) {
 	db.Model(g).Related(&(g.Action))
-	db.Model(g).Related(&(g.HomeTeam), "HomeTeamID")
+	db.Model(g).Related(&(g.Team), "TeamID")
 	db.Model(g).Related(&(g.OpposingTeam), "OpposingTeamID")
 }

@@ -87,6 +87,7 @@ func (a *AcquisitionService) getRouter() http.Handler {
 	r.HandleFunc("/api/coachs/postCoach", a.PostCoachHandler)
 	// Upload
 	r.HandleFunc("/api/upload", a.UploadHandler)
+	r.HandleFunc("/api/upload/{game-id}", a.UploadHandler).Methods("DELETE", "OPTIONS")
 	// Terrains
 	r.HandleFunc("/api/terrains", a.GetTerrainsHandler).Methods("GET")
 	r.HandleFunc("/api/terrains/{nom}", a.GetTerrainHandler).Methods("GET")
@@ -99,6 +100,7 @@ func (a *AcquisitionService) getRouter() http.Handler {
 	r.HandleFunc("/api/equipes", a.CreerEquipeHandler).Methods("POST")
 	// Parties
 	r.HandleFunc("/api/parties", a.PartiesHandler).Methods("GET", "POST")
+	r.HandleFunc("/api/parties/{id}", a.PartiesHandler).Methods("PUT", "OPTIONS")
 	r.HandleFunc("/api/parties/{id}", a.SupprimerPartiesHandler).Methods("DELETE")
 	// BD
 	r.HandleFunc("/api/seed", a.RemplirBD).Methods("POST")

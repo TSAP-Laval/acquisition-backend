@@ -11,7 +11,7 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
-// GetEquipeHandler Gère la récupération des équipes correspondant au nom entré
+// GetEquipeHandler gère la récupération des équipes correspondant au nom entré
 func (a *AcquisitionService) GetEquipeHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 
@@ -114,7 +114,7 @@ func (a *AcquisitionService) EquipesHandler(w http.ResponseWriter, r *http.Reque
 	}
 }
 
-// GetEquipesHandler Gère la récupération de toutes les équipes de la base de donnée
+// GetEquipesHandler gère la récupération de toutes les équipes de la base de donnée
 func (a *AcquisitionService) GetEquipesHandler(w http.ResponseWriter, r *http.Request) {
 	db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
 	defer db.Close()
@@ -134,7 +134,7 @@ func (a *AcquisitionService) GetEquipesHandler(w http.ResponseWriter, r *http.Re
 	Message(w, team, http.StatusOK)
 }
 
-// CreerEquipeHandler Gère la création d'une équipe dans la base de donnée
+// CreerEquipeHandler gère la création d'une équipe dans la base de donnée
 func (a *AcquisitionService) CreerEquipeHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 
@@ -196,7 +196,7 @@ func (a *AcquisitionService) CreerEquipeHandler(w http.ResponseWriter, r *http.R
 	}
 }
 
-// Message Gère les messages (erreurs, messages de succès) à envoyer au client
+// Message gère les messages (erreurs, messages de succès) à envoyer au client
 func Message(w http.ResponseWriter, msg interface{}, code int) {
 	message, _ := json.Marshal(msg)
 	w.Header().Set("Content-Type", "application/json")
