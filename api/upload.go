@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/gorilla/mux"
 	"github.com/jinzhu/gorm"
 )
 
@@ -95,6 +96,26 @@ func (a *AcquisitionService) UploadHandler(w http.ResponseWriter, r *http.Reques
 		}
 		msg := map[string]string{"succes": "Video(s) envoyé(s) avec succès!", "game_id": strconv.Itoa(int(g.ID))}
 		Message(w, msg, http.StatusCreated)
+	case "DELETE":
+		var g Games
+		gameID := mux.Vars(r)["game-id"]
+		// Erreur
+		if gameID == "0" {
+			msg := map[string]string{"error": "Aucune partie ne correspond. Elle doit déjà avoir été supprimée!"}
+			Message(w, msg, http.StatusNoContent)
+		} else {
+			db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
+			defer db.Close()
+			a.ErrorHandler(w, err)
+
+			// On supprime les vidéos
+			db.Where("game_id = ?", gameID).Delete(&Videos{})
+			// On supprime la partie
+			db.Where("ID = ?", gameID).Delete(&g)
+
+			msg := map[string]string{"succes": "L'équipe et les vidéos ont été supprimée avec succès!"}
+			Message(w, msg, http.StatusNoContent)
+		}
 	case "OPTIONS":
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.WriteHeader(http.StatusOK)
