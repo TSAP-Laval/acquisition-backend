@@ -21,20 +21,28 @@ type AcquisitionConfiguration struct {
 	Debug            bool
 }
 
+// Keys les clées utilisées pour les API de météo et géodécodage
+type Keys struct {
+	Geodecoder string
+	Weather    string
+}
+
 // AcquisitionService represents a single service instance
 type AcquisitionService struct {
 	logger *log.Logger
 	config *AcquisitionConfiguration
 	server *manners.GracefulServer
+	keys   *Keys
 }
 
 // New crée une nouvelle instance du service
-func New(writer io.Writer, config *AcquisitionConfiguration) *AcquisitionService {
+func New(writer io.Writer, config *AcquisitionConfiguration, keys *Keys) *AcquisitionService {
 
 	return &AcquisitionService{
 		logger: log.New(writer, "[acquisition-api] ", log.Flags()),
 		config: config,
 		server: manners.NewServer(),
+		keys:   keys,
 	}
 }
 
@@ -91,6 +99,7 @@ func (a *AcquisitionService) getRouter() http.Handler {
 	r.HandleFunc("/api/coachs/addCoachTeam/{id}", a.AssignerEquipeCoach).Methods("PUT")
 	// Upload
 	r.HandleFunc("/api/upload", a.UploadHandler)
+	r.HandleFunc("/api/upload/{game-id}", a.UploadHandler).Methods("DELETE", "OPTIONS")
 	// Terrains
 	r.HandleFunc("/api/terrains", a.GetTerrainsHandler).Methods("GET")
 	r.HandleFunc("/api/terrains/{nom}", a.GetTerrainHandler).Methods("GET")
@@ -104,6 +113,7 @@ func (a *AcquisitionService) getRouter() http.Handler {
 	r.HandleFunc("/api/equipes", a.CreerEquipeHandler).Methods("POST")
 	// Parties
 	r.HandleFunc("/api/parties", a.PartiesHandler).Methods("GET", "POST")
+	r.HandleFunc("/api/parties/{id}", a.PartiesHandler).Methods("PUT", "OPTIONS")
 	r.HandleFunc("/api/parties/{id}", a.SupprimerPartiesHandler).Methods("DELETE")
 	// BD
 	r.HandleFunc("/api/seed", a.RemplirBD).Methods("POST")
@@ -112,7 +122,7 @@ func (a *AcquisitionService) getRouter() http.Handler {
 	r.HandleFunc("/api/actions", a.GetActions).Methods("GET")
 	r.HandleFunc("/api/actions", a.PostAction).Methods("POST")
 	r.HandleFunc("/api/joueur", a.HandleJoueur).Methods("POST")
-	r.HandleFunc("/api/joueur/{id}", a.HandleJoueur).Methods("PUT")
+	r.HandleFunc("/api/joueur/{id}", a.HandleJoueur).Methods("PUT", "OPTIONS")
 	r.HandleFunc("/api/saison", a.GetSeasons).Methods("GET")
 	r.HandleFunc("/api/saison", a.PostSaison).Methods("POST")
 	r.HandleFunc("/api/sports", a.GetSports).Methods("GET")

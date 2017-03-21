@@ -18,14 +18,16 @@ var (
 
 func init() {
 	var a api.AcquisitionConfiguration
+	var k api.Keys
 
 	err := envconfig.Process("TSAP", &a)
+	err = envconfig.Process("KEYS", &k)
 
 	if err != nil {
 		panic(err)
 	}
 
-	service := api.New(os.Stdout, &a)
+	service := api.New(os.Stdout, &a, &k)
 	service.Start()
 
 	baseURL = "http://localhost" + a.Port
