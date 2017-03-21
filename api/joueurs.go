@@ -34,7 +34,7 @@ func (a *AcquisitionService) HandleJoueur(w http.ResponseWriter, r *http.Request
 	err = json.Unmarshal(body, &dat)
 	switch r.Method {
 	case "POST":
-
+		w.Header().Set("Access-Control-Allow-Origin", "*")
 		if db.NewRecord(t) {
 			db.Create(&t)
 			db.NewRecord(t)
@@ -57,8 +57,13 @@ func (a *AcquisitionService) HandleJoueur(w http.ResponseWriter, r *http.Request
 			Message(w, "déjà créé", http.StatusBadRequest)
 		}
 	case "PUT":
+		w.Header().Set("Access-Control-Allow-Origin", "*")
 		id := strings.ToLower(strings.TrimSpace(vars["id"]))
 		db.Model(&t).Where("ID = ?", id).Updates(t)
 		Message(w, "ok", http.StatusOK)
+	case "OPTIONS":
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.WriteHeader(http.StatusOK)
+
 	}
 }
