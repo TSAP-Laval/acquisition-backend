@@ -63,12 +63,12 @@ type Players struct {
 // Locations les lieux
 type Locations struct {
 	gorm.Model
-	Name          string
-	City          string
-	Address       string
-	InsideOutside string
-	FieldType     FieldTypes
-	FieldTypesID  int
+	Name         string
+	City         string
+	Address      string
+	IsInside     bool
+	FieldType    FieldTypes
+	FieldTypesID int
 }
 
 // FieldTypes les types de terrains
@@ -100,17 +100,10 @@ type Games struct {
 	Location       Locations
 	LocationID     int
 	FieldCondition string
-	Temperature    Temperatures
-	TemperatureID  int
 	Date           string
+	Temperature    string // Rain, wind, sun, etc
+	Degree         string // The temperature in degree celcius
 	Action         []Actions
-}
-
-// Temperatures la température durant la partie
-type Temperatures struct {
-	gorm.Model
-	TemperatureType string // Rain, wind, sun, etc
-	Degree          string // The temperature un degree celcius
 }
 
 // Positions les positions des joueurs

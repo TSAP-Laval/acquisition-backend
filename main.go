@@ -14,17 +14,19 @@ func main() {
 	// Récupération de la structure des
 	// configurations de l'api
 	var a api.AcquisitionConfiguration
+	var k api.Keys
 
 	// Récupération des configurations
 	// dans les variables d'environnement
 	// du système d'exploitation
 	err := envconfig.Process("TSAP", &a)
+	err = envconfig.Process("KEYS", &k)
 
 	if err != nil {
 		panic(err)
 	}
 
-	service := api.New(os.Stdout, &a)
+	service := api.New(os.Stdout, &a, &k)
 	service.Start()
 
 	reader := bufio.NewReader(os.Stdin)
