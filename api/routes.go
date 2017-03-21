@@ -82,12 +82,13 @@ func (a *AcquisitionService) getRouter() http.Handler {
 	r := mux.NewRouter()
 
 	// Actions
-	r.HandleFunc("/api/action/movementType", a.GetMovementTypeHandler)
-	r.HandleFunc("/api/action/actiontype", a.GetAllActionsTypes)
-	r.HandleFunc("/api/action/addactiontype", a.PostActionType)
+	r.HandleFunc("/api/action/movementType", a.GetMovementTypeHandler).Methods("GET")
+	r.HandleFunc("/api/action/actiontype", a.GetAllActionsTypes).Methods("GET")
+	r.HandleFunc("/api/action/addactiontype", a.PostActionType).Methods("POST")
 	//Coachs
-	r.HandleFunc("/api/coachs/coachs", a.GetCoachsHandler)
-	r.HandleFunc("/api/coachs/addcoach", a.PostCoachHandler)
+	r.HandleFunc("/api/coachs/coachs", a.GetCoachsHandler).Methods("GET")
+	r.HandleFunc("/api/coachs/addcoach", a.PostCoachHandler).Methods("POST")
+	r.HandleFunc("/api/coachs/addCoachTeam/{id}", a.AssignerEquipeCoach).Methods("PUT")
 	// Upload
 	r.HandleFunc("/api/upload", a.UploadHandler)
 	// Terrains
