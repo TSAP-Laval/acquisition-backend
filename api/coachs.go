@@ -37,7 +37,7 @@ func (a *AcquisitionService) GetCoachsHandler(w http.ResponseWriter, r *http.Req
 	db.Close()
 }
 
-//PostCoach : Create a new coach in the database
+//PostCoachHandler : Create a new coach in the database
 func (a *AcquisitionService) PostCoachHandler(w http.ResponseWriter, r *http.Request) {
 	db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
 
@@ -57,9 +57,16 @@ func (a *AcquisitionService) PostCoachHandler(w http.ResponseWriter, r *http.Req
 	fmt.Println(string(body))
 
 	var newCoach Coaches
-
+	var dat map[string]interface{}
 	err = json.Unmarshal(body, &newCoach)
+	err = json.Unmarshal(body, &dat)
+	num := dat["Teams"]
 
+	Team := Teams{}
+
+	db.First(&Team, num)
+
+	newCoach.Teams = append(newCoach.Teams, Team)
 	fmt.Println(err)
 
 	if err != nil {
@@ -68,9 +75,13 @@ func (a *AcquisitionService) PostCoachHandler(w http.ResponseWriter, r *http.Req
 
 	if db.NewRecord(newCoach) {
 		db.Create(&newCoach)
-		db.NewRecord(&newCoach)
+		w.Header().Set("Content-Type", "application/text")
+		w.WriteHeader(http.StatusCreated)
+
 	} else {
 		fmt.Println("Not created")
+		w.Header().Set("Content-Type", "application/text")
+		w.Write([]byte("erreur"))
 	}
 
 	defer r.Body.Close()
