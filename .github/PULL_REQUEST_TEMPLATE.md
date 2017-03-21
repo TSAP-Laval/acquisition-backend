@@ -27,3 +27,7 @@
     - [ ] Laurent
 
 ---
+
+### Complete and detailed description of your PR*
+
+* If no description is provided, the PR will be ignored.

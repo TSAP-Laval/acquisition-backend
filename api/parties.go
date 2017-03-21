@@ -4,10 +4,16 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
+	"strconv"
 	"strings"
+	"time"
 
 	"github.com/gorilla/mux"
+	"github.com/jasonwinn/geocoder"
 	"github.com/jinzhu/gorm"
+
+	// DarkSky api for historical weather
+	forecast "github.com/mlbright/forecast/v2"
 )
 
 // PartiesHandler Gère la récupération et la création des parties
@@ -122,6 +128,42 @@ func (a *AcquisitionService) PartiesHandler(w http.ResponseWriter, r *http.Reque
 					Message(w, msg, http.StatusBadRequest)
 				}
 			} else {
+				var l Locations
+				var temp string
+				var summary string
+
+				db.First(&l, "ID = ?", g.LocationID)
+
+				if !l.IsInside {
+					geocoder.SetAPIKey(a.keys.Geodecoder)
+					query := l.City + " Canada" // l.Address
+
+					latitude, longitude, err := geocoder.Geocode(query)
+					if err != nil {
+						a.ErrorHandler(w, err)
+						return
+					}
+					lat := strconv.FormatFloat(latitude, 'f', 10, 64)
+					lng := strconv.FormatFloat(longitude, 'f', 10, 64)
+
+					layout := "2006-01-02 15:04"
+					time, err := time.Parse(layout, g.Date)
+					if err != nil {
+						a.ErrorHandler(w, err)
+						return
+					}
+					date := time.Unix()
+					d := strconv.Itoa(int(date))
+
+					f, err := forecast.Get(a.keys.Weather, lat, lng, d, forecast.CA, forecast.French)
+					if err != nil {
+						a.ErrorHandler(w, err)
+						return
+					}
+
+					temp = strconv.FormatFloat(f.Currently.Temperature, 'f', 2, 64)
+					summary = f.Currently.Summary
+				}
 
 				// Modification de la partie
 				game.TeamID = g.TeamID
@@ -131,6 +173,8 @@ func (a *AcquisitionService) PartiesHandler(w http.ResponseWriter, r *http.Reque
 				game.LocationID = g.LocationID
 				game.Date = g.Date
 				game.FieldCondition = g.FieldCondition
+				game.Degree = temp
+				game.Temperature = summary
 
 				db.Model(&game).Where("ID = ?", id).Updates(game)
 			}

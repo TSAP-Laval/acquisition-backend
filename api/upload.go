@@ -4,6 +4,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
@@ -63,7 +64,7 @@ func (a *AcquisitionService) UploadHandler(w http.ResponseWriter, r *http.Reques
 			filename := timestamp + "." + ext
 
 			v.Completed = 0
-			v.Path = "home/tsap/api/videos/" + filename
+			v.Path, err = filepath.Abs("videos/" + filename)
 			v.Game = g
 
 			if db.NewRecord(v) {
