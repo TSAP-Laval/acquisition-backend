@@ -27,6 +27,7 @@ func (a *AcquisitionService) HandleJoueur(w http.ResponseWriter, r *http.Request
 		a.ErrorHandler(w, err)
 		return
 	}
+
 	log.Println(string(body))
 	var t Players
 	var dat map[string]interface{}
