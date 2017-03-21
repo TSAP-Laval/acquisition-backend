@@ -1,22 +1,23 @@
 DROP TABLE IF EXISTS "admins" CASCADE;
 DROP TABLE IF EXISTS "actions" CASCADE;
+DROP TABLE IF EXISTS "videos" CASCADE;
+DROP TABLE IF EXISTS "player_position_game_team" CASCADE;
 DROP TABLE IF EXISTS "games" CASCADE;
-DROP TABLE IF EXISTS "teams" CASCADE;
 DROP TABLE IF EXISTS "player_team" CASCADE;
 DROP TABLE IF EXISTS "coach_team" CASCADE;
+DROP TABLE IF EXISTS "metrics" CASCADE;
+DROP TABLE IF EXISTS "teams" CASCADE;
 DROP TABLE IF EXISTS "zones" CASCADE;
 DROP TABLE IF EXISTS "sports" CASCADE;
 DROP TABLE IF EXISTS "players" CASCADE;
 DROP TABLE IF EXISTS "locations" CASCADE;
+DROP TABLE IF EXISTS "field_types" CASCADE;
 DROP TABLE IF EXISTS "categories" CASCADE;
 DROP TABLE IF EXISTS "coaches" CASCADE;
 DROP TABLE IF EXISTS "actions_type" CASCADE;
 DROP TABLE IF EXISTS "seasons" CASCADE;
 DROP TABLE IF EXISTS "positions" CASCADE;
 DROP TABLE IF EXISTS "movements_type" CASCADE;
-DROP TABLE IF EXISTS "player_position_game_team" CASCADE;
-DROP TABLE IF EXISTS "videos" CASCADE;
-DROP TABLE IF EXISTS "metrics" CASCADE;
 
 
 
@@ -106,18 +107,19 @@ CREATE TABLE "locations" (
   "id" SERIAL PRIMARY KEY,
   "name" VARCHAR(256) NOT NULL,
   "city" VARCHAR(256) NOT NULL,
-  "address" VARCHAR(256) NULL);
+  "address" VARCHAR(256) NULL,
+  "inside_outside" VARCHAR(256) NOT NULL);
 
 
 
 -- -----------------------------------------------------
--- Table "video"
+-- Table "field_types"
 -- -----------------------------------------------------
 
-CREATE TABLE "videos" (
+CREATE TABLE "field_types" (
   "id" SERIAL PRIMARY KEY,
-  "path" TEXT NOT NULL,
-  "completed" INT NOT NULL DEFAULT 0);
+  "type" VARCHAR(256) NOT NULL,
+  "description" VARCHAR(256) NULL);
 
 
 
@@ -127,19 +129,17 @@ CREATE TABLE "videos" (
 
 CREATE TABLE "games" (
   "id" SERIAL PRIMARY KEY,
-  "id_home_team" INT NOT NULL,
-  "id_opposing_team" INT NOT NULL,
+  "id_team" INT NOT NULL,
+  "status" VARCHAR(50) NOT NULL,
+  "opposing_team" VARCHAR(100) NOT NULL,
   "id_season" INT NOT NULL,
   "id_location" INT NOT NULL,
-  "id_video" INT NOT NULL,
+  "field_condition" VARCHAR(45) NULL,
+  "temperature" VARCHAR(45) NULL,
+  "degree" VARCHAR(10) NULL
   "date" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  CONSTRAINT "fk_game_home_team"
-    FOREIGN KEY ("id_home_team")
-    REFERENCES "teams" ("id")
-    ON DELETE CASCADE
-    ON UPDATE CASCADE,
-  CONSTRAINT "fk_game_opposing_team"
-    FOREIGN KEY ("id_opposing_team")
+  CONSTRAINT "fk_game_team"
+    FOREIGN KEY ("id_team")
     REFERENCES "teams" ("id")
     ON DELETE CASCADE
     ON UPDATE CASCADE,
@@ -152,10 +152,23 @@ CREATE TABLE "games" (
     FOREIGN KEY ("id_season")
     REFERENCES "seasons" ("id")
     ON DELETE CASCADE
-    ON UPDATE CASCADE,
-  CONSTRAINT "fk_game_team_video"
-    FOREIGN KEY ("id_video")
-    REFERENCES "videos" ("id")
+    ON UPDATE CASCADE);
+
+
+
+-- -----------------------------------------------------
+-- Table "video"
+-- -----------------------------------------------------
+
+CREATE TABLE "videos" (
+  "id" SERIAL PRIMARY KEY,
+  "path" TEXT NOT NULL,
+  "part" INT NOT NULL DEFAULT 1,
+  "completed" INT NOT NULL DEFAULT 0,
+  "id_game" INT NOT NULL,
+  CONSTRAINT "fk_game_id"
+    FOREIGN KEY ("id_game")
+    REFERENCES "games" ("id")
     ON DELETE CASCADE
     ON UPDATE CASCADE);
 

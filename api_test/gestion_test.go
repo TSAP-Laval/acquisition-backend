@@ -115,3 +115,24 @@ func TestCreerJoueur(t *testing.T) {
 		t.Errorf("Success expected: %d", res.StatusCode)
 	}
 }
+func TestModifJoueur(t *testing.T) {
+	reader = strings.NewReader(` {"ID" :"15","Lname" :"dasdasd","Fname" :"aadas","Number" : 8,"Email" : "AA","PassHash" : "test22" ,"TokenInvitation" : "test" ,"TokenReinitialisation" : "test ","TokenConnexion" : "test","EquipeID" : "2"}`)
+	request, err := http.NewRequest("PUT", baseURL+"/api/joueur/15", reader)
+	res, err := http.DefaultClient.Do(request)
+
+	if err != nil {
+		t.Error(err)
+	}
+	// Buffer the body
+	bodyBuffer, _ := ioutil.ReadAll(res.Body)
+	t.Logf("Res: --> %s\n\n", bodyBuffer)
+
+	var l api.Players
+	err = json.Unmarshal(bodyBuffer, &l)
+	if err != nil {
+		t.Logf("ERR: --> %s\n\n", err)
+	}
+	if res.StatusCode != 200 {
+		t.Errorf("Success expected: %d", res.StatusCode)
+	}
+}
