@@ -2,9 +2,7 @@ package api
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"strings"
 
@@ -20,14 +18,12 @@ func (a *AcquisitionService) HandleJoueur(w http.ResponseWriter, r *http.Request
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
 	defer db.Close()
-	fmt.Println(r.Body)
 	body, err := ioutil.ReadAll(r.Body)
 
 	if err != nil {
 		a.ErrorHandler(w, err)
 		return
 	}
-	log.Println(string(body))
 	var t Players
 	var dat map[string]interface{}
 	err = json.Unmarshal(body, &t)
