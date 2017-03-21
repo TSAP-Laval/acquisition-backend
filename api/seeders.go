@@ -40,7 +40,6 @@ func (a *AcquisitionService) FaireBD(w http.ResponseWriter, r *http.Request) {
 	db.DropTableIfExists("actions_type")
 	db.DropTableIfExists("seasons")
 	db.DropTableIfExists("positions")
-	db.DropTableIfExists("temperatures")
 	db.DropTableIfExists("movements_type")
 
 	db.AutoMigrate(&Admins{})
@@ -51,7 +50,6 @@ func (a *AcquisitionService) FaireBD(w http.ResponseWriter, r *http.Request) {
 	db.AutoMigrate(&Players{})
 	db.AutoMigrate(&Locations{})
 	db.AutoMigrate(&FieldTypes{})
-	db.AutoMigrate(&Temperatures{})
 	db.AutoMigrate(&Videos{})
 	db.AutoMigrate(&Games{})
 	db.AutoMigrate(&Positions{})
@@ -91,7 +89,7 @@ func (a *AcquisitionService) RemplirBD(w http.ResponseWriter, r *http.Request) {
 		db.Create(&player)
 	}
 
-	season := Seasons{Years: "1997-1998"}
+	season := Seasons{Years: "2017-2018"}
 	if db.NewRecord(season) {
 		db.Create(&season)
 	}
@@ -111,12 +109,12 @@ func (a *AcquisitionService) RemplirBD(w http.ResponseWriter, r *http.Request) {
 		db.Create(&zone)
 	}
 
-	location1 := Locations{Name: "SSF", City: "St-Augustin", Address: "1223 rue Truc"}
+	location1 := Locations{Name: "SSF", City: "Saint-Augustin-de-Desmaures", Address: "4900 Rue Saint-Félix", IsInside: false}
 	if db.NewRecord(location1) {
 		db.Create(&location1)
 	}
 
-	location2 := Locations{Name: "Stade Leclerc", City: "St-Augustin", Address: "1224 rue Leclerc"}
+	location2 := Locations{Name: "Stade Leclerc", City: "Saint-Augustin-de-Desmaures", Address: "QC G3A 0C3", IsInside: true}
 	if db.NewRecord(location2) {
 		db.Create(&location2)
 	}
@@ -126,14 +124,24 @@ func (a *AcquisitionService) RemplirBD(w http.ResponseWriter, r *http.Request) {
 		db.Create(&equipe1)
 	}
 
-	equipe2 := Teams{Name: "Tigres", City: "Montreal", SportID: 1, CategoryID: 1}
+	equipe2 := Teams{Name: "Loup", City: "Vancouver", SportID: 1, CategoryID: 1}
 	if db.NewRecord(equipe2) {
 		db.Create(&equipe2)
 	}
 
-	equipe3 := Teams{Name: "Ligres", City: "Trois-Rivières", SportID: 1, CategoryID: 1}
+	equipe3 := Teams{Name: "Tigres", City: "Montreal", SportID: 1, CategoryID: 1}
 	if db.NewRecord(equipe3) {
 		db.Create(&equipe3)
+	}
+
+	equipe4 := Teams{Name: "Ligres", City: "Trois-Rivières", SportID: 1, CategoryID: 1}
+	if db.NewRecord(equipe4) {
+		db.Create(&equipe4)
+	}
+
+	equipe5 := Teams{Name: "Tatoo", City: "Rivière-du-loup", SportID: 1, CategoryID: 1}
+	if db.NewRecord(equipe5) {
+		db.Create(&equipe5)
 	}
 
 	action := Actions{ActionTypeID: 1, IsPositive: true, ZoneID: 1, GameID: 1, X1: 0, Y1: 0, X2: 0, Y2: 0, Time: 10, HomeScore: 0, GuestScore: 0, PlayerID: 1}

@@ -17,7 +17,6 @@ DROP TABLE IF EXISTS "coaches" CASCADE;
 DROP TABLE IF EXISTS "actions_type" CASCADE;
 DROP TABLE IF EXISTS "seasons" CASCADE;
 DROP TABLE IF EXISTS "positions" CASCADE;
-DROP TABLE IF EXISTS "temperatures" CASCADE;
 DROP TABLE IF EXISTS "movements_type" CASCADE;
 
 
@@ -125,17 +124,6 @@ CREATE TABLE "field_types" (
 
 
 -- -----------------------------------------------------
--- Table "temperatures"
--- -----------------------------------------------------
-
-CREATE TABLE "temperatures" (
-  "id" SERIAL PRIMARY KEY,
-  "temperature" VARCHAR(45) NULL,
-  "degree" VARCHAR(10) NULL);
-
-
-
--- -----------------------------------------------------
 -- Table "games"
 -- -----------------------------------------------------
 
@@ -147,7 +135,8 @@ CREATE TABLE "games" (
   "id_season" INT NOT NULL,
   "id_location" INT NOT NULL,
   "field_condition" VARCHAR(45) NULL,
-  "id_temperature" INT NOT NULL,
+  "temperature" VARCHAR(45) NULL,
+  "degree" VARCHAR(10) NULL
   "date" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT "fk_game_team"
     FOREIGN KEY ("id_team")
@@ -162,11 +151,6 @@ CREATE TABLE "games" (
   CONSTRAINT "fk_game_team_season"
     FOREIGN KEY ("id_season")
     REFERENCES "seasons" ("id")
-    ON DELETE CASCADE
-    ON UPDATE CASCADE,
-  CONSTRAINT "fk_temperature"
-    FOREIGN KEY ("id_temperature")
-    REFERENCES "temperatures" ("id")
     ON DELETE CASCADE
     ON UPDATE CASCADE);
 

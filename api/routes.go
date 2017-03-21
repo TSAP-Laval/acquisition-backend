@@ -21,20 +21,28 @@ type AcquisitionConfiguration struct {
 	Debug            bool
 }
 
+// Keys les clées utilisées pour les API de météo et géodécodage
+type Keys struct {
+	Geodecoder string
+	Weather    string
+}
+
 // AcquisitionService represents a single service instance
 type AcquisitionService struct {
 	logger *log.Logger
 	config *AcquisitionConfiguration
 	server *manners.GracefulServer
+	keys   *Keys
 }
 
 // New crée une nouvelle instance du service
-func New(writer io.Writer, config *AcquisitionConfiguration) *AcquisitionService {
+func New(writer io.Writer, config *AcquisitionConfiguration, keys *Keys) *AcquisitionService {
 
 	return &AcquisitionService{
 		logger: log.New(writer, "[acquisition-api] ", log.Flags()),
 		config: config,
 		server: manners.NewServer(),
+		keys:   keys,
 	}
 }
 
