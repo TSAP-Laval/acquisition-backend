@@ -88,11 +88,15 @@ func (a *AcquisitionService) Middleware(h http.Handler) http.Handler {
 
 func (a *AcquisitionService) getRouter() http.Handler {
 	r := mux.NewRouter()
-	r.HandleFunc("/api/GetMovementType", a.GetMovementTypeHandler)
-	r.HandleFunc("/api/GetActionType", a.GetAllActionsTypes)
-	r.HandleFunc("/api/PostActionType", a.PostActionType)
-	r.HandleFunc("/api/coachs/getAllCoachs", a.GetCoachsHandler)
-	r.HandleFunc("/api/coachs/postCoach", a.PostCoachHandler)
+
+	// Actions
+	r.HandleFunc("/api/action/movementType", a.GetMovementTypeHandler).Methods("GET")
+	r.HandleFunc("/api/action/actiontype", a.GetAllActionsTypes).Methods("GET")
+	r.HandleFunc("/api/action/addactiontype", a.PostActionType).Methods("POST")
+	//Coachs
+	r.HandleFunc("/api/coachs/coachs", a.GetCoachsHandler).Methods("GET")
+	r.HandleFunc("/api/coachs/addcoach", a.PostCoachHandler).Methods("POST")
+	r.HandleFunc("/api/coachs/addCoachTeam/{id}", a.AssignerEquipeCoach).Methods("PUT")
 	// Upload
 	r.HandleFunc("/api/upload", a.UploadHandler)
 	r.HandleFunc("/api/upload/{game-id}", a.UploadHandler).Methods("DELETE", "OPTIONS")
@@ -117,7 +121,7 @@ func (a *AcquisitionService) getRouter() http.Handler {
 	r.HandleFunc("/api/actions", a.GetActions).Methods("GET")
 	r.HandleFunc("/api/actions", a.PostAction).Methods("POST")
 	r.HandleFunc("/api/joueur", a.HandleJoueur).Methods("POST")
-	r.HandleFunc("/api/joueur/{id}", a.HandleJoueur).Methods("PUT")
+	r.HandleFunc("/api/joueur/{id}", a.HandleJoueur).Methods("PUT", "OPTIONS")
 	r.HandleFunc("/api/saison", a.GetSeasons).Methods("GET")
 	r.HandleFunc("/api/saison", a.PostSaison).Methods("POST")
 	r.HandleFunc("/api/sports", a.GetSports).Methods("GET")
