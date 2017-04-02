@@ -125,3 +125,31 @@ func (a *AcquisitionService) AssignerEquipeCoach(w http.ResponseWriter, r *http.
 	}
 
 }
+
+// GetEquipeByIDHandler Gère la récupération des équipes correspondant au nom entré
+func (a *AcquisitionService) GetEquipeByIDHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+
+	if vars != nil {
+		db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
+		defer db.Close()
+
+		if err != nil {
+			a.ErrorHandler(w, err)
+			return
+		}
+
+		team := []Teams{}
+		ID := strings.ToLower(strings.TrimSpace(vars["ID"]))
+		db.Where("ID LIKE ?", ID).Find(&team)
+
+		for i := 0; i < len(team); i++ {
+			team[i] = AjoutNiveauSport(db, team[i])
+		}
+
+		Message(w, team, http.StatusOK)
+	} else {
+		msg := map[string]string{"error": "Veuillez entrer un nom d'équipe ou en créer une préalablement"}
+		Message(w, msg, http.StatusNotFound)
+	}
+}
