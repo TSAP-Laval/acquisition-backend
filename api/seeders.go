@@ -144,7 +144,7 @@ func (a *AcquisitionService) RemplirBD(w http.ResponseWriter, r *http.Request) {
 		db.Create(&equipe5)
 	}
 
-	action := Actions{ActionTypeID: 1, IsPositive: true, ZoneID: 1, GameID: 1, X1: 0, Y1: 0, X2: 0, Y2: 0, Time: 10, HomeScore: 0, GuestScore: 0, PlayerID: 1}
+	action := Actions{ActionTypeID: 1, ZoneID: 1, GameID: 1, X1: 0, Y1: 0, X2: 0, Y2: 0, Time: 10, HomeScore: 0, GuestScore: 0, PlayerID: 1}
 	if db.NewRecord(action) {
 		db.Create(&action)
 	}

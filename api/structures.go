@@ -155,7 +155,6 @@ type Actions struct {
 	gorm.Model
 	ActionType   ActionsType
 	ActionTypeID int
-	IsPositive   bool
 	Zone         Zones
 	ZoneID       int
 	Game         Games
