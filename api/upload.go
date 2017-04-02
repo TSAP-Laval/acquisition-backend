@@ -27,8 +27,8 @@ func (a *AcquisitionService) UploadHandler(w http.ResponseWriter, r *http.Reques
 
 		formdata := r.MultipartForm
 
-		if _, err := os.Stat("./videos/"); os.IsNotExist(err) {
-			os.MkdirAll("./videos/", 0777)
+		if _, err := os.Stat("../videos/"); os.IsNotExist(err) {
+			os.MkdirAll("../videos/", 0777)
 		}
 
 		files := formdata.File["file"]
@@ -64,7 +64,7 @@ func (a *AcquisitionService) UploadHandler(w http.ResponseWriter, r *http.Reques
 			filename := timestamp + "." + ext
 
 			v.Completed = 0
-			v.Path, err = filepath.Abs("videos/" + filename)
+			v.Path, err = filepath.Abs("../videos/" + filename)
 			v.Game = g
 
 			if db.NewRecord(v) {
@@ -80,7 +80,7 @@ func (a *AcquisitionService) UploadHandler(w http.ResponseWriter, r *http.Reques
 					defer file.Close()
 					a.ErrorHandler(w, err)
 
-					out, err := os.Create("./videos/" + filename)
+					out, err := os.Create("../videos/" + filename)
 
 					defer out.Close()
 					a.ErrorHandler(w, err)
