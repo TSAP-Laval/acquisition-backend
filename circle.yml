@@ -9,7 +9,6 @@ dependencies:
 test:
   pre:
       - go get github.com/mattn/goveralls
-      - go get code.google.com/p/go.tools/cmd/cover
   override:
     - if [[ -n $(gofmt -l .) ]]; then echo "Please run gofmt"; exit 1; fi
     - golint ./...
