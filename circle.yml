@@ -9,11 +9,12 @@ dependencies:
 test:
   pre:
       - go get github.com/mattn/goveralls
+      - go get code.google.com/p/go.tools/cmd/cover
   override:
     - if [[ -n $(gofmt -l .) ]]; then echo "Please run gofmt"; exit 1; fi
     - golint ./...
     - go tool vet .
-    - go test -v -cover -race -coverprofile=/home/ubuntu/coverage.out ./api_test
+    - go test -v -cover -race -coverprofile=/home/ubuntu/coverage.out ./api
   post:
     - /home/ubuntu/.go_workspace/bin/goveralls -coverprofile=/home/ubuntu/coverage.out -service=circle-ci -repotoken=$COVERALLS_TOKEN
 

@@ -63,3 +63,9 @@
 ## Procédure pour tester l'API
   `$ go test -v -race ./...`
   enlever le -v pour un résultat abrégé
+
+# Pour tester le code coverage en local :
+  `go test -v -cover -race -coverprofile=coverage.out ./api`
+  pour voir les résultats et les correctifs à apporter
+  `$ go tool cover -html=coverage.out`
+

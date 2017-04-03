@@ -51,3 +51,7 @@ video
 
 #TXT
 *.txt
+
+# coverage
+coverage
+coverage.out
