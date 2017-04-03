@@ -7,14 +7,15 @@ dependencies:
     - go build main.go
 
 test:
+  pre:
+      - go get github.com/mattn/goveralls
   override:
     - if [[ -n $(gofmt -l .) ]]; then echo "Please run gofmt"; exit 1; fi
     - golint ./...
     - go tool vet .
-    - go get
-    - ifconfig
-    - sudo kill -9 $(sudo lsof -t -i:3000)
-    - go test -v -race ./...
+    - go test -v -cover -race -coverprofile=/home/ubuntu/coverage.out ./api_test
+  post:
+    - /home/ubuntu/.go_workspace/bin/goveralls -coverprofile=/home/ubuntu/coverage.out -service=circle-ci -repotoken=$COVERALLS_TOKEN
 
 database:
   override:
@@ -35,6 +36,7 @@ machine:
     TSAP_CONNECTIONSTRING: "host=localhost user=postgres dbname=tsap_acquisition sslmode=disable password="
     TSAP_PORT: ":3000"
     TSAP_DEBUG: "true"
+    COVERALLS_TOKEN: "N7eNnjlrcfuhXXFORqzga8SDgV3qbMKYA"
 
 general:
   artifacts:

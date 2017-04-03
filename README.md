@@ -1,6 +1,7 @@
 # acquisition-backend
 
 ![CircleCI](https://circleci.com/gh/TSAP-Laval/acquisition-backend.svg?style=svg)
+[![Coverage Status](https://coveralls.io/repos/github/TSAP-Laval/acquisition-backend/badge.svg?branch=master)](https://coveralls.io/github/TSAP-Laval/acquisition-backend?branch=master)
 
 ## Procédures pour PostgreSQL
 ### Sur Mac :
