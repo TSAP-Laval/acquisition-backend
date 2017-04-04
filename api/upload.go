@@ -2,6 +2,7 @@ package api
 
 import (
 	"io"
+	"mime/multipart"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -14,22 +15,64 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
+// Size constants
+const (
+	GB = 1 << (10 * 3)
+)
+
 // UploadHandler Gère l'upload de video sur le serveur
 func (a *AcquisitionService) UploadHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "POST":
 		db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
 		defer db.Close()
-		a.ErrorHandler(w, err)
+		if err != nil {
+			a.ErrorHandler(w, err)
+			return
+		}
 
-		err = r.ParseMultipartForm(8589934592) // 8Gb
-		a.ErrorHandler(w, err)
+		// Limit upload size
+		r.Body = http.MaxBytesReader(w, r.Body, 3*GB) // 3 Gb
 
-		formdata := r.MultipartForm
+		var form *multipart.Reader
+		if form, err = r.MultipartReader(); err != nil {
+			a.ErrorHandler(w, err)
+			return
+		}
+
+		var part *multipart.Part
+		if part, err = form.NextPart(); err != nil {
+			a.ErrorHandler(w, err)
+			return
+		}
+		// Create a buffer to store the header of the file in
+		fileHeader := make([]byte, 512)
+		if _, err := part.Read(fileHeader); err != nil {
+			return
+		}
+		contentType := http.DetectContentType(fileHeader)
+		var validation *regexp.Regexp
+		if validation, err = regexp.Compile("video/.*"); err != nil {
+			a.ErrorHandler(w, err)
+			return
+		}
+		if !validation.Match([]byte(contentType)) {
+			msg := map[string]string{"error": "Le fichier n'est pas une vidéo de format valide ! Les format supportés sont : mp4, avi, mov."}
+			Message(w, msg, http.StatusBadRequest)
+			return
+		}
+
+		// Taille max de 3Gb pour le fichier
+		if err = r.ParseMultipartForm(3 * GB); err != nil {
+			a.ErrorHandler(w, err)
+			return
+		}
 
 		if _, err := os.Stat("../videos/"); os.IsNotExist(err) {
 			os.MkdirAll("../videos/", 0777)
 		}
+
+		formdata := r.MultipartForm
 
 		files := formdata.File["file"]
 
@@ -52,7 +95,7 @@ func (a *AcquisitionService) UploadHandler(w http.ResponseWriter, r *http.Reques
 					Message(w, msg, http.StatusInternalServerError)
 				}
 
-				// Ajout de la partie
+				// Ajout de la partie de la vidéo
 				v.Part = int(p)
 			} else {
 				v.Part = 1
@@ -78,16 +121,23 @@ func (a *AcquisitionService) UploadHandler(w http.ResponseWriter, r *http.Reques
 					// Dans le cas contraire, on le crée
 					file, err := files[i].Open()
 					defer file.Close()
-					a.ErrorHandler(w, err)
+					if err != nil {
+						a.ErrorHandler(w, err)
+						return
+					}
 
 					out, err := os.Create("../videos/" + filename)
 
 					defer out.Close()
-					a.ErrorHandler(w, err)
+					if err != nil {
+						a.ErrorHandler(w, err)
+						return
+					}
 
-					_, err = io.Copy(out, file)
-
-					a.ErrorHandler(w, err)
+					if written, err := io.Copy(out, file); err != nil || written == 0 {
+						a.ErrorHandler(w, err)
+						return
+					}
 				}
 			} else {
 				msg := map[string]string{"error": "Une vidéo avec le même nom existe déjà. Veuillez renommer cette vidéo.", "exist": "true"}
@@ -107,7 +157,10 @@ func (a *AcquisitionService) UploadHandler(w http.ResponseWriter, r *http.Reques
 		} else {
 			db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
 			defer db.Close()
-			a.ErrorHandler(w, err)
+			if err != nil {
+				a.ErrorHandler(w, err)
+				return
+			}
 
 			// On supprime les vidéos
 			db.Where("game_id = ?", gameID).Delete(&Videos{})
