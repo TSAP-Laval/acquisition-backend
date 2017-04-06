@@ -5,7 +5,6 @@ import (
 	"mime/multipart"
 	"net/http"
 	"os"
-	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
@@ -18,7 +17,11 @@ import (
 // Size constants
 const (
 	GB = 1 << (10 * 3)
+	MB = 1 << (10 * 2)
+	KO = 1 << (10 * 1)
 )
+
+const videoPath = "../videos/"
 
 // UploadHandler Gère l'upload de video sur le serveur
 func (a *AcquisitionService) UploadHandler(w http.ResponseWriter, r *http.Request) {
@@ -31,122 +34,174 @@ func (a *AcquisitionService) UploadHandler(w http.ResponseWriter, r *http.Reques
 			return
 		}
 
-		// Limit upload size
-		r.Body = http.MaxBytesReader(w, r.Body, 3*GB) // 3 Gb
-
-		var form *multipart.Reader
-		if form, err = r.MultipartReader(); err != nil {
-			a.ErrorHandler(w, err)
-			return
-		}
-
-		var part *multipart.Part
-		if part, err = form.NextPart(); err != nil {
-			a.ErrorHandler(w, err)
-			return
-		}
-		// Create a buffer to store the header of the file in
-		fileHeader := make([]byte, 512)
-		if _, err := part.Read(fileHeader); err != nil {
-			return
-		}
-		contentType := http.DetectContentType(fileHeader)
-		var validation *regexp.Regexp
-		if validation, err = regexp.Compile("video/.*"); err != nil {
-			a.ErrorHandler(w, err)
-			return
-		}
-		if !validation.Match([]byte(contentType)) {
-			msg := map[string]string{"error": "Le fichier n'est pas une vidéo de format valide ! Les format supportés sont : mp4, avi, mov."}
+		// 10 GB
+		if r.ContentLength > 10*GB {
+			msg := map[string]string{"error": "Fichier de trop grande taille. La taille maximal pour un fichier est de 10Gb"}
 			Message(w, msg, http.StatusBadRequest)
 			return
 		}
 
-		// Taille max de 3Gb pour le fichier
-		if err = r.ParseMultipartForm(3 * GB); err != nil {
-			a.ErrorHandler(w, err)
+		// Limit upload size
+		r.Body = http.MaxBytesReader(w, r.Body, 10*GB) // 10 Gb
+
+		if _, err := os.Stat(videoPath); os.IsNotExist(err) {
+			os.MkdirAll(videoPath, 0777)
+		}
+
+		var form *multipart.Reader
+		if form, err = r.MultipartReader(); err != nil {
 			return
 		}
 
-		if _, err := os.Stat("../videos/"); os.IsNotExist(err) {
-			os.MkdirAll("../videos/", 0777)
-		}
-
-		formdata := r.MultipartForm
-
-		files := formdata.File["file"]
-
-		var g Games
-		db.Create(&g)
-
-		for i := range files {
-			fileSplit := strings.Split(files[i].Filename, ".")
-			ext := fileSplit[len(fileSplit)-1]
-
-			var v Videos
-			if len(files) > 1 {
-				re := regexp.MustCompile(`\((.*?)\)`)
-				part := re.FindStringSubmatch(files[i].Filename)[1]
-				p, err := strconv.ParseInt(part, 10, 0)
-
-				if err != nil {
-					msg := map[string]string{"error": "La nomenlature des fichiers est incorrecte! Veuillez vous assurer qu'ils contiennent un (#)!"}
-					a.Error(msg["error"])
-					Message(w, msg, http.StatusInternalServerError)
-				}
-
-				// Ajout de la partie de la vidéo
-				v.Part = int(p)
-			} else {
-				v.Part = 1
+		for {
+			var part *multipart.Part
+			if part, err = form.NextPart(); err == io.EOF {
+				break
 			}
+			// On crée un buffer qui contiendra l'en-tête du fichier
+			// ** Cela permettra de déterminer le type du fichier.
+			//    Ainsi, on valide que le fichier est bel et bien
+			//    un fichier au format vidéo/* et non un fichier
+			//    quelconque renommé en .mp4
+			buffer := make([]byte, 512)
+
+			var cBytes int
+			if cBytes, err := part.Read(buffer); err != nil || cBytes == 0 {
+				return
+			}
+
+			contentType := http.DetectContentType(buffer)
+			var validation *regexp.Regexp
+			if validation, err = regexp.Compile("video/.*"); err != nil {
+				a.ErrorHandler(w, err)
+				return
+			}
+
+			if !validation.Match([]byte(contentType)) {
+				msg := map[string]string{"error": "Le fichier \"" + part.FileName() + "\" n'est pas une vidéo de format valide ! Les format supportés sont : mp4, avi, mov."}
+				Message(w, msg, http.StatusBadRequest)
+				return
+			}
+
+			fileSplit := strings.Split(part.FileName(), ".")
+			ext := fileSplit[len(fileSplit)-1]
 
 			// Le timestamp sera le nom du fichier
 			timestamp := strconv.FormatInt(time.Now().UTC().UnixNano(), 10)
 
 			filename := timestamp + "." + ext
 
-			v.Completed = 0
-			v.Path, err = filepath.Abs("../videos/" + filename)
-			v.Game = g
-
-			if db.NewRecord(v) {
-				db.Create(&v)
-				if db.NewRecord(v) {
-					msg := map[string]string{"error": "Une erreur est survenue lors de la création de la video dans la base de données. Veuillez réessayer!"}
-					a.Error(msg["error"])
-					Message(w, msg, http.StatusInternalServerError)
-				} else {
-					// On regarde si le dossier videos existe déjà.
-					// Dans le cas contraire, on le crée
-					file, err := files[i].Open()
-					defer file.Close()
-					if err != nil {
-						a.ErrorHandler(w, err)
-						return
-					}
-
-					out, err := os.Create("../videos/" + filename)
-
-					defer out.Close()
-					if err != nil {
-						a.ErrorHandler(w, err)
-						return
-					}
-
-					if written, err := io.Copy(out, file); err != nil || written == 0 {
-						a.ErrorHandler(w, err)
-						return
-					}
-				}
-			} else {
-				msg := map[string]string{"error": "Une vidéo avec le même nom existe déjà. Veuillez renommer cette vidéo.", "exist": "true"}
-				Message(w, msg, http.StatusInternalServerError)
+			var dst *os.File
+			if dst, err = os.OpenFile(videoPath+filename, os.O_WRONLY|os.O_CREATE, 0666); err != nil {
+				msg := map[string]string{"error": "Une erreur inconnue est survenue lors de l'écriture du fichier \"" + part.FileName() + "\". Veuillez réessayer !"}
+				Message(w, msg, http.StatusBadRequest)
 				return
 			}
+			defer dst.Close()
+
+			// Écriture de l'en-tête venant d'être lue
+			dst.Write(buffer)
+
+			for {
+				buffer = make([]byte, 4*KO)
+
+				cBytes, err = part.Read(buffer)
+
+				if cBytes != 0 {
+					dst.Write(buffer[0:cBytes])
+				} else {
+					break
+				}
+
+				if err == io.EOF {
+					var g Games
+					db.Create(&g)
+					var v Videos
+					break
+				}
+			}
 		}
-		msg := map[string]string{"succes": "Video(s) envoyé(s) avec succès!", "game_id": strconv.Itoa(int(g.ID))}
-		Message(w, msg, http.StatusCreated)
+
+		/*formdata := r.MultipartForm
+
+		files := formdata.File["file"]
+
+		var g Games
+		db.Create(&g)
+
+		if len(files) > 0 {
+			for i := range files {
+				fileSplit := strings.Split(files[i].Filename, ".")
+				ext := fileSplit[len(fileSplit)-1]
+
+				var v Videos
+				if len(files) > 1 {
+					re := regexp.MustCompile(`\((.*?)\)`)
+					part := re.FindStringSubmatch(files[i].Filename)[1]
+					p, err := strconv.ParseInt(part, 10, 0)
+
+					if err != nil {
+						msg := map[string]string{"error": "La nomenlature des fichiers est incorrecte! Veuillez vous assurer qu'ils contiennent un (#)!"}
+						a.Error(msg["error"])
+						Message(w, msg, http.StatusInternalServerError)
+					}
+
+					// Ajout de la partie de la vidéo
+					v.Part = int(p)
+				} else {
+					v.Part = 1
+				}
+
+				// Le timestamp sera le nom du fichier
+				timestamp := strconv.FormatInt(time.Now().UTC().UnixNano(), 10)
+
+				filename := timestamp + "." + ext
+
+				v.Completed = 0
+				v.Path, err = filepath.Abs("../videos/" + filename)
+				v.Game = g
+
+				if db.NewRecord(v) {
+					db.Create(&v)
+					if db.NewRecord(v) {
+						msg := map[string]string{"error": "Une erreur est survenue lors de la création de la video dans la base de données. Veuillez réessayer!"}
+						a.Error(msg["error"])
+						Message(w, msg, http.StatusInternalServerError)
+					} else {
+						// On regarde si le dossier videos existe déjà.
+						// Dans le cas contraire, on le crée
+						file, err := files[i].Open()
+						defer file.Close()
+						if err != nil {
+							a.ErrorHandler(w, err)
+							return
+						}
+
+						out, err := os.Create("../videos/" + filename)
+
+						defer out.Close()
+						if err != nil {
+							a.ErrorHandler(w, err)
+							return
+						}
+
+						if written, err := io.Copy(out, file); err != nil || written == 0 {
+							a.ErrorHandler(w, err)
+							return
+						}
+					}
+				} else {
+					msg := map[string]string{"error": "Une vidéo avec le même nom existe déjà. Veuillez renommer cette vidéo.", "exist": "true"}
+					Message(w, msg, http.StatusInternalServerError)
+					return
+				}
+			}
+			msg := map[string]string{"succes": "Video(s) envoyé(s) avec succès!", "game_id": strconv.Itoa(int(g.ID))}
+			Message(w, msg, http.StatusCreated)
+		} else {
+			msg := map[string]string{"error": "Une erreur inconnue est survenue lors du tranfert des vidéos. Veuillez réessayer !"}
+			Message(w, msg, http.StatusInternalServerError)
+		}*/
 	case "DELETE":
 		var g Games
 		gameID := mux.Vars(r)["game-id"]
