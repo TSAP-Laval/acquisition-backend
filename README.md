@@ -3,6 +3,7 @@
 ![CircleCI](https://circleci.com/gh/TSAP-Laval/acquisition-backend.svg?style=svg)
 [![Coverage Status](https://coveralls.io/repos/github/TSAP-Laval/acquisition-backend/badge.svg?branch=master)](https://coveralls.io/github/TSAP-Laval/acquisition-backend?branch=master)
 [![CodeFactor](https://www.codefactor.io/repository/github/tsap-laval/acquisition-backend/badge)](https://www.codefactor.io/repository/github/tsap-laval/acquisition-backend)
+[![Go Report Card](https://goreportcard.com/badge/github.com/TSAP-Laval/acquisition-backend)](https://goreportcard.com/report/github.com/TSAP-Laval/acquisition-backend)
 
 ## Procédures pour PostgreSQL
 ### Sur Mac :
