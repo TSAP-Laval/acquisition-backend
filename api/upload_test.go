@@ -69,7 +69,7 @@ func TestUploadVideoMP4(t *testing.T) {
 	responseMapping(&m, res)
 	gameID[0] = m.GameID
 
-	if gameID[0] == "" {
+	if gameID[0] == "" || gameID[0] == "0" {
 		t.Errorf("Game ID expected: %s", gameID[0])
 	}
 }
@@ -166,7 +166,7 @@ func TestUploadVideoWEBM(t *testing.T) {
 	responseMapping(&m, res)
 	gameID[1] = m.GameID
 
-	if gameID[1] == "" {
+	if gameID[1] == "" || gameID[1] == "0" {
 		t.Errorf("Game ID expected: %s", gameID[1])
 	}
 }
@@ -196,7 +196,7 @@ func TestUploadVideos(t *testing.T) {
 	responseMapping(&m, res)
 	gameID[2] = m.GameID
 
-	if gameID[2] == "" {
+	if gameID[2] == "" || gameID[2] == "0" {
 		t.Errorf("Game ID expected: %s", gameID[2])
 	}
 }
@@ -221,7 +221,7 @@ func TestUploadVideoWEBMDel(t *testing.T) {
 	responseMapping(&m, res)
 	gameID[1] = m.GameID
 
-	if gameID[1] == "" {
+	if gameID[3] == "" || gameID[3] == "0" {
 		t.Errorf("Game ID expected: %s", gameID[3])
 	}
 }
