@@ -51,11 +51,12 @@ func (a *AcquisitionService) UploadHandler(w http.ResponseWriter, r *http.Reques
 
 		var form *multipart.Reader
 		if form, err = r.MultipartReader(); err != nil {
+			msg := map[string]string{"error": "Aucun fichier envoyé ! Veuillez réessayer !"}
+			Message(w, msg, http.StatusBadRequest)
 			return
 		}
 
 		var g Games
-		db.Create(&g)
 
 		for {
 			var part *multipart.Part
@@ -96,7 +97,7 @@ func (a *AcquisitionService) UploadHandler(w http.ResponseWriter, r *http.Reques
 			filename := timestamp + "." + ext
 
 			var dst *os.File
-			if dst, err = os.OpenFile(videoPath+filename, os.O_WRONLY|os.O_CREATE, 0666); err != nil {
+			if dst, err = os.OpenFile(videoPath+filename, os.O_WRONLY|os.O_CREATE, 0777); err != nil {
 				msg := map[string]string{"error": "Une erreur inconnue est survenue lors de l'écriture du fichier \"" + part.FileName() + "\". Veuillez réessayer !"}
 				Message(w, msg, http.StatusBadRequest)
 				return
@@ -123,19 +124,18 @@ func (a *AcquisitionService) UploadHandler(w http.ResponseWriter, r *http.Reques
 
 					v.Completed = 0
 					v.Path, err = filepath.Abs("../videos/" + filename)
+					db.Create(&g)
 					v.Game = g
 
 					if db.NewRecord(v) {
 						db.Create(&v)
 						if db.NewRecord(v) {
+							// Dans le cas où il y a une erreur, on supprime la partie
+							// venant d'être créée
+							db.Delete(&g)
 							msg := map[string]string{"error": "Une erreur est survenue lors de la création de la video dans la base de données. Veuillez réessayer!"}
-							a.Error(msg["error"])
 							Message(w, msg, http.StatusInternalServerError)
 						}
-					} else {
-						msg := map[string]string{"error": "Une vidéo avec le même nom existe déjà. Veuillez renommer cette vidéo.", "exist": "true"}
-						Message(w, msg, http.StatusInternalServerError)
-						return
 					}
 					break
 				}
@@ -146,16 +146,28 @@ func (a *AcquisitionService) UploadHandler(w http.ResponseWriter, r *http.Reques
 	case "DELETE":
 		var g Games
 		gameID := mux.Vars(r)["game-id"]
-		// Erreur
-		if gameID == "0" {
+		// Erreur, l'identifiant d'une partie ne peut être de 0
+		if id, err := strconv.Atoi(gameID); id <= 0 || err != nil {
 			msg := map[string]string{"error": "Aucune partie ne correspond. Elle doit déjà avoir été supprimée!"}
-			Message(w, msg, http.StatusNoContent)
+			Message(w, msg, http.StatusNotFound)
 		} else {
 			db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
 			defer db.Close()
 			if err != nil {
 				a.ErrorHandler(w, err)
 				return
+			}
+
+			v := []Videos{}
+			// On supprime les vidéos
+			db.Where("game_id = ?", gameID).Find(&v)
+			for _, video := range v {
+				// delete file
+				if err = os.Remove(video.Path); err != nil {
+					msg := map[string]string{"error": "Impossible de supprimer la video ! Elle doit déjà avoir été supprimée!"}
+					Message(w, msg, http.StatusNotFound)
+					return
+				}
 			}
 
 			// On supprime les vidéos
