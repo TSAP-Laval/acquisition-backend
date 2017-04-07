@@ -147,10 +147,11 @@ func (a *AcquisitionService) UploadHandler(w http.ResponseWriter, r *http.Reques
 	case "DELETE":
 		var g Games
 		gameID := mux.Vars(r)["game-id"]
+		fmt.Printf("\nGAMEID : %s", gameID)
 		// Erreur, l'identifiant d'une partie ne peut être de 0
 		if id, err := strconv.Atoi(gameID); id <= 0 || err != nil {
-			fmt.Printf("ID : %d", id)
-			fmt.Print(err)
+			fmt.Printf("\nID : %d", id)
+			fmt.Println(err)
 			msg := map[string]string{"error": "Aucune partie ne correspond. Elle doit déjà avoir été supprimée!"}
 			Message(w, msg, http.StatusNotFound)
 		} else {
