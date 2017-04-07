@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"io"
 	"mime/multipart"
 	"net/http"
@@ -148,6 +149,8 @@ func (a *AcquisitionService) UploadHandler(w http.ResponseWriter, r *http.Reques
 		gameID := mux.Vars(r)["game-id"]
 		// Erreur, l'identifiant d'une partie ne peut être de 0
 		if id, err := strconv.Atoi(gameID); id <= 0 || err != nil {
+			fmt.Printf("ID : %d", id)
+			fmt.Print(err)
 			msg := map[string]string{"error": "Aucune partie ne correspond. Elle doit déjà avoir été supprimée!"}
 			Message(w, msg, http.StatusNotFound)
 		} else {
