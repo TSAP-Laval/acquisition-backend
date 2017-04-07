@@ -275,6 +275,9 @@ func TestUploadDeleteVideoMP4(t *testing.T) {
 
 	if res.StatusCode != 204 {
 		t.Errorf("Success expected: %d", res.StatusCode)
+		var m MessageError
+		responseMapping(&m, res)
+		t.Errorf("Error: %s", m.Err)
 	}
 }
 
@@ -290,6 +293,9 @@ func TestUploadDeleteVideoWEBM(t *testing.T) {
 
 	if res.StatusCode != 204 {
 		t.Errorf("Success expected: %d", res.StatusCode)
+		var m MessageError
+		responseMapping(&m, res)
+		t.Errorf("Error: %s", m.Err)
 	}
 }
 
@@ -305,6 +311,9 @@ func TestUploadDeleteVideos(t *testing.T) {
 
 	if res.StatusCode != 204 {
 		t.Errorf("Success expected: %d", res.StatusCode)
+		var m MessageError
+		responseMapping(&m, res)
+		t.Errorf("Error: %s", m.Err)
 	}
 }
 
