@@ -23,7 +23,7 @@ import (
 	if res.StatusCode != 200 {
 		t.Errorf("Success expected: %d", res.StatusCode)
 	}
-}
+}*/
 
 func TestSeed(t *testing.T) {
 	reader = strings.NewReader("")
@@ -37,7 +37,7 @@ func TestSeed(t *testing.T) {
 	if res.StatusCode != 200 {
 		t.Errorf("Success expected: %d", res.StatusCode)
 	}
-}*/
+}
 
 func TestGetEquipes(t *testing.T) {
 	reader = strings.NewReader("")
