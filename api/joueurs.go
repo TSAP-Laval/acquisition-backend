@@ -24,6 +24,7 @@ func (a *AcquisitionService) HandleJoueur(w http.ResponseWriter, r *http.Request
 		a.ErrorHandler(w, err)
 		return
 	}
+
 	var t Players
 	var dat map[string]interface{}
 	err = json.Unmarshal(body, &t)
@@ -60,6 +61,5 @@ func (a *AcquisitionService) HandleJoueur(w http.ResponseWriter, r *http.Request
 	case "OPTIONS":
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.WriteHeader(http.StatusOK)
-
 	}
 }

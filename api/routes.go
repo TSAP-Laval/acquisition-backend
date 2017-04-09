@@ -39,7 +39,7 @@ type AcquisitionService struct {
 func New(writer io.Writer, config *AcquisitionConfiguration, keys *Keys) *AcquisitionService {
 
 	return &AcquisitionService{
-		logger: log.New(writer, "[acquisition-api] ", log.Flags()),
+		logger: log.New(writer, "\x1b[32m[acquisition-api]\x1b[0m ", log.Flags()),
 		config: config,
 		server: manners.NewServer(),
 		keys:   keys,
@@ -48,11 +48,13 @@ func New(writer io.Writer, config *AcquisitionConfiguration, keys *Keys) *Acquis
 
 // Info écrit un message vers le logger du service
 func (a *AcquisitionService) Info(message string) {
+	a.logger.SetPrefix("\x1b[32m[acquisition-api]\x1b[0m ")
 	a.logger.Println(message)
 }
 
 // Info écrit un message d'erreur vers le logger du service
 func (a *AcquisitionService) Error(message string) {
+	a.logger.SetPrefix("\x1b[31m[acquisition-api]\x1b[0m ")
 	a.logger.Printf("ERROR - %s\n", message)
 }
 
@@ -89,45 +91,47 @@ func (a *AcquisitionService) Middleware(h http.Handler) http.Handler {
 func (a *AcquisitionService) getRouter() http.Handler {
 	r := mux.NewRouter()
 
+	api := r.PathPrefix("/api").Subrouter()
+
 	// Actions
-	r.HandleFunc("/api/action/movementType", a.GetMovementTypeHandler).Methods("GET")
-	r.HandleFunc("/api/action/actiontype", a.GetAllActionsTypes).Methods("GET")
-	r.HandleFunc("/api/action/addactiontype", a.PostActionType).Methods("POST")
+	api.HandleFunc("/action/movementType", a.GetMovementTypeHandler).Methods("GET")
+	api.HandleFunc("/action/actiontype", a.GetAllActionsTypes).Methods("GET")
+	api.HandleFunc("/action/addactiontype", a.PostActionType).Methods("POST")
 	//Coachs
-	r.HandleFunc("/api/coachs/coachs", a.GetCoachsHandler).Methods("GET")
-	r.HandleFunc("/api/coachs/addcoach", a.PostCoachHandler).Methods("POST")
-	r.HandleFunc("/api/coachs/addCoachTeam/{id}", a.AssignerEquipeCoach).Methods("PUT")
+	api.HandleFunc("/coachs/coachs", a.GetCoachsHandler).Methods("GET")
+	api.HandleFunc("/coachs/addcoach", a.PostCoachHandler).Methods("POST")
+	api.HandleFunc("/coachs/addCoachTeam/{id}", a.AssignerEquipeCoach).Methods("PUT")
 	// Upload
-	r.HandleFunc("/api/upload", a.UploadHandler)
-	r.HandleFunc("/api/upload/{game-id}", a.UploadHandler).Methods("DELETE", "OPTIONS")
+	api.HandleFunc("/upload", a.UploadHandler)
+	api.HandleFunc("/upload/{game-id}", a.UploadHandler).Methods("DELETE", "OPTIONS")
 	// Terrains
-	r.HandleFunc("/api/terrains", a.GetTerrainsHandler).Methods("GET")
-	r.HandleFunc("/api/terrains/{nom}", a.GetTerrainHandler).Methods("GET")
-	r.HandleFunc("/api/terrains/{id}", a.TerrainsHandler).Methods("DELETE", "PUT")
-	r.HandleFunc("/api/terrains", a.CreerTerrainHandler).Methods("POST")
+	api.HandleFunc("/terrains", a.GetTerrainsHandler).Methods("GET")
+	api.HandleFunc("/terrains/{nom}", a.GetTerrainHandler).Methods("GET")
+	api.HandleFunc("/terrains/{id}", a.TerrainsHandler).Methods("DELETE", "PUT")
+	api.HandleFunc("/terrains", a.CreerTerrainHandler).Methods("POST")
 	// Equipes
-	r.HandleFunc("/api/equipes", a.GetEquipesHandler).Methods("GET")
-	r.HandleFunc("/api/equipes/{nom}", a.GetEquipeHandler).Methods("GET")
-	r.HandleFunc("/api/equipes/{id}", a.EquipesHandler).Methods("DELETE", "PUT")
-	r.HandleFunc("/api/equipes", a.CreerEquipeHandler).Methods("POST")
+	api.HandleFunc("/equipes", a.GetEquipesHandler).Methods("GET")
+	api.HandleFunc("/equipes/{nom}", a.GetEquipeHandler).Methods("GET")
+	api.HandleFunc("/equipes/{id}", a.EquipesHandler).Methods("DELETE", "PUT")
+	api.HandleFunc("/equipes", a.CreerEquipeHandler).Methods("POST")
 	// Parties
-	r.HandleFunc("/api/parties", a.PartiesHandler).Methods("GET", "POST")
-	r.HandleFunc("/api/parties/{id}", a.PartiesHandler).Methods("PUT", "OPTIONS")
-	r.HandleFunc("/api/parties/{id}", a.SupprimerPartiesHandler).Methods("DELETE")
+	api.HandleFunc("/parties", a.PartiesHandler).Methods("GET", "POST")
+	api.HandleFunc("/parties/{id}", a.PartiesHandler).Methods("PUT", "OPTIONS")
+	api.HandleFunc("/parties/{id}", a.SupprimerPartiesHandler).Methods("DELETE")
 	// BD
-	r.HandleFunc("/api/seed", a.RemplirBD).Methods("POST")
-	r.HandleFunc("/api/bd", a.FaireBD).Methods("POST")
+	api.HandleFunc("/seed", a.RemplirBD).Methods("POST")
+	api.HandleFunc("/bd", a.FaireBD).Methods("POST")
 	// Autre
-	r.HandleFunc("/api/actions", a.GetActions).Methods("GET")
-	r.HandleFunc("/api/actions", a.PostAction).Methods("POST")
-	r.HandleFunc("/api/joueur", a.HandleJoueur).Methods("POST")
-	r.HandleFunc("/api/joueur/{id}", a.HandleJoueur).Methods("PUT", "OPTIONS")
-	r.HandleFunc("/api/saison", a.GetSeasons).Methods("GET")
-	r.HandleFunc("/api/saison", a.PostSaison).Methods("POST")
-	r.HandleFunc("/api/sports", a.GetSports).Methods("GET")
-	r.HandleFunc("/api/niveau", a.GetNiveau).Methods("GET")
-	r.HandleFunc("/api/joueur", a.GetJoueurs).Methods("GET")
-	return a.Middleware(r)
+	api.HandleFunc("/actions", a.GetActions).Methods("GET")
+	api.HandleFunc("/actions", a.PostAction).Methods("POST")
+	api.HandleFunc("/joueur", a.HandleJoueur).Methods("POST")
+	api.HandleFunc("/joueur/{id}", a.HandleJoueur).Methods("PUT", "OPTIONS")
+	api.HandleFunc("/saison", a.GetSeasons).Methods("GET")
+	api.HandleFunc("/saison", a.PostSaison).Methods("POST")
+	api.HandleFunc("/sports", a.GetSports).Methods("GET")
+	api.HandleFunc("/niveau", a.GetNiveau).Methods("GET")
+	api.HandleFunc("/joueur", a.GetJoueurs).Methods("GET")
+	return a.Middleware(api)
 }
 
 // Start démarre le service
@@ -136,7 +140,7 @@ func (a *AcquisitionService) Start() {
 		a.server.Addr = a.config.Port
 		a.server.Handler = a.getRouter()
 		err := a.server.ListenAndServe()
-		a.Info("Acquisition shutting down...")
+		a.Error("Acquisition shutting down...")
 
 		if err != nil {
 			panic(err)
@@ -149,4 +153,5 @@ func (a *AcquisitionService) Start() {
 // Stop arrête le service
 func (a *AcquisitionService) Stop() {
 	a.server.Close()
+	a.Info("Acquisition shutting down...")
 }

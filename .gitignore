@@ -44,10 +44,13 @@ main
 
 #Le dossier contenant les videos
 video
-*.mp4
 
 # SQL
 *.sql
 
 #TXT
 *.txt
+
+# coverage
+coverage
+coverage.out
