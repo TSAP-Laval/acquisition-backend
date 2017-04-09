@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -15,6 +16,11 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/jinzhu/gorm"
 )
+
+type dates struct {
+	index int
+	date  time.Time
+}
 
 // Size constants
 const (
@@ -24,6 +30,8 @@ const (
 )
 
 const videoPath = "../videos/"
+
+type creationDates []dates
 
 // UploadHandler Gère l'upload de video sur le serveur
 func (a *AcquisitionService) UploadHandler(w http.ResponseWriter, r *http.Request) {
@@ -58,12 +66,22 @@ func (a *AcquisitionService) UploadHandler(w http.ResponseWriter, r *http.Reques
 		}
 
 		var g Games
-
-		for {
-			var part *multipart.Part
-			if part, err = form.NextPart(); err == io.EOF {
+		var videos = make([]*Videos, 0)
+		var partsDate = make(map[string]dates)
+		// Infinite loop, but will stop when last part is read
+		for i := 0; i >= 0; i++ {
+			part, err := form.NextPart()
+			if err == io.EOF {
 				break
 			}
+
+			layout := "Mon Jan 02 2006 15:04:05 GMT-0400 (EDT)"
+			str := part.FormName()
+			t, _ := time.Parse(layout, str)
+
+			// Forn name is use as file last modified date
+			partsDate[strconv.Itoa(i)] = dates{index: i, date: t}
+
 			// On crée un buffer qui contiendra l'en-tête du fichier
 			// ** Cela permettra de déterminer le type du fichier.
 			//    Ainsi, on valide que le fichier est bel et bien
@@ -131,17 +149,32 @@ func (a *AcquisitionService) UploadHandler(w http.ResponseWriter, r *http.Reques
 					if db.NewRecord(v) {
 						db.Create(&v)
 						if db.NewRecord(v) {
-							// Dans le cas où il y a une erreur, on supprime la partie
-							// venant d'être créée
-							db.Delete(&g)
 							msg := map[string]string{"error": "Une erreur est survenue lors de la création de la video dans la base de données. Veuillez réessayer!"}
 							Message(w, msg, http.StatusInternalServerError)
 						}
+						videos = append(videos, &v)
 					}
 					break
 				}
 			}
 		}
+
+		//Sort the map by date
+		creationDateSorted := make(creationDates, 0, len(partsDate))
+		for _, d := range partsDate {
+			creationDateSorted = append(creationDateSorted, d)
+		}
+		sort.Sort(creationDateSorted)
+
+		for j, video := range videos {
+			var index int
+			if index = creationDateSorted.IndexOf(j); index == -1 {
+				return
+			}
+			video.Part = index + 1
+			db.Model(&video).Where("ID = ?", video.ID).Update("part", video.Part)
+		}
+
 		msg := map[string]string{"succes": "Video(s) envoyé(s) avec succès!", "game_id": strconv.Itoa(int(g.ID))}
 		Message(w, msg, http.StatusCreated)
 	case "DELETE":
@@ -186,4 +219,25 @@ func (a *AcquisitionService) UploadHandler(w http.ResponseWriter, r *http.Reques
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.WriteHeader(http.StatusOK)
 	}
+}
+
+func (d creationDates) Len() int {
+	return len(d)
+}
+
+func (d creationDates) Less(i int, j int) bool {
+	return d[i].date.Before(d[j].date)
+}
+
+func (d creationDates) Swap(i, j int) {
+	d[i], d[j] = d[j], d[i]
+}
+
+func (d creationDates) IndexOf(value int) int {
+	for i, date := range d {
+		if date.index == value {
+			return i
+		}
+	}
+	return -1
 }
