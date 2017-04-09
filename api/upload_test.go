@@ -219,7 +219,7 @@ func TestUploadVideoWEBMDel(t *testing.T) {
 
 	var m MessageSuccess
 	responseMapping(&m, res)
-	gameID[1] = m.GameID
+	gameID[3] = m.GameID
 
 	if gameID[3] == "" || gameID[3] == "0" {
 		t.Errorf("Game ID expected: %s", gameID[3])
@@ -337,7 +337,7 @@ func TestUploadDeleteVideoWEBMDel(t *testing.T) {
 	var m MessageError
 	responseMapping(&m, res)
 
-	if strings.Contains(m.Err, "Impossible de supprimer la video") {
+	if !strings.Contains(m.Err, "Impossible de supprimer la video") {
 		t.Errorf("Error expected: %s", m.Err)
 	}
 }
