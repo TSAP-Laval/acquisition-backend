@@ -12,3 +12,4 @@ exclude_paths:
 - config/
 - deployment
 - .github
+- test
