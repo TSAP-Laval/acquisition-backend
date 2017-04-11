@@ -119,27 +119,27 @@ func (a *AcquisitionService) RemplirBD(w http.ResponseWriter, r *http.Request) {
 		db.Create(&location2)
 	}
 
-	equipe1 := Teams{Name: "Lions", City: "Quebec", SportID: 1, CategoryID: 1}
+	equipe1 := Teams{Name: "Lions", City: "Quebec", SportID: 1, CategoryID: 1, SeasonID: 1, Sexe: "M"}
 	if db.NewRecord(equipe1) {
 		db.Create(&equipe1)
 	}
 
-	equipe2 := Teams{Name: "Loup", City: "Vancouver", SportID: 1, CategoryID: 1}
+	equipe2 := Teams{Name: "Loup", City: "Vancouver", SportID: 1, CategoryID: 1, SeasonID: 1, Sexe: "M"}
 	if db.NewRecord(equipe2) {
 		db.Create(&equipe2)
 	}
 
-	equipe3 := Teams{Name: "Tigres", City: "Montreal", SportID: 1, CategoryID: 1}
+	equipe3 := Teams{Name: "Tigres", City: "Montreal", SportID: 1, CategoryID: 1, SeasonID: 1, Sexe: "F"}
 	if db.NewRecord(equipe3) {
 		db.Create(&equipe3)
 	}
 
-	equipe4 := Teams{Name: "Ligres", City: "Trois-Rivières", SportID: 1, CategoryID: 1}
+	equipe4 := Teams{Name: "Ligres", City: "Trois-Rivières", SportID: 1, CategoryID: 1, SeasonID: 1, Sexe: "M"}
 	if db.NewRecord(equipe4) {
 		db.Create(&equipe4)
 	}
 
-	equipe5 := Teams{Name: "Tatoo", City: "Rivière-du-loup", SportID: 1, CategoryID: 1}
+	equipe5 := Teams{Name: "Tatoo", City: "Rivière-du-loup", SportID: 1, CategoryID: 1, SeasonID: 1, Sexe: "F"}
 	if db.NewRecord(equipe5) {
 		db.Create(&equipe5)
 	}
