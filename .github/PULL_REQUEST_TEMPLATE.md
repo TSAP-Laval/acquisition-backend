@@ -10,7 +10,7 @@
 ### Before submitting a pull request, make sure you have:
 - [ ] Read the [README](https://github.com/TSAP-Laval/acquisition-backend/blob/master/README.md)
 - [ ] [Searched](https://github.com/TSAP-Laval/acquisition-backend/search?type=Issues) the bugtracker for similar issues including **closed** ones
-- [ ] Reviewed the sample code in [tests](https://github.com/TSAP-Laval/acquisition-backend/tree/master/api_test)
+- [ ] Reviewed the sample code in [_tests files](https://github.com/TSAP-Laval/acquisition-backend/tree/master/api)
 
 ### Purpose of your pull request?
 - [ ] Bug fix (encountered problems/errors)

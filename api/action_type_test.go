@@ -13,7 +13,7 @@ import (
 
 func PostActionType(t *testing.T) {
 	reader = strings.NewReader(`{"Name": "Passe", "Description": "Interceptée", "ControlType": "Neutre", "MovementType": "Postif"}`)
-	request, err := http.NewRequest("POST", baseURL+"/api/addactiontype", reader)
+	request, err := http.NewRequest("POST", baseURL+"//addactiontype", reader)
 	res, err := http.DefaultClient.Do(request)
 
 	if err != nil {
@@ -39,7 +39,7 @@ func PostActionType(t *testing.T) {
 
 func GetActionsTypes(t *testing.T) {
 	reader = strings.NewReader("")
-	request, err := http.NewRequest("GET", baseURL+"/api/actiontype", reader)
+	request, err := http.NewRequest("GET", baseURL+"//actiontype", reader)
 	res, err := http.DefaultClient.Do(request)
 
 	if err != nil {
@@ -53,7 +53,7 @@ func GetActionsTypes(t *testing.T) {
 
 func GetMovementType(t *testing.T) {
 	reader = strings.NewReader("")
-	request, err := http.NewRequest("GET", baseURL+"/api/movementType", reader)
+	request, err := http.NewRequest("GET", baseURL+"//movementType", reader)
 	res, err := http.DefaultClient.Do(request)
 
 	if err != nil {
