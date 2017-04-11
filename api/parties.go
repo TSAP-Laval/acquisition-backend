@@ -136,7 +136,7 @@ func (a *AcquisitionService) PartiesHandler(w http.ResponseWriter, r *http.Reque
 
 				if !l.IsInside {
 					geocoder.SetAPIKey(a.keys.Geodecoder)
-					query := l.City + " Canada" // l.Address
+					query := l.City + " Canada" // l.Address TODO
 
 					latitude, longitude, err := geocoder.Geocode(query)
 					if err != nil {
