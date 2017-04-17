@@ -148,8 +148,8 @@ type MovementsType struct {
 type ActionsType struct {
 	gorm.Model
 	Description string
-	Acquisition string
-	Separation  string
+	TypeAction  string
+	Name        string
 }
 
 // Actions est une modélisation des informations sur une
@@ -166,6 +166,8 @@ type Actions struct {
 	Y1           float64
 	X2           float64
 	Y2           float64
+	X3           float64
+	Y3           float64
 	Time         time.Duration
 	HomeScore    int
 	GuestScore   int

@@ -4,7 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 
+	"github.com/gorilla/mux"
 	"github.com/jinzhu/gorm"
 
 	"io/ioutil"
@@ -94,4 +96,27 @@ func (a *AcquisitionService) PostActionType(w http.ResponseWriter, r *http.Reque
 	defer r.Body.Close()
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(body)
+}
+func (a *AcquisitionService) GetActionsTypeHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	vars := mux.Vars(r)
+
+	if vars != nil {
+		db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
+		defer db.Close()
+
+		if err != nil {
+			a.ErrorHandler(w, err)
+			return
+		}
+
+		action := []ActionsType{}
+		id := strings.ToLower(strings.TrimSpace(vars["id"]))
+		db.Where("ID = ?", id).Find(&action)
+
+		Message(w, action, http.StatusOK)
+	} else {
+		msg := map[string]string{"error": "Veuillez entrer un nom d'équipe ou en créer une préalablement"}
+		Message(w, msg, http.StatusNotFound)
+	}
 }

@@ -60,6 +60,13 @@ func (a *AcquisitionService) HandleJoueur(w http.ResponseWriter, r *http.Request
 	case "OPTIONS":
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.WriteHeader(http.StatusOK)
+	case "DELETE":
+		id := strings.ToLower(strings.TrimSpace(vars["id"]))
+		// On supprime l'équipe
+		db.Model(&t).Where("ID = ?", id).Delete(t)
+		msg := map[string]string{"succes": "Le joueur a été supprimée avec succès!"}
+		Message(w, msg, http.StatusNoContent)
 
 	}
+
 }

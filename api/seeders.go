@@ -74,9 +74,13 @@ func (a *AcquisitionService) RemplirBD(w http.ResponseWriter, r *http.Request) {
 		fmt.Println(err)
 	}
 
-	user := ActionsType{Description: "Passe offensive", Acquisition: "Positive", Separation: "Positive"}
+	user := ActionsType{Description: "Passe offensive", TypeAction: "reception et action", Name: "Passe offensive"}
 	if db.NewRecord(user) {
 		db.Create(&user)
+	}
+	action := ActionsType{Description: "Reception suivi d'une perte de ballon", TypeAction: "balle perdu", Name: "Balle perdu"}
+	if db.NewRecord(action) {
+		db.Create(&action)
 	}
 
 	coach := Coaches{Fname: "alex", Lname: "Des", Email: "alex@hotmail.com", PassHash: "test"}
@@ -144,8 +148,8 @@ func (a *AcquisitionService) RemplirBD(w http.ResponseWriter, r *http.Request) {
 		db.Create(&equipe5)
 	}
 
-	action := Actions{ActionTypeID: 1, ZoneID: 1, GameID: 1, X1: 0, Y1: 0, X2: 0, Y2: 0, Time: 10, HomeScore: 0, GuestScore: 0, PlayerID: 1}
-	if db.NewRecord(action) {
-		db.Create(&action)
+	Uneaction := Actions{ActionTypeID: 1, ZoneID: 1, GameID: 1, X1: 0, Y1: 0, X2: 0, Y2: 0, X3: 0, Y3: 0, Time: 10, HomeScore: 0, GuestScore: 0, PlayerID: 1}
+	if db.NewRecord(Uneaction) {
+		db.Create(&Uneaction)
 	}
 }

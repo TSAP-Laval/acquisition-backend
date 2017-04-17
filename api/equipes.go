@@ -13,6 +13,7 @@ import (
 
 // GetEquipeHandler gère la récupération des équipes correspondant au nom entré
 func (a *AcquisitionService) GetEquipeHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	vars := mux.Vars(r)
 
 	if vars != nil {

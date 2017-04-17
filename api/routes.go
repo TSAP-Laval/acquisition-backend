@@ -93,6 +93,7 @@ func (a *AcquisitionService) getRouter() http.Handler {
 	r.HandleFunc("/api/action/movementType", a.GetMovementTypeHandler).Methods("GET")
 	r.HandleFunc("/api/action/actiontype", a.GetAllActionsTypes).Methods("GET")
 	r.HandleFunc("/api/action/addactiontype", a.PostActionType).Methods("POST")
+	r.HandleFunc("/api/actionType/{id}", a.GetActionsTypeHandler).Methods("GET")
 	//Coachs
 	r.HandleFunc("/api/coachs/coachs", a.GetCoachsHandler).Methods("GET")
 	r.HandleFunc("/api/coachs/addcoach", a.PostCoachHandler).Methods("POST")
@@ -121,7 +122,7 @@ func (a *AcquisitionService) getRouter() http.Handler {
 	r.HandleFunc("/api/actions", a.GetActions).Methods("GET")
 	r.HandleFunc("/api/actions", a.PostAction).Methods("POST")
 	r.HandleFunc("/api/joueur", a.HandleJoueur).Methods("POST")
-	r.HandleFunc("/api/joueur/{id}", a.HandleJoueur).Methods("PUT", "OPTIONS")
+	r.HandleFunc("/api/joueur/{id}", a.HandleJoueur).Methods("PUT", "OPTIONS", "DELETE")
 	r.HandleFunc("/api/saison", a.GetSeasons).Methods("GET")
 	r.HandleFunc("/api/saison", a.PostSaison).Methods("POST")
 	r.HandleFunc("/api/sports", a.GetSports).Methods("GET")
