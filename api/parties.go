@@ -140,7 +140,8 @@ func (a *AcquisitionService) PartiesHandler(w http.ResponseWriter, r *http.Reque
 
 					latitude, longitude, err := geocoder.Geocode(query)
 					if err != nil {
-						a.ErrorHandler(w, err)
+						msg := map[string]string{"error": "Une erreur inconnue est survenue lors de la création de la partie. Veuillez réessayer"}
+						Message(w, msg, http.StatusBadRequest)
 						return
 					}
 					lat := strconv.FormatFloat(latitude, 'f', 10, 64)
