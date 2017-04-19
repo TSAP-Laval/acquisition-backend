@@ -74,7 +74,7 @@ func (a *AcquisitionService) RemplirBD(w http.ResponseWriter, r *http.Request) {
 		fmt.Println(err)
 	}
 
-	user := ActionsType{Description: "Passe offensive", Acquisition: "Positive", Separation: "Positive"}
+	user := ActionsType{Description: "Passe offensive", Acquisition: "ac_neg", Separation: "se_pos"}
 	if db.NewRecord(user) {
 		db.Create(&user)
 	}
