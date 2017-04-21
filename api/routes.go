@@ -103,7 +103,7 @@ func (a *AcquisitionService) getRouter() http.Handler {
 	api.HandleFunc("/coachs/addCoachTeam/{id}", a.AssignerEquipeCoach).Methods("PUT")
 	// Upload
 	api.HandleFunc("/upload", a.UploadHandler)
-	api.HandleFunc("/upload/{game-id}", a.UploadHandler).Methods("DELETE", "OPTIONS")
+	api.HandleFunc("/upload/{game-id}", a.UploadHandler).Methods("DELETE", "POST", "OPTIONS")
 	// Terrains
 	api.HandleFunc("/terrains", a.GetTerrainsHandler).Methods("GET")
 	api.HandleFunc("/terrains/{nom}", a.GetTerrainHandler).Methods("GET")

@@ -37,10 +37,11 @@ func (a *AcquisitionService) PartiesHandler(w http.ResponseWriter, r *http.Reque
 
 		Message(w, games, http.StatusOK)
 	case "POST":
+		db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
+		defer db.Close()
+
 		body, err := ioutil.ReadAll(r.Body)
 		if len(body) > 0 {
-			db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
-			defer db.Close()
 
 			if err != nil {
 				a.ErrorHandler(w, err)
@@ -85,8 +86,10 @@ func (a *AcquisitionService) PartiesHandler(w http.ResponseWriter, r *http.Reque
 				return
 			}
 		} else {
-			msg := map[string]string{"error": "Veuillez remplir tous les champs."}
-			Message(w, msg, http.StatusBadRequest)
+			var g Games
+			db.Create(&g)
+			msg := map[string]string{"game_id": strconv.Itoa(int(g.ID))}
+			Message(w, msg, http.StatusCreated)
 		}
 	case "PUT":
 		id := mux.Vars(r)["id"]
