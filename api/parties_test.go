@@ -278,7 +278,9 @@ func TestModifierPartie(t *testing.T) {
 		t.Errorf("Response code expected: %d", res.StatusCode)
 		var me MessageError
 		json.Unmarshal(bodyBuffer, &me)
-		t.Error(me.Err)
+		if me.Err != "" {
+			t.Error(me.Err)
+		}
 	}
 
 	if ga.Date != "2016-06-22 06:02" {

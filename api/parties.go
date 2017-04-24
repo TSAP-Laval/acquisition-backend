@@ -183,7 +183,8 @@ func (a *AcquisitionService) PartieHandler(w http.ResponseWriter, r *http.Reques
 					layout := "2006-01-02 15:04"
 					time, err := time.Parse(layout, g.Date)
 					if err != nil {
-						a.ErrorHandler(w, err)
+						msg := map[string]string{"error": err.Error()}
+						Message(w, msg, http.StatusBadRequest)
 						return
 					}
 					date := time.Unix()
@@ -191,7 +192,8 @@ func (a *AcquisitionService) PartieHandler(w http.ResponseWriter, r *http.Reques
 
 					f, err := forecast.Get(a.keys.Weather, lat, lng, d, forecast.CA, forecast.French)
 					if err != nil {
-						a.ErrorHandler(w, err)
+						msg := map[string]string{"error": err.Error()}
+						Message(w, msg, http.StatusBadRequest)
 						return
 					}
 
