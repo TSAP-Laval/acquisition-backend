@@ -11,7 +11,6 @@ package api
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"strconv"
@@ -191,10 +190,6 @@ func (a *AcquisitionService) PartieHandler(w http.ResponseWriter, r *http.Reques
 					date := time.Unix()
 					d := strconv.Itoa(int(date))
 
-					fmt.Print("KEY : ", a.keys.Weather)
-					fmt.Print("LAT : ", lat)
-					fmt.Print("LNG : ", lng)
-					fmt.Print("DATE : ", d)
 					f, err := forecast.Get(a.keys.Weather, lat, lng, d, forecast.CA, forecast.French)
 					if err != nil {
 						msg := map[string]string{"error": err.Error()}
