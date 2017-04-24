@@ -184,7 +184,7 @@ func (a *AcquisitionService) PartieHandler(w http.ResponseWriter, r *http.Reques
 					time, err := time.Parse(layout, g.Date)
 					if err != nil {
 						msg := map[string]string{"error": err.Error()}
-						Message(w, msg, http.StatusBadRequest)
+						Message(w, msg, http.StatusBadGateway)
 						return
 					}
 					date := time.Unix()
