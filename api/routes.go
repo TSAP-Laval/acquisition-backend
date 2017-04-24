@@ -1,3 +1,10 @@
+//
+// Fichier     : routes.go
+// Développeur : Laurent Leclerc Poulin
+//
+// Permet de gérer le serveur et ses configurations
+//
+
 package api
 
 import (
@@ -116,21 +123,24 @@ func (a *AcquisitionService) getRouter() http.Handler {
 	api.HandleFunc("/equipes", a.CreerEquipeHandler).Methods("POST")
 	// Parties
 	api.HandleFunc("/parties", a.PartiesHandler).Methods("GET", "POST")
-	api.HandleFunc("/parties/{id}", a.PartiesHandler).Methods("PUT", "OPTIONS")
+	api.HandleFunc("/parties/{id}", a.PartieHandler).Methods("GET", "PUT", "OPTIONS")
 	api.HandleFunc("/parties/{id}", a.SupprimerPartiesHandler).Methods("DELETE")
 	// BD
 	api.HandleFunc("/seed", a.RemplirBD).Methods("POST")
 	api.HandleFunc("/bd", a.FaireBD).Methods("POST")
-	// Autre
+	// Actions
 	api.HandleFunc("/actions", a.GetActions).Methods("GET")
 	api.HandleFunc("/actions", a.PostAction).Methods("POST")
+	// Joueurs
 	api.HandleFunc("/joueur", a.HandleJoueur).Methods("POST")
 	api.HandleFunc("/joueur/{id}", a.HandleJoueur).Methods("PUT", "OPTIONS")
+	api.HandleFunc("/joueur", a.GetJoueurs).Methods("GET")
+	// Saisons
 	api.HandleFunc("/saison", a.GetSeasons).Methods("GET")
 	api.HandleFunc("/saison", a.PostSaison).Methods("POST")
+	// Autres
 	api.HandleFunc("/sports", a.GetSports).Methods("GET")
 	api.HandleFunc("/niveau", a.GetNiveau).Methods("GET")
-	api.HandleFunc("/joueur", a.GetJoueurs).Methods("GET")
 	return a.Middleware(api)
 }
 

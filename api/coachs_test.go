@@ -1,3 +1,10 @@
+//
+// Fichier     : coachs_test.go
+// Développeur : ?
+//
+// Commentaire expliquant le code, les fonctions...
+//
+
 package api_test
 
 import (
@@ -11,26 +18,34 @@ import (
 	"github.com/TSAP-Laval/acquisition-backend/api"
 )
 
+// TODO: Changer le nom du fichier et ses références pour coach au pluriel...
+//		http://www.wordhippo.com/what-is/the-plural-of/coach.html
+
 func PostNewCoach(t *testing.T) {
-	reader = strings.NewReader(`{"Fname": "MEHEHHEHEHEDi", "Lname": "Lariihhhiibi", "Actif": "true", "Email": "Mehdi@hotmale.com"}`)
+	reader = strings.NewReader(
+		`{
+			"Fname": "MEHEHHEHEHEDi", 
+			"Lname": "Lariihhhiibi", 
+			"Actif": "true", 
+			"Email": "Mehdi@hotmale.com"
+		}`)
+
 	request, err := http.NewRequest("POST", baseURL+"/api/coachs/addcoach", reader)
 	res, err := http.DefaultClient.Do(request)
 
 	if err != nil {
 		t.Error(err)
 	}
-	// Buffer the body
+
 	bodyBuffer, _ := ioutil.ReadAll(res.Body)
-	t.Logf("Res: --> %s\n\n", bodyBuffer)
 
 	var l api.Coaches
 	err = json.Unmarshal(bodyBuffer, &l)
 	if err != nil {
-		t.Logf("ERR: --> %s\n\n", err)
+		t.Error(err)
 	}
 
 	rmID = fmt.Sprintf("%d", l.ID)
-	t.Logf("ID: --> %s\n\n", rmID)
 
 	if res.StatusCode != 201 {
 		t.Errorf("Success expected: %d", res.StatusCode)
@@ -43,7 +58,7 @@ func GetCoachs(t *testing.T) {
 	res, err := http.DefaultClient.Do(request)
 
 	if err != nil {
-		t.Error(err) //Something is wrong while sending request
+		t.Error(err)
 	}
 
 	if res.StatusCode != 200 {

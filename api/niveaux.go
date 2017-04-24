@@ -1,8 +1,13 @@
+//
+// Fichier     : niveaux.go
+// Développeur : ?
+//
+// Commentaire expliquant le code, les fonction...
+//
+
 package api
 
 import (
-	"encoding/json"
-	"fmt"
 	"net/http"
 
 	//Import DB driver
@@ -10,6 +15,10 @@ import (
 
 	"github.com/jinzhu/gorm"
 )
+
+// TODO: Changer le nom du fichier et ses références pour catégorie...
+// TODO: Linter le code... Aucun commentaire pour les fonctions
+// TODO: Enlever tous ce qui est log, print...
 
 func (a *AcquisitionService) GetNiveau(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
@@ -22,13 +31,8 @@ func (a *AcquisitionService) GetNiveau(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	strucNiveau := []Categories{}
-	db.Find(&strucNiveau)
+	c := []Categories{}
+	db.Find(&c)
 
-	NiveauJSON, _ := json.Marshal(strucNiveau)
-	fmt.Println(string(NiveauJSON))
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	w.Write(NiveauJSON)
+	Message(w, c, http.StatusOK)
 }

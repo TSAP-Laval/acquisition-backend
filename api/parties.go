@@ -1,3 +1,12 @@
+//
+// Fichier     : parties.go
+// Développeur : Laurent Leclerc Poulin
+//
+// Permet de gérer toutes les interractions nécessaires à la création,
+// la modification, la seppression et la récupération des informations
+// d'une partie à analyser.
+//
+
 package api
 
 import (
@@ -40,7 +49,7 @@ func (a *AcquisitionService) PartiesHandler(w http.ResponseWriter, r *http.Reque
 		db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
 		defer db.Close()
 
-		body, err := ioutil.ReadAll(r.Body)
+		body, _ := ioutil.ReadAll(r.Body)
 		if len(body) > 0 {
 
 			if err != nil {
@@ -80,20 +89,41 @@ func (a *AcquisitionService) PartiesHandler(w http.ResponseWriter, r *http.Reque
 					Message(w, msg, http.StatusBadRequest)
 				}
 			}
-		} else if err != nil {
-			if err != nil {
-				a.ErrorHandler(w, err)
-				return
-			}
 		} else {
 			var g Games
 			db.Create(&g)
 			msg := map[string]string{"game_id": strconv.Itoa(int(g.ID))}
 			Message(w, msg, http.StatusCreated)
 		}
+	}
+}
+
+// PartieHandler Gère la récupération et la création des parties
+func (a *AcquisitionService) PartieHandler(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case "GET":
+		id := mux.Vars(r)["id"]
+		db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
+		defer db.Close()
+
+		if err != nil {
+			a.ErrorHandler(w, err)
+			return
+		}
+
+		var game Games
+		db.Where("ID = ?", id).Find(&game)
+
+		if game.ID == 0 {
+			msg := map[string]string{"error": "Aucune partie ne correspond"}
+			Message(w, msg, http.StatusNotFound)
+			return
+		}
+		AjoutInfosPartie(db, game)
+		Message(w, game, http.StatusOK)
 	case "PUT":
 		id := mux.Vars(r)["id"]
-		body, err := ioutil.ReadAll(r.Body)
+		body, _ := ioutil.ReadAll(r.Body)
 		if len(body) > 0 {
 			db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
 			defer db.Close()
@@ -181,11 +211,8 @@ func (a *AcquisitionService) PartiesHandler(w http.ResponseWriter, r *http.Reque
 				game.Temperature = summary
 
 				db.Model(&game).Where("ID = ?", id).Updates(game)
-			}
-		} else if err != nil {
-			if err != nil {
-				a.ErrorHandler(w, err)
-				return
+
+				Message(w, game, http.StatusOK)
 			}
 		} else {
 			msg := map[string]string{"error": "Veuillez remplir tous les champs."}
@@ -199,7 +226,30 @@ func (a *AcquisitionService) PartiesHandler(w http.ResponseWriter, r *http.Reque
 
 // SupprimerPartiesHandler Gère la suppression des parties
 func (a *AcquisitionService) SupprimerPartiesHandler(w http.ResponseWriter, r *http.Request) {
-	return
+	vars := mux.Vars(r)
+
+	db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
+	defer db.Close()
+
+	if err != nil {
+		a.ErrorHandler(w, err)
+		return
+	}
+
+	g := Games{}
+	id := strings.ToLower(strings.TrimSpace(vars["id"]))
+	db.First(&g, "ID = ?", id)
+
+	// Erreur
+	if g.ID == 0 {
+		msg := map[string]string{"error": "Aucune partie ne correspond. Elle doit déjà avoir été supprimée!"}
+		Message(w, msg, http.StatusBadRequest)
+	} else {
+		// On supprime l'équipe
+		db.Where("ID = ?", id).Delete(&g)
+		msg := map[string]string{"succes": "La partie a été supprimée avec succès!"}
+		Message(w, msg, http.StatusNoContent)
+	}
 }
 
 // AjoutInfosPartie ajout des informations sur une parties

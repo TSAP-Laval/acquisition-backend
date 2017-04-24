@@ -1,3 +1,12 @@
+//
+// TEST
+//
+// Fichier     : upload_test.go
+// Développeur : Laurent Leclerc Poulin
+//
+// Permet de tester l'upload de fichiers.
+//
+
 package api_test
 
 import (
@@ -20,6 +29,10 @@ type MessageError struct {
 type MessageSuccess struct {
 	Success string `json:"success"`
 	GameID  string `json:"game_id"`
+}
+
+type MessageGameID struct {
+	GameID string `json:"game_id"`
 }
 
 const videoPath = "../videos"
@@ -50,7 +63,7 @@ func TestUploadNoVideo(t *testing.T) {
 	}
 
 	if res.StatusCode != 400 {
-		t.Errorf("Success expected: %d", res.StatusCode)
+		t.Errorf("Response code expected: %d", res.StatusCode)
 	}
 
 	var me MessageError
@@ -86,7 +99,7 @@ func TestUploadVideoMP4(t *testing.T) {
 	}
 
 	if res.StatusCode != 201 {
-		t.Errorf("Success expected: %d", res.StatusCode)
+		t.Errorf("Response code expected: %d", res.StatusCode)
 	}
 }
 
@@ -115,7 +128,7 @@ func TestUploadVideo3GP(t *testing.T) {
 	}
 
 	if res.StatusCode != 400 {
-		t.Errorf("Success expected: %d", res.StatusCode)
+		t.Errorf("Response code expected: %d", res.StatusCode)
 	}
 
 	var me MessageError
@@ -151,7 +164,7 @@ func TestUploadVideoFLV(t *testing.T) {
 	}
 
 	if res.StatusCode != 400 {
-		t.Errorf("Success expected: %d", res.StatusCode)
+		t.Errorf("Response code expected: %d", res.StatusCode)
 	}
 
 	var me MessageError
@@ -187,7 +200,7 @@ func TestUploadVideoOGV(t *testing.T) {
 	}
 
 	if res.StatusCode != 400 {
-		t.Errorf("Success expected: %d", res.StatusCode)
+		t.Errorf("Response code expected: %d", res.StatusCode)
 	}
 
 	var me MessageError
@@ -223,7 +236,7 @@ func TestUploadVideoWEBM(t *testing.T) {
 	}
 
 	if res.StatusCode != 201 {
-		t.Errorf("Success expected: %d", res.StatusCode)
+		t.Errorf("Response code expected: %d", res.StatusCode)
 	}
 }
 
@@ -257,7 +270,7 @@ func TestUploadVideos(t *testing.T) {
 	}
 
 	if res.StatusCode != 201 {
-		t.Errorf("Success expected: %d", res.StatusCode)
+		t.Errorf("Response code expected: %d", res.StatusCode)
 	}
 }
 
@@ -286,14 +299,14 @@ func TestUploadVideoWEBMDel(t *testing.T) {
 	}
 
 	if res.StatusCode != 201 {
-		t.Errorf("Success expected: %d", res.StatusCode)
+		t.Errorf("Response code expected: %d", res.StatusCode)
 	}
 }
 
-// Simule l'envoie d'une requête d'options
-func TestSendOptions(t *testing.T) {
+// Simule l'envoie d'une requête d'options pour l'upload
+func TestSendOptionsUpload(t *testing.T) {
 	reader = strings.NewReader("")
-	req, err := http.NewRequest("OPTIONS", baseURL+"/api/upload/0", reader)
+	req, err := http.NewRequest("OPTIONS", baseURL+"/api/parties/0", reader)
 	res, err := http.DefaultClient.Do(req)
 
 	if err != nil {
@@ -301,7 +314,7 @@ func TestSendOptions(t *testing.T) {
 	}
 
 	if res.StatusCode != 200 {
-		t.Errorf("Success expected: %d", res.StatusCode)
+		t.Errorf("Response code expected: %d", res.StatusCode)
 	}
 }
 
@@ -316,7 +329,7 @@ func TestUploadDeleteFalseVideo(t *testing.T) {
 	}
 
 	if res.StatusCode != 404 {
-		t.Errorf("Success expected: %d", res.StatusCode)
+		t.Errorf("Response code expected: %d", res.StatusCode)
 	}
 
 	var m MessageError
@@ -338,7 +351,7 @@ func TestUploadDeleteVideoMP4(t *testing.T) {
 	}
 
 	if res.StatusCode != 204 {
-		t.Errorf("Success expected: %d", res.StatusCode)
+		t.Errorf("Response code expected: %d", res.StatusCode)
 		var m MessageError
 		responseMapping(&m, res)
 		t.Errorf("Error: %s", m.Err)
@@ -356,7 +369,7 @@ func TestUploadDeleteVideoWEBM(t *testing.T) {
 	}
 
 	if res.StatusCode != 204 {
-		t.Errorf("Success expected: %d", res.StatusCode)
+		t.Errorf("Response code expected: %d", res.StatusCode)
 		var m MessageError
 		responseMapping(&m, res)
 		t.Errorf("Error: %s", m.Err)
@@ -394,14 +407,14 @@ func TestUploadDeleteVideoWEBMDel(t *testing.T) {
 	}
 
 	if res.StatusCode != 404 {
-		t.Errorf("Success expected: %d", res.StatusCode)
+		t.Errorf("Response code expected: %d", res.StatusCode)
 		return
 	}
 
 	var m MessageError
 	responseMapping(&m, res)
 
-	if !strings.Contains(m.Err, "Impossible de supprimer la video") {
+	if !strings.Contains(m.Err, "Impossible de supprimer la video !") {
 		t.Errorf("Error expected: %s", m.Err)
 	}
 }

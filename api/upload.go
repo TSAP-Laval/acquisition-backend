@@ -1,7 +1,15 @@
+//
+// Fichier     : upload.go
+// Développeur : Laurent Leclerc Poulin
+//
+// Permet de gérer toutes les interractions nécessaires à l'upload,
+// d'une vidéo sur le serveur et l'ajout des informations de base
+// sur la partie à créer en lien avec la/les vidéo(s) `uploadé`.
+//
+
 package api
 
 import (
-	"fmt"
 	"io"
 	"mime/multipart"
 	"net/http"
@@ -22,7 +30,7 @@ type dates struct {
 	date  time.Time
 }
 
-// Size constants
+// Constantes sur les tailles possibles
 const (
 	GB = 1 << (10 * 3)
 	MB = 1 << (10 * 2)
@@ -33,7 +41,7 @@ const videoPath = "../videos/"
 
 type creationDates []dates
 
-// UploadHandler Gère l'upload de video sur le serveur
+// UploadHandler Gère l'upload de videos sur le serveur
 func (a *AcquisitionService) UploadHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "POST":
@@ -53,7 +61,7 @@ func (a *AcquisitionService) UploadHandler(w http.ResponseWriter, r *http.Reques
 				return
 			}
 
-			// Limit upload size
+			// Taille limite d'envoie de fichiers
 			r.Body = http.MaxBytesReader(w, r.Body, 10*GB) // 10 Gb
 
 			if _, err := os.Stat(videoPath); os.IsNotExist(err) {
@@ -69,7 +77,8 @@ func (a *AcquisitionService) UploadHandler(w http.ResponseWriter, r *http.Reques
 
 			var videos = make([]*Videos, 0)
 			var partsDate = make(map[string]dates)
-			// Infinite loop, but will stop when last part is read
+
+			// Boucle infinie, mais termine une fois que la dernière partie est lue
 			for i := 0; i >= 0; i++ {
 				part, err := form.NextPart()
 				if err == io.EOF {
@@ -84,6 +93,7 @@ func (a *AcquisitionService) UploadHandler(w http.ResponseWriter, r *http.Reques
 				partsDate[strconv.Itoa(i)] = dates{index: i, date: t}
 
 				// On crée un buffer qui contiendra l'en-tête du fichier
+				//
 				// ** Cela permettra de déterminer le type du fichier.
 				//    Ainsi, on valide que le fichier est bel et bien
 				//    un fichier au format vidéo/* et non un fichier
@@ -98,6 +108,7 @@ func (a *AcquisitionService) UploadHandler(w http.ResponseWriter, r *http.Reques
 				// On valide préalablement que le fichier est une vidéo au format
 				// Quicktime (.mov). Dans le cas où ell ne l'est pas, on valide
 				// alors son format avec la fonction native `DetectContentType`.
+				//
 				// ** Cette fonction ne continent pas la définition pour les
 				//    fichier .mov, c'est pourquoi j'ai ajouté la fonction
 				//    qui permet de valider ce type de fichier.
@@ -152,6 +163,11 @@ func (a *AcquisitionService) UploadHandler(w http.ResponseWriter, r *http.Reques
 					videos = append(videos, &v)
 				}
 
+				// Upload de la vidéo
+				//
+				// ** La boucle termine une fois que
+				//    cette partie du formulaire a été
+				//    envoyé entièrement
 				for {
 					buffer = make([]byte, 4*KO)
 
@@ -169,7 +185,8 @@ func (a *AcquisitionService) UploadHandler(w http.ResponseWriter, r *http.Reques
 				}
 			}
 
-			//Sort the map by date
+			// Trie les dates en ordre croissant pour permettre de récupérer
+			// l'ordre des vidéos en plusieurs parties
 			creationDateSorted := make(creationDates, 0, len(partsDate))
 			for _, d := range partsDate {
 				creationDateSorted = append(creationDateSorted, d)
@@ -194,10 +211,9 @@ func (a *AcquisitionService) UploadHandler(w http.ResponseWriter, r *http.Reques
 	case "DELETE":
 		var g Games
 		gameID := mux.Vars(r)["game-id"]
-		fmt.Printf("\nGAMEID : %s", gameID)
+
 		// Erreur, l'identifiant d'une partie ne peut être de 0
 		if id, err := strconv.Atoi(gameID); id <= 0 || err != nil {
-			fmt.Println(err)
 			msg := map[string]string{"error": "Impossible de mettre fin à la partie, car aucune partie ne correspond. Elle doit déjà avoir été supprimée!"}
 			Message(w, msg, http.StatusNotFound)
 		} else {
@@ -209,11 +225,12 @@ func (a *AcquisitionService) UploadHandler(w http.ResponseWriter, r *http.Reques
 			}
 
 			v := []Videos{}
-			// On supprime les vidéos
+			// Récupération des vidéos à supprimer
 			db.Where("game_id = ?", gameID).Find(&v)
-			fmt.Println(v[0].Path)
+
+			// Pour chacune des viséos contenues dans la partie
 			for _, video := range v {
-				// delete file
+				// On supprime la vidéo du serveur
 				if err = os.Remove(video.Path); err != nil {
 					msg := map[string]string{"error": "Impossible de supprimer la video ! Elle doit déjà avoir été supprimée!"}
 					Message(w, msg, http.StatusNotFound)
@@ -221,13 +238,12 @@ func (a *AcquisitionService) UploadHandler(w http.ResponseWriter, r *http.Reques
 				}
 			}
 
-			// On supprime les vidéos
+			// On supprime la/les vidéo(s) de la base de donnée
 			db.Where("game_id = ?", gameID).Delete(&Videos{})
-			// On supprime la partie
+			// On supprime la partie de la base de donnée
 			db.Where("ID = ?", gameID).Delete(&g)
 
-			msg := map[string]string{"succes": "L'équipe et les vidéos ont été supprimée avec succès!"}
-			Message(w, msg, http.StatusNoContent)
+			Message(w, "", http.StatusNoContent)
 		}
 	case "OPTIONS":
 		w.Header().Set("Access-Control-Allow-Origin", "*")
@@ -239,10 +255,12 @@ func (d creationDates) Len() int {
 	return len(d)
 }
 
+// Less fonction utilisée pour trier les dates
 func (d creationDates) Less(i int, j int) bool {
 	return d[i].date.Before(d[j].date)
 }
 
+// Less fonction utilisée pour trier les dates
 func (d creationDates) Swap(i, j int) {
 	d[i], d[j] = d[j], d[i]
 }
@@ -256,6 +274,13 @@ func (d creationDates) IndexOf(value int) int {
 	return -1
 }
 
+// isMov permet de déterminer si le fichier
+// envoyé vers le serveur est bel est bien
+// dans un format pris en charge.
+//
+// ** Dans ce cas ci, on n'utilise pas la
+//    fonction DetectContentType, car elle
+//    ne valide pas les vidéos au format mov
 func isMov(buf []byte) bool {
 	return len(buf) > 7 &&
 		buf[0] == 0x0 && buf[1] == 0x0 &&
