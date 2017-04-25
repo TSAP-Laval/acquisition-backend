@@ -1,3 +1,12 @@
+//
+// TEST
+//
+// Fichier     : api_test.go
+// Développeur : Laurent Leclerc Poulin
+//
+// Fichier `main` pour lancer les tests
+//
+
 package api_test
 
 import (
@@ -17,6 +26,7 @@ var (
 	rmID    string
 )
 
+// Permet de simuler le démarrage du serveur le temps des tests
 func init() {
 	var a api.AcquisitionConfiguration
 	var k api.Keys
@@ -30,6 +40,10 @@ func init() {
 
 	service := api.New(os.Stdout, &a, &k)
 	service.Start()
+
+	// ** IMPORTANT **
+	// Permet de s'assurer que le serveur a bel et bien démarré
+	// avant de lancer les tests.
 	time.Sleep(5 * time.Second)
 
 	baseURL = "http://localhost" + a.Port

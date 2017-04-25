@@ -1,8 +1,13 @@
+//
+// Fichier     : sports.go
+// Développeur : ?
+//
+// Commentaire expliquant le code, les fonctions...
+//
+
 package api
 
 import (
-	"encoding/json"
-	"fmt"
 	"net/http"
 
 	//Import DB driver
@@ -10,6 +15,9 @@ import (
 
 	"github.com/jinzhu/gorm"
 )
+
+// TODO: Linter le code... Aucun commentaire pour les fonctions
+// TODO: Enlever tous ce qui est log, print...
 
 func (a *AcquisitionService) GetSports(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
@@ -22,13 +30,8 @@ func (a *AcquisitionService) GetSports(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	strucSport := []Sports{}
-	db.Find(&strucSport)
+	s := []Sports{}
+	db.Find(&s)
 
-	SportJSON, _ := json.Marshal(strucSport)
-	fmt.Println(string(SportJSON))
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	w.Write(SportJSON)
+	Message(w, s, http.StatusOK)
 }
