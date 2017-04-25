@@ -81,14 +81,27 @@ func (a *AcquisitionService) RemplirBD(w http.ResponseWriter, r *http.Request) {
 		fmt.Println(err)
 	}
 
-	user := ActionsType{Description: "Passe offensive", Acquisition: "Positive", Separation: "Positive"}
-	if db.NewRecord(user) {
-		db.Create(&user)
+	action0 := ActionsType{Description: "Passe offensive", Acquisition: "ac_neg", Separation: "se_pos"}
+	if db.NewRecord(action0) {
+		db.Create(&action0)
+	}
+	action1 := ActionsType{Description: "Passe defensive", Acquisition: "ac_pos", Separation: "se_neg"}
+	if db.NewRecord(action1) {
+		db.Create(&action1)
+	}
+	action2 := ActionsType{Description: "Centre", Acquisition: "ac_neg", Separation: "se_neg"}
+	if db.NewRecord(action2) {
+		db.Create(&action2)
 	}
 
-	coach := Coaches{Fname: "alex", Lname: "Des", Email: "alex@hotmail.com", PassHash: "test"}
+	coach := Coaches{Fname: "alex", Lname: "Des", Email: "alex@hotmail.com", PassHash: "test", TeamsIDs: "3", Actif: "false", SeasonID: "2"}
 	if db.NewRecord(coach) {
 		db.Create(&coach)
+	}
+
+	coach2 := Coaches{Fname: "Mehdi", Lname: "Laribi", Email: "m.laribi@hotmail.com", SeasonID: "1", TeamsIDs: "1,2,3", Actif: "true"}
+	if db.NewRecord(coach2) {
+		db.Create(&coach2)
 	}
 
 	player := Players{Fname: "alex", Lname: "Des", Number: 1, Email: "alex@hotmail.com", PassHash: "test"}
@@ -101,6 +114,10 @@ func (a *AcquisitionService) RemplirBD(w http.ResponseWriter, r *http.Request) {
 		db.Create(&season)
 	}
 
+	season1 := Seasons{Years: "2016-2017"}
+	if db.NewRecord(season1) {
+		db.Create(&season1)
+	}
 	sport := Sports{Name: "soccer"}
 	if db.NewRecord(sport) {
 		db.Create(&sport)

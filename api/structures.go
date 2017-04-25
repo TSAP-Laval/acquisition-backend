@@ -181,7 +181,6 @@ type PlayersTeam struct {
 // Coaches les entraineurs
 type Coaches struct {
 	gorm.Model
-	CoachID      int
 	Fname        string
 	Lname        string
 	Email        string
@@ -190,7 +189,10 @@ type Coaches struct {
 	TokenReset   string
 	TokenLogin   string
 	Teams        []Teams `gorm:"many2many:coach_team;"`
+	TeamsIDs     string
 	Actif        string
+	Season       Seasons
+	SeasonID     string
 }
 
 // CoachTeam table de relations entre entraineurs et équipes
@@ -223,4 +225,10 @@ func (g *Games) Expand(db *gorm.DB) {
 	db.Model(g).Related(&(g.Action))
 	db.Model(g).Related(&(g.Team), "TeamID")
 	db.Model(g).Related(&(g.OpposingTeam), "OpposingTeamID")
+}
+
+//Fonction Expand : Fetch all coach children (Teams)
+// (has-many has-one)
+func (c *Coaches) Expand(db *gorm.DB) {
+	db.Model(c).Related(&(c.Teams))
 }
