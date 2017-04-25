@@ -1,8 +1,6 @@
 //
 // Fichier     : coachs_test.go
-// Développeur : ?
-//
-// Commentaire expliquant le code, les fonctions...
+// Développeur : Mehdi Laribi
 //
 
 package api_test
@@ -18,9 +16,7 @@ import (
 	"github.com/TSAP-Laval/acquisition-backend/api"
 )
 
-// TODO: Changer le nom du fichier et ses références pour coach au pluriel...
-//		http://www.wordhippo.com/what-is/the-plural-of/coach.html
-
+// PostNewCoach: test de la methode POST
 func PostNewCoach(t *testing.T) {
 	reader = strings.NewReader(
 		`{
@@ -52,7 +48,8 @@ func PostNewCoach(t *testing.T) {
 	}
 }
 
-func GetCoachs(t *testing.T) {
+//GetCoaches : test de la methode GET
+func GetCoaches(t *testing.T) {
 	reader = strings.NewReader("")
 	request, err := http.NewRequest("GET", baseURL+"/api/coachs", reader)
 	res, err := http.DefaultClient.Do(request)
@@ -66,7 +63,8 @@ func GetCoachs(t *testing.T) {
 	}
 }
 
-/*func UpdateCoach(t *testing.T) {
+//UpdateCoach : test de la methode PUT
+func UpdateCoach(t *testing.T) {
 	reader = strings.NewReader(`{"Fname": "m", "Lname": "l", "Actif": "false", "Email": "Mehdi@hotmale.com"}`)
 	request, err := http.NewRequest("PUT", baseURL+"/api/coachs/updatecoach"+rmID, reader)
 	res, err := http.DefaultClient.Do(request)
@@ -79,19 +77,3 @@ func GetCoachs(t *testing.T) {
 		t.Errorf("Success expected: %d", res.StatusCode)
 	}
 }
-*/
-
-/*func UpdateTeams(t *testing.T) {
-	reader = strings.NewReader(`{"Teams" : {1,2,3,4}}`)
-	request, err := http.NewRequest("PUT", baseURL+"/api/coachs/updatecoachteam/" + rmID, reader)
-	res, err := http.DefaultClient.Do(request)
-
-	if err != nil {
-		t.Error(err)
-	}
-
-	if res.StatusCode != 201 {
-		t.Errorf("Success expected: %d", res.StatusCode)
-	}
-}
-*/

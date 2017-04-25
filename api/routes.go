@@ -105,10 +105,10 @@ func (a *AcquisitionService) getRouter() http.Handler {
 	api.HandleFunc("/action/actiontype", a.GetAllActionsTypes).Methods("GET")
 	api.HandleFunc("/action/addactiontype", a.PostActionType).Methods("POST")
 	//Coachs
-	r.HandleFunc("/api/coachs", a.GetCoachsHandler).Methods("GET")
-	r.HandleFunc("/api/coachs/{coachID}", a.GetCoachsHandler).Methods("GET")
-	r.HandleFunc("/api/coachs/addcoach", a.PostCoachHandler).Methods("POST")
-	r.HandleFunc("/api/coachs/editcoach/{id}", a.AssignerEquipeCoach).Methods("PUT")
+	api.HandleFunc("/coaches", a.GetCoachesHandler).Methods("GET")
+	api.HandleFunc("/coaches/{coachID}", a.GetCoachesHandler).Methods("GET")
+	api.HandleFunc("/coaches/addcoach", a.PostCoachHandler).Methods("POST")
+	api.HandleFunc("/coaches/editcoach/{id}", a.AssignerEquipeCoach).Methods("PUT")
 	// Upload
 	api.HandleFunc("/upload", a.UploadHandler)
 	api.HandleFunc("/upload/{game-id}", a.UploadHandler).Methods("DELETE", "POST", "OPTIONS")

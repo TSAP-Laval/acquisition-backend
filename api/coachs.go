@@ -1,14 +1,11 @@
 //
 // Fichier     : coaches.go
-// Développeur : ?
-//
-// Commentaire expliquant le code, les fonctions...
+// Développeur : Mehdi Laribi
 //
 
 package api
 
 import (
-	"fmt"
 	"io/ioutil"
 	"net/http"
 
@@ -24,14 +21,8 @@ import (
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 )
 
-// TODO: Changer le nom du fichier et ses références pour coach au pluriel...
-//		http://www.wordhippo.com/what-is/the-plural-of/coach.html
-// TODO: Linter le code...
-// TODO: Gérer les erreurs comme du monde
-// TODO: Enlever tous ce qui est log, print...
-
-//GetCoachsHandler :  fetch all created coachs
-func (a *AcquisitionService) GetCoachsHandler(w http.ResponseWriter, r *http.Request) {
+//GetCoachesHandler :  fetch all created coaches
+func (a *AcquisitionService) GetCoachesHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Content-Type", "Application/json")
@@ -46,22 +37,19 @@ func (a *AcquisitionService) GetCoachsHandler(w http.ResponseWriter, r *http.Req
 
 	vars := mux.Vars(r)
 
-	fmt.Println(vars)
-
 	idCoach := strings.ToLower(strings.TrimSpace(vars["coachID"]))
 
 	if idCoach == "" {
-		coachs := []Coaches{}
-		db.Find(&coachs)
+		coaches := []Coaches{}
+		db.Find(&coaches)
 
-		for i := 0; i < len(coachs); i++ {
+		for i := 0; i < len(coaches); i++ {
 			var c Coaches
-			c = coachs[i]
-			coachs[i] = AjoutCoachInfo(db, c)
+			c = coaches[i]
+			coaches[i] = AjoutCoachInfo(db, c)
 		}
 
-		coachJSON, _ := json.Marshal(coachs)
-		fmt.Println(string(coachJSON))
+		coachJSON, _ := json.Marshal(coaches)
 		w.Write(coachJSON)
 	} else {
 		coach := Coaches{}
@@ -70,7 +58,6 @@ func (a *AcquisitionService) GetCoachsHandler(w http.ResponseWriter, r *http.Req
 		coach = AjoutCoachInfo(db, coach)
 
 		coachJSON, _ := json.Marshal(coach)
-		fmt.Println(string(coachJSON))
 		w.Write(coachJSON)
 	}
 
@@ -82,12 +69,14 @@ func (a *AcquisitionService) PostCoachHandler(w http.ResponseWriter, r *http.Req
 	db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
 	defer db.Close()
 	if err != nil {
-		panic(err)
+		a.ErrorHandler(w, err)
+		return
 	}
 
 	body, errorBody := ioutil.ReadAll(r.Body)
 	if errorBody != nil {
-		panic(err)
+		a.ErrorHandler(w, errorBody)
+		return
 	}
 
 	if len(body) > 0 {
@@ -106,12 +95,10 @@ func (a *AcquisitionService) PostCoachHandler(w http.ResponseWriter, r *http.Req
 		err = json.Unmarshal(body, &dat)
 
 		var seaID = dat["SeasonID"]
-		fmt.Println(seaID)
 
 		var num = dat["TeamsIDs"]
 		ids := strings.Split(num, ",")
 
-		fmt.Println(ids)
 		Team := Teams{}
 		db.Find(&Team, ids)
 
