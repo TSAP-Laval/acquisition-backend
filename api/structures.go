@@ -192,6 +192,8 @@ type Coaches struct {
 	Teams        []Teams `gorm:"many2many:coach_team;"`
 	TeamsIDs     string
 	Actif        string
+	Season       Seasons
+	SeasonID     string
 }
 
 // CoachTeam table de relations entre entraineurs et équipes

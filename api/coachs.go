@@ -33,19 +33,36 @@ func (a *AcquisitionService) GetCoachsHandler(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	coachs := []Coaches{}
-	db.Find(&coachs)
+	vars := mux.Vars(r)
 
-	for i := 0; i < len(coachs); i++ {
-		var c Coaches
-		c = coachs[i]
-		coachs[i] = AjoutCoachInfo(db, c)
+	fmt.Println(vars)
+
+	idCoach := strings.ToLower(strings.TrimSpace(vars["coachID"]))
+
+	if idCoach == "" {
+		coachs := []Coaches{}
+		db.Find(&coachs)
+
+		for i := 0; i < len(coachs); i++ {
+			var c Coaches
+			c = coachs[i]
+			coachs[i] = AjoutCoachInfo(db, c)
+		}
+
+		coachJSON, _ := json.Marshal(coachs)
+		fmt.Println(string(coachJSON))
+		w.Write(coachJSON)
+	} else {
+		coach := Coaches{}
+		var id = vars["ID"]
+		db.First(coach, id)
+		coach = AjoutCoachInfo(db, coach)
+
+		coachJSON, _ := json.Marshal(coach)
+		fmt.Println(string(coachJSON))
+		w.Write(coachJSON)
 	}
 
-	coachJSON, _ := json.Marshal(coachs)
-	fmt.Println(string(coachJSON))
-
-	w.Write(coachJSON)
 	db.Close()
 }
 
@@ -68,6 +85,10 @@ func (a *AcquisitionService) PostCoachHandler(w http.ResponseWriter, r *http.Req
 		var dat map[string]string
 		err = json.Unmarshal(body, &newCoach)
 		err = json.Unmarshal(body, &dat)
+
+		var seaID = dat["SeasonID"]
+		fmt.Println(seaID)
+
 		var num = dat["TeamsIDs"]
 		ids := strings.Split(num, ",")
 
@@ -75,9 +96,13 @@ func (a *AcquisitionService) PostCoachHandler(w http.ResponseWriter, r *http.Req
 		Team := Teams{}
 		db.Find(&Team, ids)
 
+		Saison := Seasons{}
+		db.Find(&Saison, seaID)
+
 		db.Create(&newCoach)
 		newCoach = AjoutCoachInfo(db, newCoach)
 		newCoach.Teams = append(newCoach.Teams, Team)
+		newCoach.Season = Saison
 
 		db.Model(&Team).Association("Teams").Append(newCoach)
 		w.WriteHeader(http.StatusCreated)
@@ -125,7 +150,6 @@ func (a *AcquisitionService) AssignerEquipeCoach(w http.ResponseWriter, r *http.
 		db.Model(&c).Where("ID = ?", id).Updates(c)
 
 		Message(w, "Teams for this coach : OK", http.StatusCreated)
-
 	}
 
 }
