@@ -31,11 +31,13 @@ func (a *AcquisitionService) GetTerrainHandler(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	location := []Locations{}
+	locations := []Locations{}
 	name := strings.ToLower(strings.TrimSpace(vars["nom"]))
-	db.Where("LOWER(Name) LIKE LOWER(?)", name+"%").Find(&location)
+	db.Where("LOWER(Name) LIKE LOWER(?)", name+"%").Find(&locations)
 
-	Message(w, location, http.StatusOK)
+	locations = addFieldTypes(db, locations)
+
+	Message(w, locations, http.StatusOK)
 }
 
 // TerrainsHandler gère la modification et la suppression d'un terrains
@@ -114,6 +116,8 @@ func (a *AcquisitionService) GetTerrainsHandler(w http.ResponseWriter, r *http.R
 	locations := []Locations{}
 	db.Find(&locations)
 
+	locations = addFieldTypes(db, locations)
+
 	Message(w, locations, http.StatusOK)
 }
 
@@ -172,4 +176,14 @@ func (a *AcquisitionService) CreerTerrainHandler(w http.ResponseWriter, r *http.
 		msg := map[string]string{"error": "Veuillez remplir tous les champs."}
 		Message(w, msg, http.StatusBadRequest)
 	}
+}
+
+func addFieldTypes(db *gorm.DB, locations []Locations) []Locations {
+	for i := range locations {
+		var ft FieldTypes
+		db.Where("ID = ?", locations[i].FieldTypesID).Find(&ft)
+		locations[i].FieldType = ft
+	}
+
+	return locations
 }
