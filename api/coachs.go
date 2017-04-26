@@ -22,6 +22,7 @@ import (
 )
 
 //GetCoachesHandler :  fetch all created coaches
+//Si l'identifiant est vide, la fonction retourne tous les coachs
 func (a *AcquisitionService) GetCoachesHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Access-Control-Allow-Origin", "*")
@@ -73,9 +74,9 @@ func (a *AcquisitionService) PostCoachHandler(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	body, errorBody := ioutil.ReadAll(r.Body)
-	if errorBody != nil {
-		a.ErrorHandler(w, errorBody)
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		a.ErrorHandler(w, err)
 		return
 	}
 
@@ -112,8 +113,8 @@ func (a *AcquisitionService) PostCoachHandler(w http.ResponseWriter, r *http.Req
 
 		db.Model(&Team).Association("Teams").Append(newCoach)
 		w.WriteHeader(http.StatusCreated)
-	} else if errorBody != nil {
-		a.ErrorHandler(w, errorBody)
+	} else if err != nil {
+		a.ErrorHandler(w, err)
 		return
 	} else {
 		w.Header().Set("Content-Type", "application/text")
