@@ -1,3 +1,10 @@
+//
+// Fichier     : seeders.go
+// Développeur : Alexandre Deschêne et Laurent Leclerc Poulin
+//
+// Permet de créer la base de données et d'y ajouter des information
+//
+
 package api
 
 import (

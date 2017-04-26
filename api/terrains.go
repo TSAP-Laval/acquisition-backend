@@ -1,3 +1,12 @@
+//
+// Fichier     : terrains.go
+// Développeur : Laurent Leclerc Poulin
+//
+// Permet de gérer toutes les interractions nécessaires à la création,
+// la modification, la seppression et la récupération des informations
+// d'un terrain.
+//
+
 package api
 
 import (
@@ -14,98 +23,85 @@ import (
 func (a *AcquisitionService) GetTerrainHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 
-	if vars != nil {
-		db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
-		defer db.Close()
+	db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
+	defer db.Close()
 
-		if err != nil {
-			a.ErrorHandler(w, err)
-			return
-		}
-
-		location := []Locations{}
-		name := strings.ToLower(strings.TrimSpace(vars["nom"]))
-		db.Where("LOWER(Name) LIKE LOWER(?)", name+"%").Find(&location)
-
-		Message(w, location, http.StatusOK)
-	} else {
-		msg := map[string]string{"error": "Veuillez entrer un nom de terrain ou en créer un préalablement"}
-		Message(w, msg, http.StatusBadRequest)
+	if err != nil {
+		a.ErrorHandler(w, err)
+		return
 	}
+
+	location := []Locations{}
+	name := strings.ToLower(strings.TrimSpace(vars["nom"]))
+	db.Where("LOWER(Name) LIKE LOWER(?)", name+"%").Find(&location)
+
+	Message(w, location, http.StatusOK)
 }
 
-// TerrainsHandler gère la modification et la suppression de terrains
+// TerrainsHandler gère la modification et la suppression d'un terrains
 func (a *AcquisitionService) TerrainsHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	if vars != nil {
-		db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
-		defer db.Close()
+	db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
+	defer db.Close()
 
-		if err != nil {
-			a.ErrorHandler(w, err)
-			return
-		}
+	if err != nil {
+		a.ErrorHandler(w, err)
+		return
+	}
 
-		location := []Locations{}
-		id := strings.ToLower(strings.TrimSpace(vars["id"]))
-		db.First(&location, "ID = ?", id)
+	var location Locations
+	id := strings.ToLower(strings.TrimSpace(vars["id"]))
+	db.First(&location, "ID = ?", id)
 
-		switch r.Method {
-		case "PUT":
-			body, err := ioutil.ReadAll(r.Body)
-			if len(body) > 0 {
-				var l Locations
-				err = json.Unmarshal(body, &l)
-				if err != nil {
-					a.ErrorHandler(w, err)
-					return
-				}
-
-				l.Name = strings.TrimSpace(l.Name)
-				l.City = strings.TrimSpace(l.City)
-				l.Address = strings.TrimSpace(l.Address)
-
-				var o string
-
-				if l.Name == "" {
-					o += "Name, "
-				}
-				if l.City == "" {
-					o += "City, "
-				}
-				if l.Address == "" {
-					o += "Address, "
-				}
-
-				db.Model(&location).Where("ID = ?", id).Omit(o).Updates(l)
-
-				// Le lieu modifié
-				var nl Locations
-				db.Where("ID = ?", id).Find(&nl)
-				Message(w, nl, http.StatusCreated)
-			} else if err != nil {
+	switch r.Method {
+	case "PUT":
+		body, err := ioutil.ReadAll(r.Body)
+		if len(body) > 0 {
+			var l Locations
+			err = json.Unmarshal(body, &l)
+			if err != nil {
 				a.ErrorHandler(w, err)
-			} else {
-				msg := map[string]string{"error": "Veuillez choisir au moins un champs à modifier."}
-				Message(w, msg, http.StatusBadRequest)
+				return
 			}
-		case "DELETE":
-			if len(location) == 0 {
-				msg := map[string]string{"error": "Aucun terrain ne correspond. Il doit déjà avoir été supprimé!"}
-				Message(w, msg, http.StatusNoContent)
-			} else {
-				db.Where("ID = ?", id).Delete(&location)
-				msg := map[string]string{"succes": "Le terrain a été supprimé avec succès!"}
-				Message(w, msg, http.StatusNoContent)
+
+			l.Name = strings.TrimSpace(l.Name)
+			l.City = strings.TrimSpace(l.City)
+			l.Address = strings.TrimSpace(l.Address)
+
+			var o string
+
+			if l.Name == "" {
+				o += "Name, "
 			}
+			if l.City == "" {
+				o += "City, "
+			}
+			if l.Address == "" {
+				o += "Address, "
+			}
+
+			db.Model(&location).Where("ID = ?", id).Omit(o).Updates(l)
+
+			// Le lieu modifié
+			var nl Locations
+			db.Where("ID = ?", id).Find(&nl)
+			Message(w, nl, http.StatusCreated)
+		} else {
+			msg := map[string]string{"error": "Veuillez choisir au moins un champs à modifier."}
+			Message(w, msg, http.StatusBadRequest)
 		}
-	} else {
-		msg := map[string]string{"error": "Veuillez entrer un nom de terrain ou en créer un préalablement."}
-		Message(w, msg, http.StatusNotFound)
+	case "DELETE":
+		if location.ID == 0 {
+			msg := map[string]string{"error": "Aucun terrain ne correspond. Il doit déjà avoir été supprimé!"}
+			Message(w, msg, http.StatusNotFound)
+		} else {
+			db.Where("ID = ?", id).Delete(&location)
+			Message(w, "", http.StatusNoContent)
+		}
 	}
 }
 
-// GetTerrainsHandler Gère la récupération de tous les terrains de la base de donnée
+// GetTerrainsHandler Gère la récupération de tous les terrains de la base de données
 func (a *AcquisitionService) GetTerrainsHandler(w http.ResponseWriter, r *http.Request) {
 	db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
 	defer db.Close()
@@ -121,9 +117,9 @@ func (a *AcquisitionService) GetTerrainsHandler(w http.ResponseWriter, r *http.R
 	Message(w, locations, http.StatusOK)
 }
 
-// CreerTerrainHandler Gère la création de terrain dans la base de donnée
+// CreerTerrainHandler Gère la création d'un terrain dans la base de données
 func (a *AcquisitionService) CreerTerrainHandler(w http.ResponseWriter, r *http.Request) {
-	body, err := ioutil.ReadAll(r.Body)
+	body, _ := ioutil.ReadAll(r.Body)
 	if len(body) > 0 {
 		db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
 		defer db.Close()
@@ -171,11 +167,6 @@ func (a *AcquisitionService) CreerTerrainHandler(w http.ResponseWriter, r *http.
 					Message(w, msg, http.StatusUnauthorized)
 				}
 			}
-		}
-	} else if err != nil {
-		if err != nil {
-			a.ErrorHandler(w, err)
-			return
 		}
 	} else {
 		msg := map[string]string{"error": "Veuillez remplir tous les champs."}
