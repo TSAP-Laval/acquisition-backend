@@ -42,6 +42,9 @@ type Teams struct {
 	SportID    int
 	Category   Categories
 	CategoryID int
+	Season     Seasons
+	SeasonID   int
+	Sexe       string
 	Coaches    []Coaches `gorm:"many2many:coach_team;"`
 	Players    []Players `gorm:"many2many:players_team;"`
 }
