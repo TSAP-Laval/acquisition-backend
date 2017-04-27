@@ -104,6 +104,8 @@ func (a *AcquisitionService) getRouter() http.Handler {
 	api.HandleFunc("/action/movementType", a.GetMovementTypeHandler).Methods("GET")
 	api.HandleFunc("/action/actiontype", a.GetAllActionsTypes).Methods("GET")
 	api.HandleFunc("/action/addactiontype", a.PostActionType).Methods("POST")
+	api.HandleFunc("/actionType/{id}", a.GetActionsTypeHandler).Methods("GET")
+	api.HandleFunc("/action/addactiontype", a.PostActionType).Methods("POST")
 	//Coachs
 	api.HandleFunc("/coachs/coachs", a.GetCoachsHandler).Methods("GET")
 	api.HandleFunc("/coachs/addcoach", a.PostCoachHandler).Methods("POST")

@@ -22,6 +22,7 @@ import (
 
 // GetEquipeHandler gère la récupération des équipes correspondant au nom entré
 func (a *AcquisitionService) GetEquipeHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	vars := mux.Vars(r)
 
 	db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
@@ -106,6 +107,7 @@ func (a *AcquisitionService) EquipesHandler(w http.ResponseWriter, r *http.Reque
 			db.Where("ID = ?", id).Delete(&team)
 			Message(w, "", http.StatusNoContent)
 		}
+
 	}
 }
 
