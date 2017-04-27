@@ -117,7 +117,7 @@ func (a *AcquisitionService) GetActionsTypeHandler(w http.ResponseWriter, r *htt
 
 		action := []ActionsType{}
 		id := strings.ToLower(strings.TrimSpace(vars["id"]))
-		db.Where("ID = ?", id).Find(&action)s
+		db.Where("ID = ?", id).Find(&action)
 		Message(w, action, http.StatusOK)
 	} else {
 		msg := map[string]string{"error": "Veuillez entrer un nom d'équipe ou en créer une préalablement"}
