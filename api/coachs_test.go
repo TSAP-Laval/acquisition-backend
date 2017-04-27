@@ -16,8 +16,8 @@ import (
 	"github.com/TSAP-Laval/acquisition-backend/api"
 )
 
-// PostNewCoach: test de la methode POST
-func PostNewCoach(t *testing.T) {
+// TestPostNewCoach: test de la methode POST
+func TestPostNewCoach(t *testing.T) {
 	reader = strings.NewReader(
 		`{
 			"Fname": "MEHEHHEHEHEDi", 
@@ -69,8 +69,8 @@ func PostNewCoach(t *testing.T) {
 	}
 }
 
-//GetCoaches : test de la methode GET
-func GetCoaches(t *testing.T) {
+//TestGetCoaches : test de la methode GET
+func TestGetCoaches(t *testing.T) {
 	reader = strings.NewReader("")
 	request, err := http.NewRequest("GET", baseURL+"/api/coachs", reader)
 	res, err := http.DefaultClient.Do(request)
@@ -98,8 +98,8 @@ func GetCoaches(t *testing.T) {
 
 }
 
-//UpdateCoach : test de la methode PUT
-func UpdateCoach(t *testing.T) {
+//TestUpdateCoach : test de la methode PUT
+func TestUpdateCoach(t *testing.T) {
 	reader = strings.NewReader(`{"Fname": "m", "Lname": "l", "Actif": "false", "Email": "Mehdi@hotmale.com"}`)
 	request, err := http.NewRequest("PUT", baseURL+"/api/coachs/updatecoach"+rmID, reader)
 	res, err := http.DefaultClient.Do(request)
@@ -118,7 +118,7 @@ func TestModifierCoach(t *testing.T) {
 	reader = strings.NewReader(`{"Fname": "Mehdi", "Lname": "Laribi", "Actif": "false", "Email": "Mehdi@hotmale.com"}`)
 
 	// rmID est utilisé ici pour permettre la modification créée plus haut
-	request, err := http.NewRequest("PUT", baseURL+"/api/coaches/editcoach/"+rmID, reader)
+	request, err := http.NewRequest("PUT", baseURL+"/coaches/editcoach/"+rmID, reader)
 	res, err := http.DefaultClient.Do(request)
 
 	if err != nil {
@@ -151,7 +151,7 @@ func TestModifierCoach(t *testing.T) {
 func TestCreerCoacheVide(t *testing.T) {
 	reader = strings.NewReader(``)
 
-	request, err := http.NewRequest("POST", baseURL+"/api/coachs/addcoach", reader)
+	request, err := http.NewRequest("POST", baseURL+"/coachs/addcoach", reader)
 	res, err := http.DefaultClient.Do(request)
 
 	if err != nil {
