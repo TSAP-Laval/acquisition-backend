@@ -165,7 +165,8 @@ func (a *AcquisitionService) AssignerEquipeCoach(w http.ResponseWriter, r *http.
 func AjoutCoachInfo(db *gorm.DB, c Coaches) Coaches {
 
 	var ts []Teams
-	db.Where("ID in (?)", c.TeamsIDs).Find(&ts)
+	ids := strings.Split(c.TeamsIDs, ",")
+	db.Where("ID in (?)", ids).Find(&ts)
 	if len(ts) > 0 {
 		c.Teams = ts
 	}

@@ -26,7 +26,6 @@ import (
 func PostActionType(t *testing.T) {
 	reader = strings.NewReader(
 		`{
-			"Name": "Passe", 
 			"Description": "Interceptée", 
 			"ControlType": "Neutre", 
 			"MovementType": "Postif"
