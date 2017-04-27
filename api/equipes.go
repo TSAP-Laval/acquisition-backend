@@ -107,6 +107,7 @@ func (a *AcquisitionService) EquipesHandler(w http.ResponseWriter, r *http.Reque
 			db.Where("ID = ?", id).Delete(&team)
 			Message(w, "", http.StatusNoContent)
 		}
+
 	}
 }
 
