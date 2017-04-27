@@ -156,7 +156,6 @@ func (a *AcquisitionService) RemplirBD(w http.ResponseWriter, r *http.Request) {
 	if db.NewRecord(location2) {
 		db.Create(&location2)
 	}
-
 	location3 := Locations{Name: "Terrain univers", City: "Saint-Augustin-de-Desmaures", Address: "QC G3A 0C3", IsInside: true, FieldTypesID: int(fieldType1.ID)}
 	if db.NewRecord(location3) {
 		db.Create(&location3)
