@@ -111,6 +111,8 @@ func (a *AcquisitionService) getRouter() http.Handler {
 	// Upload
 	api.HandleFunc("/upload", a.UploadHandler)
 	api.HandleFunc("/upload/{game-id}", a.UploadHandler).Methods("DELETE", "POST", "OPTIONS")
+	// Videos
+	api.HandleFunc("/parties/{id}/videos/{part}", a.VideoHandler).Methods("GET")
 	// Terrains
 	api.HandleFunc("/terrains", a.GetTerrainsHandler).Methods("GET")
 	api.HandleFunc("/terrains/{nom}", a.GetTerrainHandler).Methods("GET")
