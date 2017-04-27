@@ -81,6 +81,7 @@ func (a *AcquisitionService) RemplirBD(w http.ResponseWriter, r *http.Request) {
 		fmt.Println(err)
 	}
 
+
 	action0 := ActionsType{Description: "Passe offensive", Acquisition: "ac_neg", Separation: "se_pos"}
 	if db.NewRecord(action0) {
 		db.Create(&action0)
@@ -133,14 +134,43 @@ func (a *AcquisitionService) RemplirBD(w http.ResponseWriter, r *http.Request) {
 		db.Create(&zone)
 	}
 
-	location1 := Locations{Name: "SSF", City: "Saint-Augustin-de-Desmaures", Address: "4900 Rue Saint-Félix", IsInside: false}
+	fieldType1 := FieldTypes{Type: "Synthétique", Description: "Terrain synthétique..."}
+	if db.NewRecord(fieldType1) {
+		db.Create(&fieldType1)
+	}
+
+	fieldType2 := FieldTypes{Type: "Gazon", Description: "Terrain extérieur..."}
+	if db.NewRecord(fieldType2) {
+		db.Create(&fieldType2)
+	}
+
+	location1 := Locations{Name: "SSF", City: "Saint-Augustin-de-Desmaures", Address: "4900 Rue Saint-Félix", IsInside: false, FieldTypesID: int(fieldType1.ID)}
 	if db.NewRecord(location1) {
 		db.Create(&location1)
 	}
 
-	location2 := Locations{Name: "Stade Leclerc", City: "Saint-Augustin-de-Desmaures", Address: "QC G3A 0C3", IsInside: true}
+	location2 := Locations{Name: "Stade Leclerc", City: "Saint-Augustin-de-Desmaures", Address: "QC G3A 0C3", IsInside: true, FieldTypesID: int(fieldType1.ID)}
 	if db.NewRecord(location2) {
 		db.Create(&location2)
+	}
+	location3 := Locations{Name: "Terrain univers", City: "Saint-Augustin-de-Desmaures", Address: "QC G3A 0C3", IsInside: true, FieldTypesID: int(fieldType1.ID)}
+	if db.NewRecord(location3) {
+		db.Create(&location3)
+	}
+
+	location4 := Locations{Name: "Stade Bidule", City: "Saint-Augustin-de-Desmaures", Address: "QC G3A 0C3", IsInside: false, FieldTypesID: int(fieldType2.ID)}
+	if db.NewRecord(location4) {
+		db.Create(&location4)
+	}
+
+	location5 := Locations{Name: "Stade Chnoubouc", City: "Saint-Augustin-de-Desmaures", Address: "QC G3A 0C3", IsInside: true, FieldTypesID: int(fieldType1.ID)}
+	if db.NewRecord(location5) {
+		db.Create(&location5)
+	}
+
+	location6 := Locations{Name: "Terrains PGR", City: "Saint-Augustin-de-Desmaures", Address: "QC G3A 0C3", IsInside: true, FieldTypesID: int(fieldType1.ID)}
+	if db.NewRecord(location6) {
+		db.Create(&location6)
 	}
 
 	equipe1 := Teams{Name: "Lions", City: "Quebec", SportID: 1, CategoryID: 1}
@@ -148,28 +178,28 @@ func (a *AcquisitionService) RemplirBD(w http.ResponseWriter, r *http.Request) {
 		db.Create(&equipe1)
 	}
 
-	equipe2 := Teams{Name: "Loup", City: "Vancouver", SportID: 1, CategoryID: 1}
+	equipe2 := Teams{Name: "Loup", City: "Vancouver", SportID: 1, CategoryID: 1, SeasonID: 1, Sexe: "M"}
 	if db.NewRecord(equipe2) {
 		db.Create(&equipe2)
 	}
 
-	equipe3 := Teams{Name: "Tigres", City: "Montreal", SportID: 1, CategoryID: 1}
+	equipe3 := Teams{Name: "Tigres", City: "Montreal", SportID: 1, CategoryID: 1, SeasonID: 1, Sexe: "F"}
 	if db.NewRecord(equipe3) {
 		db.Create(&equipe3)
 	}
 
-	equipe4 := Teams{Name: "Ligres", City: "Trois-Rivières", SportID: 1, CategoryID: 1}
+	equipe4 := Teams{Name: "Ligres", City: "Trois-Rivières", SportID: 1, CategoryID: 1, SeasonID: 1, Sexe: "M"}
 	if db.NewRecord(equipe4) {
 		db.Create(&equipe4)
 	}
 
-	equipe5 := Teams{Name: "Tatoo", City: "Rivière-du-loup", SportID: 1, CategoryID: 1}
+	equipe5 := Teams{Name: "Tatoo", City: "Rivière-du-loup", SportID: 1, CategoryID: 1, SeasonID: 1, Sexe: "F"}
 	if db.NewRecord(equipe5) {
 		db.Create(&equipe5)
 	}
 
-	action := Actions{ActionTypeID: 1, ZoneID: 1, GameID: 1, X1: 0, Y1: 0, X2: 0, Y2: 0, Time: 10, HomeScore: 0, GuestScore: 0, PlayerID: 1}
-	if db.NewRecord(action) {
-		db.Create(&action)
+	Uneaction := Actions{ActionTypeID: 1, ZoneID: 1, GameID: 1, X1: 0, Y1: 0, X2: 0, Y2: 0, X3: 0, Y3: 0, Time: 10, HomeScore: 0, GuestScore: 0, PlayerID: 1}
+	if db.NewRecord(Uneaction) {
+		db.Create(&Uneaction)
 	}
 }

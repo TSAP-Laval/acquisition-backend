@@ -104,6 +104,8 @@ func (a *AcquisitionService) getRouter() http.Handler {
 	api.HandleFunc("/action/movementType", a.GetMovementTypeHandler).Methods("GET")
 	api.HandleFunc("/action/actiontype", a.GetAllActionsTypes).Methods("GET")
 	api.HandleFunc("/action/addactiontype", a.PostActionType).Methods("POST")
+	api.HandleFunc("/actionType/{id}", a.GetActionsTypeHandler).Methods("GET")
+	api.HandleFunc("/action/addactiontype", a.PostActionType).Methods("POST")
 	//Coachs
 	api.HandleFunc("/coaches", a.GetCoachesHandler).Methods("GET")
 	api.HandleFunc("/coaches/{coachID}", a.GetCoachesHandler).Methods("GET")
@@ -112,6 +114,8 @@ func (a *AcquisitionService) getRouter() http.Handler {
 	// Upload
 	api.HandleFunc("/upload", a.UploadHandler)
 	api.HandleFunc("/upload/{game-id}", a.UploadHandler).Methods("DELETE", "POST", "OPTIONS")
+	// Videos
+	api.HandleFunc("/parties/{id}/videos/{part}", a.VideoHandler).Methods("GET")
 	// Terrains
 	api.HandleFunc("/terrains", a.GetTerrainsHandler).Methods("GET")
 	api.HandleFunc("/terrains/{nom}", a.GetTerrainHandler).Methods("GET")
