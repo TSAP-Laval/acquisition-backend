@@ -44,7 +44,7 @@ func (a *AcquisitionService) FaireBD(w http.ResponseWriter, r *http.Request) {
 	db.DropTableIfExists("locations")
 	db.DropTableIfExists("field_types")
 	db.DropTableIfExists("coaches")
-	db.DropTableIfExists("actions_type")
+	db.DropTableIfExists("actions_types")
 	db.DropTableIfExists("seasons")
 	db.DropTableIfExists("positions")
 	db.DropTableIfExists("movements_type")

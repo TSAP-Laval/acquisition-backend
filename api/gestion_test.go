@@ -97,7 +97,7 @@ func TestGetNiveau(t *testing.T) {
 // TODO : Ne test même pas les valeurs de retour ?
 func TestGetJoueurs(t *testing.T) {
 	reader = strings.NewReader("")
-	request, err := http.NewRequest("GET", baseURL+"/api/joueur", reader)
+	request, err := http.NewRequest("GET", baseURL+"/api/joueurs", reader)
 	res, err := http.DefaultClient.Do(request)
 
 	if err != nil {
@@ -124,7 +124,7 @@ func TestCreerJoueur(t *testing.T) {
 			"EquipeID": "1"
 		}`)
 
-	request, err := http.NewRequest("POST", baseURL+"/api/joueur", reader)
+	request, err := http.NewRequest("POST", baseURL+"/api/joueurs", reader)
 	res, err := http.DefaultClient.Do(request)
 
 	if err != nil {
@@ -159,7 +159,7 @@ func TestModifJoueur(t *testing.T) {
 		}`)
 
 	// rmID est utilisé, ici pour permettre la modification du joueur tout juste créé
-	request, err := http.NewRequest("PUT", baseURL+"/api/joueur/"+rmID, reader)
+	request, err := http.NewRequest("PUT", baseURL+"/api/joueurs/"+rmID, reader)
 	res, err := http.DefaultClient.Do(request)
 
 	if err != nil {
