@@ -148,8 +148,8 @@ type MovementsType struct {
 type ActionsType struct {
 	gorm.Model
 	Description string
-	TypeAction  string
-	Name        string
+	Acquisition string
+	Separation  string
 }
 
 // Actions est une modélisation des informations sur une
