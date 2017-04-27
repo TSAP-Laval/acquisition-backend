@@ -137,17 +137,49 @@ func (a *AcquisitionService) RemplirBD(w http.ResponseWriter, r *http.Request) {
 		db.Create(&zone)
 	}
 
-	location1 := Locations{Name: "SSF", City: "Saint-Augustin-de-Desmaures", Address: "4900 Rue Saint-Félix", IsInside: false}
+	fieldType1 := FieldTypes{Type: "Synthétique", Description: "Terrain synthétique..."}
+	if db.NewRecord(fieldType1) {
+		db.Create(&fieldType1)
+	}
+
+	fieldType2 := FieldTypes{Type: "Gazon", Description: "Terrain extérieur..."}
+	if db.NewRecord(fieldType2) {
+		db.Create(&fieldType2)
+	}
+
+	location1 := Locations{Name: "SSF", City: "Saint-Augustin-de-Desmaures", Address: "4900 Rue Saint-Félix", IsInside: false, FieldTypesID: int(fieldType1.ID)}
 	if db.NewRecord(location1) {
 		db.Create(&location1)
 	}
 
-	location2 := Locations{Name: "Stade Leclerc", City: "Saint-Augustin-de-Desmaures", Address: "QC G3A 0C3", IsInside: true}
+	location2 := Locations{Name: "Stade Leclerc", City: "Saint-Augustin-de-Desmaures", Address: "QC G3A 0C3", IsInside: true, FieldTypesID: int(fieldType1.ID)}
 	if db.NewRecord(location2) {
 		db.Create(&location2)
 	}
 
-	equipe1 := Teams{Name: "Lions", City: "Quebec", SportID: 1, CategoryID: 1, SeasonID: 1, Sexe: "M"}
+
+	location3 := Locations{Name: "Terrain univers", City: "Saint-Augustin-de-Desmaures", Address: "QC G3A 0C3", IsInside: true, FieldTypesID: int(fieldType1.ID)}
+	if db.NewRecord(location3) {
+		db.Create(&location3)
+	}
+
+	location4 := Locations{Name: "Stade Bidule", City: "Saint-Augustin-de-Desmaures", Address: "QC G3A 0C3", IsInside: false, FieldTypesID: int(fieldType2.ID)}
+	if db.NewRecord(location4) {
+		db.Create(&location4)
+	}
+
+	location5 := Locations{Name: "Stade Chnoubouc", City: "Saint-Augustin-de-Desmaures", Address: "QC G3A 0C3", IsInside: true, FieldTypesID: int(fieldType1.ID)}
+	if db.NewRecord(location5) {
+		db.Create(&location5)
+	}
+
+	location6 := Locations{Name: "Terrains PGR", City: "Saint-Augustin-de-Desmaures", Address: "QC G3A 0C3", IsInside: true, FieldTypesID: int(fieldType1.ID)}
+	if db.NewRecord(location6) {
+		db.Create(&location6)
+	}
+
+	equipe1 := Teams{Name: "Lions", City: "Quebec", SportID: 1, CategoryID: 1}
+
 	if db.NewRecord(equipe1) {
 		db.Create(&equipe1)
 	}
