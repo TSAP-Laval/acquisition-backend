@@ -1,5 +1,5 @@
 //
-// Fichier     : coachs_test.go
+// Fichier     : coaches_test.go
 // Développeur : Mehdi Laribi
 //
 
@@ -27,7 +27,7 @@ func TestPostNewCoach(t *testing.T) {
 			"SeasonID": "1"
 		}`)
 
-	request, err := http.NewRequest("POST", baseURL+"/api/coachs/addcoach", reader)
+	request, err := http.NewRequest("POST", baseURL+"/api/coaches/addcoach", reader)
 	res, err := http.DefaultClient.Do(request)
 
 	if err != nil {
@@ -72,7 +72,7 @@ func TestPostNewCoach(t *testing.T) {
 //TestGetCoaches : test de la methode GET
 func TestGetCoaches(t *testing.T) {
 	reader = strings.NewReader("")
-	request, err := http.NewRequest("GET", baseURL+"/api/coachs", reader)
+	request, err := http.NewRequest("GET", baseURL+"/api/coaches", reader)
 	res, err := http.DefaultClient.Do(request)
 
 	if err != nil {
@@ -101,7 +101,7 @@ func TestGetCoaches(t *testing.T) {
 //TestUpdateCoach : test de la methode PUT
 func TestUpdateCoach(t *testing.T) {
 	reader = strings.NewReader(`{"Fname": "m", "Lname": "l", "Actif": "false", "Email": "Mehdi@hotmale.com"}`)
-	request, err := http.NewRequest("PUT", baseURL+"/api/coachs/updatecoach"+rmID, reader)
+	request, err := http.NewRequest("PUT", baseURL+"/api/coaches/updatecoach"+rmID, reader)
 	res, err := http.DefaultClient.Do(request)
 
 	if err != nil {
@@ -151,7 +151,7 @@ func TestModifierCoach(t *testing.T) {
 func TestCreerCoacheVide(t *testing.T) {
 	reader = strings.NewReader(``)
 
-	request, err := http.NewRequest("POST", baseURL+"/coachs/addcoach", reader)
+	request, err := http.NewRequest("POST", baseURL+"/coaches/addcoach", reader)
 	res, err := http.DefaultClient.Do(request)
 
 	if err != nil {
