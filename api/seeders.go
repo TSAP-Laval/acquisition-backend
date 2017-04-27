@@ -81,7 +81,6 @@ func (a *AcquisitionService) RemplirBD(w http.ResponseWriter, r *http.Request) {
 		fmt.Println(err)
 	}
 
-
 	action0 := ActionsType{Description: "Passe offensive", Acquisition: "ac_neg", Separation: "se_pos"}
 	if db.NewRecord(action0) {
 		db.Create(&action0)
