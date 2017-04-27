@@ -1,3 +1,12 @@
+//
+// Fichier     : equipes.go
+// Développeur : Laurent Leclerc Poulin
+//
+// Permet de gérer toutes les interractions nécessaires à la création,
+// la modification, la seppression et la récupération des informations
+// d'une équipes.
+//
+
 package api
 
 import (
@@ -13,105 +22,92 @@ import (
 
 // GetEquipeHandler gère la récupération des équipes correspondant au nom entré
 func (a *AcquisitionService) GetEquipeHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	vars := mux.Vars(r)
 
-	if vars != nil {
-		db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
-		defer db.Close()
+	db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
+	defer db.Close()
 
-		if err != nil {
-			a.ErrorHandler(w, err)
-			return
-		}
-
-		team := []Teams{}
-		name := strings.ToLower(strings.TrimSpace(vars["nom"]))
-		db.Where("LOWER(Name) LIKE LOWER(?)", name+"%").Find(&team)
-
-		for i := 0; i < len(team); i++ {
-			team[i] = AjoutNiveauSport(db, team[i])
-		}
-
-		Message(w, team, http.StatusOK)
-	} else {
-		msg := map[string]string{"error": "Veuillez entrer un nom d'équipe ou en créer une préalablement"}
-		Message(w, msg, http.StatusNotFound)
+	if err != nil {
+		a.ErrorHandler(w, err)
+		return
 	}
+
+	team := []Teams{}
+	name := strings.ToLower(strings.TrimSpace(vars["nom"]))
+	db.Where("LOWER(Name) LIKE LOWER(?)", name+"%").Find(&team)
+
+	for i := 0; i < len(team); i++ {
+		team[i] = AjoutNiveauSport(db, team[i])
+	}
+
+	Message(w, team, http.StatusOK)
 }
 
 // EquipesHandler gère la modification et la suppression des équipes
 func (a *AcquisitionService) EquipesHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	vars := mux.Vars(r)
-	if vars != nil {
-		db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
-		defer db.Close()
 
-		if err != nil {
-			a.ErrorHandler(w, err)
-			return
+	db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
+	defer db.Close()
+
+	if err != nil {
+		a.ErrorHandler(w, err)
+		return
+	}
+
+	team := []Teams{}
+	id := strings.ToLower(strings.TrimSpace(vars["id"]))
+	db.First(&team, "ID = ?", id)
+
+	switch r.Method {
+	case "PUT":
+		body, err := ioutil.ReadAll(r.Body)
+		if len(body) > 0 {
+			var t Teams
+			err = json.Unmarshal(body, &t)
+			if err != nil {
+				a.ErrorHandler(w, err)
+				return
+			}
+
+			t.Name = strings.TrimSpace(t.Name)
+			t.City = strings.TrimSpace(t.City)
+
+			// Omit
+			var o string
+			if t.Name == "" {
+				o += "Name, "
+			}
+			if t.City == "" {
+				o += "City, "
+			}
+			db.Model(&team).Where("ID = ?", id).Omit(o).Updates(t)
+
+			// L'équipe modifiée (new team)
+			var nt Teams
+			db.Where("ID = ?", id).Find(&nt)
+
+			nt = AjoutNiveauSport(db, nt)
+
+			Message(w, nt, http.StatusCreated)
+
+		} else {
+			msg := map[string]string{"error": "Veuillez choisir au moins un champs à modifier."}
+			Message(w, msg, http.StatusBadRequest)
+		}
+	case "DELETE":
+		// Erreur
+		if len(team) == 0 {
+			msg := map[string]string{"error": "Aucune equipe ne correspond. Elle doit déjà avoir été supprimée!"}
+			Message(w, msg, http.StatusBadRequest)
+		} else {
+			// On supprime l'équipe
+			db.Where("ID = ?", id).Delete(&team)
+			Message(w, "", http.StatusNoContent)
 		}
 
-		team := []Teams{}
-		id := strings.ToLower(strings.TrimSpace(vars["id"]))
-		db.First(&team, "ID = ?", id)
-
-		switch r.Method {
-		case "PUT":
-			body, err := ioutil.ReadAll(r.Body)
-			if len(body) > 0 {
-				var t Teams
-				err = json.Unmarshal(body, &t)
-				if err != nil {
-					a.ErrorHandler(w, err)
-					return
-				}
-
-				t.Name = strings.TrimSpace(t.Name)
-				t.City = strings.TrimSpace(t.City)
-
-				// Omit
-				var o string
-				if t.Name == "" {
-					o += "Name, "
-				}
-				if t.City == "" {
-					o += "City, "
-				}
-				db.Model(&team).Where("ID = ?", id).Omit(o).Updates(t)
-
-				// L'équipe modifiée (new team)
-				var nt Teams
-				db.Where("ID = ?", id).Find(&nt)
-
-				nt = AjoutNiveauSport(db, t)
-
-				Message(w, nt, http.StatusCreated)
-
-			} else if err != nil {
-				if err != nil {
-					a.ErrorHandler(w, err)
-					return
-				}
-			} else {
-				msg := map[string]string{"error": "Veuillez choisir au moins un champs à modifier."}
-				Message(w, msg, http.StatusBadRequest)
-			}
-		case "DELETE":
-			// Erreur
-			if len(team) == 0 {
-				msg := map[string]string{"error": "Aucune equipe ne correspond. Elle doit déjà avoir été supprimée!"}
-				Message(w, msg, http.StatusNoContent)
-			} else {
-				// On supprime l'équipe
-				db.Where("ID = ?", id).Delete(&team)
-				msg := map[string]string{"succes": "L'équipe a été supprimée avec succès!"}
-				Message(w, msg, http.StatusNoContent)
-			}
-		}
-	} else {
-		msg := map[string]string{"error": "Veuillez entrer un nom d'équipe ou en créer une préalablement."}
-		Message(w, msg, http.StatusBadRequest)
 	}
 }
 
@@ -140,7 +136,7 @@ func (a *AcquisitionService) GetEquipesHandler(w http.ResponseWriter, r *http.Re
 func (a *AcquisitionService) CreerEquipeHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 
-	body, err := ioutil.ReadAll(r.Body)
+	body, _ := ioutil.ReadAll(r.Body)
 	if len(body) > 0 {
 		db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
 		defer db.Close()
@@ -189,9 +185,6 @@ func (a *AcquisitionService) CreerEquipeHandler(w http.ResponseWriter, r *http.R
 				}
 			}
 		}
-	} else if err != nil {
-		a.ErrorHandler(w, err)
-		return
 	} else {
 		msg := map[string]string{"error": "Veuillez remplir tous les champs."}
 		Message(w, msg, http.StatusBadRequest)

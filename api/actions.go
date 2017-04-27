@@ -1,10 +1,18 @@
+//
+// Fichier     : actions.go
+// Développeur : ?
+//
+// Commentaire expliquant le code, les fonctions...
+//
+
 package api
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
+	"strings"
 
+	"github.com/gorilla/mux"
 	"github.com/jinzhu/gorm"
 
 	"io/ioutil"
@@ -12,6 +20,10 @@ import (
 	//Import DB driver
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 )
+
+// TODO: Linter le code...
+// TODO: Gérer les erreurs comme du monde
+// TODO: Enlever tous ce qui est log, print...
 
 // GetMovementTypeHandler Gestion du select des types de mouvements
 func (a *AcquisitionService) GetMovementTypeHandler(w http.ResponseWriter, r *http.Request) {
@@ -27,7 +39,6 @@ func (a *AcquisitionService) GetMovementTypeHandler(w http.ResponseWriter, r *ht
 	db.Find(&mvmType)
 
 	mvmTypeJSON, _ := json.Marshal(mvmType)
-	fmt.Println(string(mvmTypeJSON))
 
 	w.Header().Set("Content-Type", "Application/json")
 	w.Write(mvmTypeJSON)
@@ -48,7 +59,6 @@ func (a *AcquisitionService) GetAllActionsTypes(w http.ResponseWriter, r *http.R
 	db.Find(&actionTypes)
 
 	actionTypesJSON, _ := json.Marshal(actionTypes)
-	fmt.Println(string(actionTypesJSON))
 
 	w.Header().Set("Content-Type", "Application/json")
 	w.Write(actionTypesJSON)
@@ -65,15 +75,11 @@ func (a *AcquisitionService) PostActionType(w http.ResponseWriter, r *http.Reque
 	}
 
 	body, err := ioutil.ReadAll(r.Body)
-	fmt.Printf("-----------------------")
-	fmt.Println(body)
-	fmt.Printf("-----------------------")
+
 	if err != nil {
 		a.ErrorHandler(w, err)
 		return
 	}
-
-	fmt.Println(string(body))
 
 	var newActionType ActionsType
 
@@ -88,10 +94,33 @@ func (a *AcquisitionService) PostActionType(w http.ResponseWriter, r *http.Reque
 		db.Create(&newActionType)
 		db.NewRecord(newActionType) // => return `false` after `user` created
 	} else {
-		fmt.Println("erreur")
+		// TODO: Gérer l'erreur
+		return
 	}
 
 	defer r.Body.Close()
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(body)
+}
+func (a *AcquisitionService) GetActionsTypeHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	vars := mux.Vars(r)
+
+	if vars != nil {
+		db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
+		defer db.Close()
+
+		if err != nil {
+			a.ErrorHandler(w, err)
+			return
+		}
+
+		action := []ActionsType{}
+		id := strings.ToLower(strings.TrimSpace(vars["id"]))
+		db.Where("ID = ?", id).Find(&action)
+		Message(w, action, http.StatusOK)
+	} else {
+		msg := map[string]string{"error": "non trouvé"}
+		Message(w, msg, http.StatusNotFound)
+	}
 }

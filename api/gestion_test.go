@@ -1,3 +1,12 @@
+//
+// Fichier     : gestion_test.go
+// Développeur : ?
+//
+// Permet de gérer toutes les interractions nécessaires à la création,
+// la modification, la seppression et la récupération des informations
+// de trop de choses ?.
+//
+
 package api_test
 
 import (
@@ -11,13 +20,16 @@ import (
 	"github.com/TSAP-Laval/acquisition-backend/api"
 )
 
+// TODO : Aucun commentaire sur les fonctions
+
+// TODO : Ne test même pas les valeurs de retour ?
 func TestGetSaison(t *testing.T) {
 	reader = strings.NewReader("")
 	request, err := http.NewRequest("GET", baseURL+"/api/saison", reader)
 	res, err := http.DefaultClient.Do(request)
 
 	if err != nil {
-		t.Error(err) //Something is wrong while sending request
+		t.Error(err)
 	}
 
 	if res.StatusCode != http.StatusOK {
@@ -25,114 +37,153 @@ func TestGetSaison(t *testing.T) {
 	}
 }
 
+// TODO : Ne test même pas les valeurs de retour ?
 func TestCreerSaison(t *testing.T) {
-	reader = strings.NewReader(`{"Years": "2000"}`)
+	reader = strings.NewReader(
+		`{
+			"Years": "2000"
+		}`)
+
 	request, err := http.NewRequest("POST", baseURL+"/api/saison", reader)
 	res, err := http.DefaultClient.Do(request)
 
 	if err != nil {
 		t.Error(err)
 	}
-	// Buffer the body
+
 	bodyBuffer, _ := ioutil.ReadAll(res.Body)
-	t.Logf("Res: --> %s\n\n", bodyBuffer)
 
-	var l api.Seasons
-	err = json.Unmarshal(bodyBuffer, &l)
+	var s api.Seasons
+	err = json.Unmarshal(bodyBuffer, &s)
 	if err != nil {
-		t.Logf("ERR: --> %s\n\n", err)
+		t.Error(err)
 	}
-
-	rmID = fmt.Sprintf("%d", l.ID)
-	t.Logf("ID: --> %s\n\n", rmID)
 
 	if res.StatusCode != 201 {
 		t.Errorf("Success expected: %d", res.StatusCode)
 	}
 }
 
+// TODO : Ne test même pas les valeurs de retour ?
 func TestGetSports(t *testing.T) {
 	reader = strings.NewReader("")
 	request, err := http.NewRequest("GET", baseURL+"/api/sports", reader)
 	res, err := http.DefaultClient.Do(request)
 
 	if err != nil {
-		t.Error(err) //Something is wrong while sending request
+		t.Error(err)
 	}
 
 	if res.StatusCode != 200 {
 		t.Errorf("Success expected: %d", res.StatusCode)
 	}
 }
+
+// TODO : Ne test même pas les valeurs de retour ?
 func TestGetNiveau(t *testing.T) {
 	reader = strings.NewReader("")
 	request, err := http.NewRequest("GET", baseURL+"/api/niveau", reader)
 	res, err := http.DefaultClient.Do(request)
 
 	if err != nil {
-		t.Error(err) //Something is wrong while sending request
+		t.Error(err)
 	}
 
 	if res.StatusCode != 200 {
 		t.Errorf("Success expected: %d", res.StatusCode)
 	}
 }
+
+// TODO : Ne test même pas les valeurs de retour ?
 func TestGetJoueurs(t *testing.T) {
 	reader = strings.NewReader("")
 	request, err := http.NewRequest("GET", baseURL+"/api/joueur", reader)
 	res, err := http.DefaultClient.Do(request)
 
 	if err != nil {
-		t.Error(err) //Something is wrong while sending request
+		t.Error(err)
 	}
 
 	if res.StatusCode != 200 {
 		t.Errorf("Success expected: %d", res.StatusCode)
 	}
 }
+
+// TODO : Ne test que la création et la modification d'un joueurs ?
+// TODO : Un joueur peut être dans plusieurs équipes à la fois, il ne
+//        faudrait donc pas lui affecter un équipe de cette façon...
+//        D'ailleurs, il faudrait mettre à jour ces tests
 func TestCreerJoueur(t *testing.T) {
-	reader = strings.NewReader(` {"Lname" :"aa133","Fname" :"aa1","Number" : 55,"Email" : "ee","PassHash" : "test22" ,"TokenInvitation" : "test" ,"TokenReinitialisation" : "test ","TokenConnexion" : "test","EquipeID" : "1"}`)
+	reader = strings.NewReader(
+		`{
+			"Lname": "Test",
+			"Fname": "Test",
+			"Number": 55,
+			"Email" : "test@test.ca",
+			"PassHash" : "test123" ,
+			"EquipeID": "1"
+		}`)
+
 	request, err := http.NewRequest("POST", baseURL+"/api/joueur", reader)
 	res, err := http.DefaultClient.Do(request)
 
 	if err != nil {
 		t.Error(err)
 	}
-	// Buffer the body
-	bodyBuffer, _ := ioutil.ReadAll(res.Body)
-	t.Logf("Res: --> %s\n\n", bodyBuffer)
 
-	var l api.Players
-	err = json.Unmarshal(bodyBuffer, &l)
+	bodyBuffer, _ := ioutil.ReadAll(res.Body)
+
+	var p api.Players
+	err = json.Unmarshal(bodyBuffer, &p)
 	if err != nil {
-		t.Logf("ERR: --> %s\n\n", err)
+		t.Error(err)
 	}
 
-	rmID = fmt.Sprintf("%d", l.ID)
-	t.Logf("ID: --> %s\n\n", rmID)
+	rmID = fmt.Sprintf("%d", p.ID)
 
 	if res.StatusCode != 201 {
 		t.Errorf("Success expected: %d", res.StatusCode)
 	}
 }
+
 func TestModifJoueur(t *testing.T) {
-	reader = strings.NewReader(` {"ID" :"15","Lname" :"dasdasd","Fname" :"aadas","Number" : 8,"Email" : "AA","PassHash" : "test22" ,"TokenInvitation" : "test" ,"TokenReinitialisation" : "test ","TokenConnexion" : "test","EquipeID" : "2"}`)
-	request, err := http.NewRequest("PUT", baseURL+"/api/joueur/15", reader)
+	reader = strings.NewReader(
+		`{
+			"ID": "15",
+			"Lname": "Test",
+			"Fname": "Test",
+			"Number": 8,
+			"Email": "test@test.com",
+			"PassHash": "test123",
+			"EquipeID": "2"
+		}`)
+
+	// rmID est utilisé, ici pour permettre la modification du joueur tout juste créé
+	request, err := http.NewRequest("PUT", baseURL+"/api/joueur/"+rmID, reader)
 	res, err := http.DefaultClient.Do(request)
 
 	if err != nil {
 		t.Error(err)
 	}
-	// Buffer the body
-	bodyBuffer, _ := ioutil.ReadAll(res.Body)
-	t.Logf("Res: --> %s\n\n", bodyBuffer)
 
-	var l api.Players
-	err = json.Unmarshal(bodyBuffer, &l)
+	bodyBuffer, _ := ioutil.ReadAll(res.Body)
+
+	var p api.Players
+	err = json.Unmarshal(bodyBuffer, &p)
 	if err != nil {
-		t.Logf("ERR: --> %s\n\n", err)
+		t.Error(err)
 	}
+
 	if res.StatusCode != 200 {
 		t.Errorf("Success expected: %d", res.StatusCode)
+	}
+
+	// Test des valeurs de retour
+	if p.Email != "test@test.com" {
+		t.Error("Success expected: ", p.Email)
+	}
+
+	if p.Number != 8 {
+		t.Errorf("Success expected: %d", p.Number)
 	}
 }

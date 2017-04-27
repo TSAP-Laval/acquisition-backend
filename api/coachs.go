@@ -1,14 +1,18 @@
+//
+// Fichier     : coaches.go
+// Développeur : ?
+//
+// Commentaire expliquant le code, les fonctions...
+//
+
 package api
 
 import (
 	"io/ioutil"
 	"net/http"
 
-	"fmt"
-
 	"encoding/json"
 
-	"log"
 	"strings"
 
 	"github.com/gorilla/mux"
@@ -18,19 +22,25 @@ import (
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 )
 
+// TODO: Changer le nom du fichier et ses références pour coach au pluriel...
+//		http://www.wordhippo.com/what-is/the-plural-of/coach.html
+// TODO: Linter le code...
+// TODO: Gérer les erreurs comme du monde
+// TODO: Enlever tous ce qui est log, print...
+
 //GetCoachsHandler :  fetch all created coachs
 func (a *AcquisitionService) GetCoachsHandler(w http.ResponseWriter, r *http.Request) {
-
 	db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
 	defer db.Close()
-	fmt.Println(err)
+	if err != nil {
+		panic(err)
+	}
 
 	coach := []Coaches{}
 
 	db.Find(&coach)
 
 	coachJSON, _ := json.Marshal(coach)
-	fmt.Println(string(coachJSON))
 
 	w.Header().Set("Content-Type", "Application/json")
 	w.Write(coachJSON)
@@ -40,21 +50,16 @@ func (a *AcquisitionService) GetCoachsHandler(w http.ResponseWriter, r *http.Req
 //PostCoachHandler : Create a new coach in the database
 func (a *AcquisitionService) PostCoachHandler(w http.ResponseWriter, r *http.Request) {
 	db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
-
 	defer db.Close()
-	fmt.Println(err)
-
-	body, errorBody := ioutil.ReadAll(r.Body)
-
-	fmt.Printf("-----------------------")
-	fmt.Println(body)
-	fmt.Printf("-----------------------")
 	if err != nil {
-		defer db.Close()
-		panic(errorBody)
+		panic(err)
 	}
 
-	fmt.Println(string(body))
+	body, err := ioutil.ReadAll(r.Body)
+
+	if err != nil {
+		panic(err)
+	}
 
 	var newCoach Coaches
 	var dat map[string]interface{}
@@ -67,7 +72,6 @@ func (a *AcquisitionService) PostCoachHandler(w http.ResponseWriter, r *http.Req
 	db.First(&Team, num)
 
 	newCoach.Teams = append(newCoach.Teams, Team)
-	fmt.Println(err)
 
 	if err != nil {
 		panic(err)
@@ -79,7 +83,6 @@ func (a *AcquisitionService) PostCoachHandler(w http.ResponseWriter, r *http.Req
 		w.WriteHeader(http.StatusCreated)
 
 	} else {
-		fmt.Println("Not created")
 		w.Header().Set("Content-Type", "application/text")
 		w.Write([]byte("erreur"))
 	}
@@ -101,7 +104,6 @@ func (a *AcquisitionService) AssignerEquipeCoach(w http.ResponseWriter, r *http.
 	db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
 
 	defer db.Close()
-	fmt.Println(r.Body)
 	body, err := ioutil.ReadAll(r.Body)
 
 	if err != nil {
@@ -109,7 +111,6 @@ func (a *AcquisitionService) AssignerEquipeCoach(w http.ResponseWriter, r *http.
 		return
 	}
 
-	log.Println(string(body))
 	var c Coaches
 	err = json.Unmarshal(body, &c)
 

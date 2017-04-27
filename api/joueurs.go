@@ -1,3 +1,10 @@
+//
+// Fichier     : niveaux.go
+// Développeur : ?
+//
+// Commentaire expliquant le code, les fonction...
+//
+
 package api
 
 import (
@@ -11,6 +18,10 @@ import (
 	//Import DB driver
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 )
+
+// TODO: Rendre le code beau et épuré!
+// TODO: Linter le code... Aucun commentaire pour les fonctions
+// TODO: Enlever tous ce qui est log, print...
 
 // HandleJoueur gère la modification et l'ajout de joueur
 func (a *AcquisitionService) HandleJoueur(w http.ResponseWriter, r *http.Request) {
@@ -27,6 +38,7 @@ func (a *AcquisitionService) HandleJoueur(w http.ResponseWriter, r *http.Request
 
 	var t Players
 	var dat map[string]interface{}
+	// TODO: GÉRER LES ERREURS !?!?!?!?!?
 	err = json.Unmarshal(body, &t)
 	err = json.Unmarshal(body, &dat)
 	switch r.Method {
@@ -46,20 +58,28 @@ func (a *AcquisitionService) HandleJoueur(w http.ResponseWriter, r *http.Request
 				t.Teams = append(t.Teams, Team)
 				db.Model(&Team).Association("Players").Append(t)
 			}
-			w.Header().Set("Content-Type", "application/text")
-			w.WriteHeader(http.StatusCreated)
+			Message(w, t, http.StatusCreated)
 
 		} else {
-
+			// Très beau message !
 			Message(w, "déjà créé", http.StatusBadRequest)
 		}
 	case "PUT":
+		// Ca donne rien de mettre cette ligne là parce que le middleware le fait déjà !
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		id := strings.ToLower(strings.TrimSpace(vars["id"]))
 		db.Model(&t).Where("ID = ?", id).Updates(t)
-		Message(w, "ok", http.StatusOK)
+		// Encore mieux !
+		Message(w, t, http.StatusOK)
 	case "OPTIONS":
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.WriteHeader(http.StatusOK)
+	case "DELETE":
+		id := strings.ToLower(strings.TrimSpace(vars["id"]))
+		// On supprime l'équipe
+		db.Model(&t).Where("ID = ?", id).Delete(t)
+		msg := map[string]string{"succes": "Le joueur a été supprimée avec succès!"}
+		Message(w, msg, http.StatusNoContent)
 	}
+
 }
