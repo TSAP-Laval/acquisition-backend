@@ -238,7 +238,6 @@ func (a *AcquisitionService) GetEquipeParSport(w http.ResponseWriter, r *http.Re
 	w.Header().Set("Content-Type", "Application/json")
 
 	vars := mux.Vars(r)
-	fmt.Println("**********************************")
 	db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
 	defer db.Close()
 
@@ -259,7 +258,6 @@ func (a *AcquisitionService) GetEquipeParSport(w http.ResponseWriter, r *http.Re
 	db.Where("sport_id=  ?", idSp).Find(&equipes)
 
 	equipeJSON, _ := json.Marshal(equipes)
-	fmt.Println(string(equipeJSON))
 
 	w.Write(equipeJSON)
 	db.Close()

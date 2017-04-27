@@ -89,7 +89,8 @@ func (a *AcquisitionService) PostActionType(w http.ResponseWriter, r *http.Reque
 		db.NewRecord(newActionType) // => return `false` after `user` created
 	} else {
 		w.Header().Set("Content-Type", "application/text")
-		w.Write([]byte("erreur lors de la transaction"))
+		msg := map[string]string{"erreur": "Transaction annulée"}
+		Message(w, msg, http.StatusBadRequest)
 	}
 
 	defer r.Body.Close()
