@@ -120,7 +120,7 @@ func (a *AcquisitionService) GetActionsTypeHandler(w http.ResponseWriter, r *htt
 		db.Where("ID = ?", id).Find(&action)
 		Message(w, action, http.StatusOK)
 	} else {
-		msg := map[string]string{"error": "Veuillez entrer un nom d'équipe ou en créer une préalablement"}
+		msg := map[string]string{"error": "non trouvé"}
 		Message(w, msg, http.StatusNotFound)
 	}
 }
