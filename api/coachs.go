@@ -1,8 +1,6 @@
 //
 // Fichier     : coaches.go
-// Développeur : ?
-//
-// Commentaire expliquant le code, les fonctions...
+// Développeur : Mehdi Laribi
 //
 
 package api
@@ -19,31 +17,51 @@ import (
 	"github.com/jinzhu/gorm"
 
 	//Import driver
+
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 )
 
-// TODO: Changer le nom du fichier et ses références pour coach au pluriel...
-//		http://www.wordhippo.com/what-is/the-plural-of/coach.html
-// TODO: Linter le code...
-// TODO: Gérer les erreurs comme du monde
-// TODO: Enlever tous ce qui est log, print...
+//GetCoachesHandler :  fetch all created coaches
+//Si l'identifiant est vide, la fonction retourne tous les coachs
+func (a *AcquisitionService) GetCoachesHandler(w http.ResponseWriter, r *http.Request) {
 
-//GetCoachsHandler :  fetch all created coachs
-func (a *AcquisitionService) GetCoachsHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Content-Type", "Application/json")
+
 	db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
 	defer db.Close()
+
 	if err != nil {
-		panic(err)
+		a.ErrorHandler(w, err)
+		return
 	}
 
-	coach := []Coaches{}
+	vars := mux.Vars(r)
 
-	db.Find(&coach)
+	idCoach := strings.ToLower(strings.TrimSpace(vars["coachID"]))
 
-	coachJSON, _ := json.Marshal(coach)
+	if idCoach == "" {
+		coaches := []Coaches{}
+		db.Find(&coaches)
 
-	w.Header().Set("Content-Type", "Application/json")
-	w.Write(coachJSON)
+		for i := 0; i < len(coaches); i++ {
+			var c Coaches
+			c = coaches[i]
+			coaches[i] = AjoutCoachInfo(db, c)
+		}
+
+		coachJSON, _ := json.Marshal(coaches)
+		w.Write(coachJSON)
+	} else {
+		coach := Coaches{}
+		var id = vars["ID"]
+		db.First(coach, id)
+		coach = AjoutCoachInfo(db, coach)
+
+		coachJSON, _ := json.Marshal(coach)
+		w.Write(coachJSON)
+	}
+
 	db.Close()
 }
 
@@ -52,46 +70,68 @@ func (a *AcquisitionService) PostCoachHandler(w http.ResponseWriter, r *http.Req
 	db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
 	defer db.Close()
 	if err != nil {
-		panic(err)
+		a.ErrorHandler(w, err)
+		return
 	}
 
 	body, err := ioutil.ReadAll(r.Body)
-
 	if err != nil {
-		panic(err)
+		a.ErrorHandler(w, err)
+		return
 	}
 
-	var newCoach Coaches
-	var dat map[string]interface{}
-	err = json.Unmarshal(body, &newCoach)
-	err = json.Unmarshal(body, &dat)
-	num := dat["Teams"]
+	if len(body) > 0 {
+		db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
 
-	Team := Teams{}
+		defer db.Close()
 
-	db.First(&Team, num)
+		if err != nil {
+			a.ErrorHandler(w, err)
+			return
+		}
 
-	newCoach.Teams = append(newCoach.Teams, Team)
+		var newCoach Coaches
+		var dat map[string]string
+		err = json.Unmarshal(body, &newCoach)
+		err = json.Unmarshal(body, &dat)
 
-	if err != nil {
-		panic(err)
-	}
+		if err != nil {
+			a.ErrorHandler(w, err)
+			return
+		}
 
-	if db.NewRecord(newCoach) {
+		var seaID = dat["SeasonID"]
+
+		var num = dat["TeamsIDs"]
+		ids := strings.Split(num, ",")
+
+		Team := Teams{}
+		db.Find(&Team, ids)
+
+		Saison := Seasons{}
+		db.Find(&Saison, seaID)
+
 		db.Create(&newCoach)
-		w.Header().Set("Content-Type", "application/text")
-		w.WriteHeader(http.StatusCreated)
+		newCoach = AjoutCoachInfo(db, newCoach)
+		newCoach.Teams = append(newCoach.Teams, Team)
+		newCoach.Season = Saison
 
+		db.Model(&Team).Association("Teams").Append(newCoach)
+		w.WriteHeader(http.StatusCreated)
+	} else if err != nil {
+		a.ErrorHandler(w, err)
+		return
 	} else {
 		w.Header().Set("Content-Type", "application/text")
 		w.Write([]byte("erreur"))
+		msg := map[string]string{"error": "Veuillez remplir tous les champs."}
+		Message(w, msg, http.StatusBadRequest)
 	}
 
 	defer r.Body.Close()
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(body)
-
 }
 
 //AssignerEquipeCoach : Assigne des equipes au coach
@@ -122,7 +162,19 @@ func (a *AcquisitionService) AssignerEquipeCoach(w http.ResponseWriter, r *http.
 		db.Model(&c).Where("ID = ?", id).Updates(c)
 
 		Message(w, "Teams for this coach : OK", http.StatusCreated)
-
 	}
+
+}
+
+// AjoutCoachInfo : Ajout des équipes au coach
+func AjoutCoachInfo(db *gorm.DB, c Coaches) Coaches {
+
+	var ts []Teams
+	ids := strings.Split(c.TeamsIDs, ",")
+	db.Where("ID in (?)", ids).Find(&ts)
+	if len(ts) > 0 {
+		c.Teams = ts
+	}
+	return c
 
 }

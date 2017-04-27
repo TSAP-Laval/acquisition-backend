@@ -1,8 +1,6 @@
 //
 // Fichier     : actions.go
-// Développeur : ?
-//
-// Commentaire expliquant le code, les fonctions...
+// Développeur : Mehdi Laribi
 //
 
 package api
@@ -20,10 +18,6 @@ import (
 	//Import DB driver
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 )
-
-// TODO: Linter le code...
-// TODO: Gérer les erreurs comme du monde
-// TODO: Enlever tous ce qui est log, print...
 
 // GetMovementTypeHandler Gestion du select des types de mouvements
 func (a *AcquisitionService) GetMovementTypeHandler(w http.ResponseWriter, r *http.Request) {
@@ -94,8 +88,9 @@ func (a *AcquisitionService) PostActionType(w http.ResponseWriter, r *http.Reque
 		db.Create(&newActionType)
 		db.NewRecord(newActionType) // => return `false` after `user` created
 	} else {
-		// TODO: Gérer l'erreur
-		return
+		w.Header().Set("Content-Type", "application/text")
+		msg := map[string]string{"erreur": "Transaction annulée"}
+		Message(w, msg, http.StatusBadRequest)
 	}
 
 	defer r.Body.Close()

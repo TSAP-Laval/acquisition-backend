@@ -14,6 +14,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/gorilla/mux"
@@ -229,4 +230,36 @@ func (a *AcquisitionService) ErrorHandler(w http.ResponseWriter, err error) {
 		a.ErrorWrite(err.Error(), w)
 	}
 	return
+}
+
+// GetEquipeParSport : Obtient les equipes selon un sport particulier
+func (a *AcquisitionService) GetEquipeParSport(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Content-Type", "Application/json")
+
+	vars := mux.Vars(r)
+	db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
+	defer db.Close()
+
+	if err != nil {
+		a.ErrorHandler(w, err)
+		return
+	}
+
+	equipes := []Teams{}
+	idSport := strings.ToLower(strings.TrimSpace(vars["teamID"]))
+	i := strings.Index(idSport, "=")
+	idstring := idSport[i+1:]
+	idSp, errs := strconv.Atoi(idstring)
+	if errs != nil {
+		a.ErrorHandler(w, err)
+		return
+	}
+	db.Where("sport_id=  ?", idSp).Find(&equipes)
+
+	equipeJSON, _ := json.Marshal(equipes)
+
+	w.Write(equipeJSON)
+	db.Close()
+
 }
