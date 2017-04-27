@@ -95,6 +95,11 @@ func (a *AcquisitionService) PostCoachHandler(w http.ResponseWriter, r *http.Req
 		err = json.Unmarshal(body, &newCoach)
 		err = json.Unmarshal(body, &dat)
 
+		if err != nil {
+			a.ErrorHandler(w, err)
+			return
+		}
+
 		var seaID = dat["SeasonID"]
 
 		var num = dat["TeamsIDs"]
