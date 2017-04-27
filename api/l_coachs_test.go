@@ -14,6 +14,9 @@ import (
 	"testing"
 
 	"github.com/TSAP-Laval/acquisition-backend/api"
+
+	//Mehdi Fix
+	_ "github.com/lib/pq"
 )
 
 // TestPostNewCoach: test de la methode POST
@@ -23,7 +26,7 @@ func TestPostNewCoach(t *testing.T) {
 			"Fname": "MEHEHHEHEHEDi", 
 			"Lname": "Lariihhhiibi", 
 			"Actif": "true", 
-			"Email": "Mehdi@hotmale.com"
+			"Email": "Mehdi@hotmale.com",
 			"TeamsIDs": "1,2",
 			"SeasonID": 5
 		}`)
