@@ -94,12 +94,12 @@ func (a *AcquisitionService) RemplirBD(w http.ResponseWriter, r *http.Request) {
 		db.Create(&action2)
 	}
 
-	coach := Coaches{Fname: "alex", Lname: "Des", Email: "alex@hotmail.com", PassHash: "test", TeamsIDs: "3", Actif: "false", SeasonID: "2"}
+	coach := Coaches{Fname: "alex", Lname: "Des", Email: "alex@hotmail.com", PassHash: "test", TeamsIDs: "3", Actif: "false", SeasonID: 2}
 	if db.NewRecord(coach) {
 		db.Create(&coach)
 	}
 
-	coach2 := Coaches{Fname: "Mehdi", Lname: "Laribi", Email: "m.laribi@hotmail.com", SeasonID: "1", TeamsIDs: "1,2,3", Actif: "true"}
+	coach2 := Coaches{Fname: "Mehdi", Lname: "Laribi", Email: "m.laribi@hotmail.com", SeasonID: 1, TeamsIDs: "1,2,3", Actif: "true"}
 	if db.NewRecord(coach2) {
 		db.Create(&coach2)
 	}

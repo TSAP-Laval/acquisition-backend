@@ -24,6 +24,8 @@ func TestPostNewCoach(t *testing.T) {
 			"Lname": "Lariihhhiibi", 
 			"Actif": "true", 
 			"Email": "Mehdi@hotmale.com"
+			"TeamsIDs": "1,2",
+			"SeasonID": 5
 		}`)
 
 	request, err := http.NewRequest("POST", baseURL+"/api/coaches/addcoach", reader)
@@ -34,7 +36,6 @@ func TestPostNewCoach(t *testing.T) {
 	}
 
 	bodyBuffer, _ := ioutil.ReadAll(res.Body)
-	t.Log(bodyBuffer)
 	var l api.Coaches
 	err = json.Unmarshal(bodyBuffer, &l)
 	if err != nil {

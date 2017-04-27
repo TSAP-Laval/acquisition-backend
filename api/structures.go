@@ -197,7 +197,7 @@ type Coaches struct {
 	TeamsIDs     string
 	Actif        string
 	Season       Seasons
-	SeasonID     string
+	SeasonID     int
 }
 
 // CoachTeam table de relations entre entraineurs et équipes
