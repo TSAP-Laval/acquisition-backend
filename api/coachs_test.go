@@ -23,8 +23,7 @@ func TestPostNewCoach(t *testing.T) {
 			"Fname": "MEHEHHEHEHEDi", 
 			"Lname": "Lariihhhiibi", 
 			"Actif": "true", 
-			"Email": "Mehdi@hotmale.com",
-			"SeasonID": "1"
+			"Email": "Mehdi@hotmale.com"
 		}`)
 
 	request, err := http.NewRequest("POST", baseURL+"/api/coaches/addcoach", reader)
@@ -63,10 +62,6 @@ func TestPostNewCoach(t *testing.T) {
 	if l.Email != "Mehdi@hotmale.com" {
 		t.Error("Actif expected: ", l.Actif)
 	}
-
-	if l.SeasonID != "1" {
-		t.Error("SeasonID expected: ", l.SeasonID)
-	}
 }
 
 //TestGetCoaches : test de la methode GET
@@ -93,7 +88,7 @@ func TestGetCoaches(t *testing.T) {
 
 	// On s'assure qu'il y ait au moins un coach
 	if len(co) <= 0 {
-		t.Errorf("Number of teams expected: %d", len(co))
+		t.Errorf("Number of Coaches expected: %d", len(co))
 	}
 
 }
