@@ -29,6 +29,7 @@ func (a *AcquisitionService) FaireBD(w http.ResponseWriter, r *http.Request) {
 	}
 
 	db.DropTableIfExists("admins")
+	db.DropTableIfExists("reception_types")
 	db.DropTableIfExists("actions")
 	db.DropTableIfExists("videos")
 	db.DropTableIfExists("player_position_game_team")
@@ -49,6 +50,7 @@ func (a *AcquisitionService) FaireBD(w http.ResponseWriter, r *http.Request) {
 	db.DropTableIfExists("positions")
 	db.DropTableIfExists("movements_type")
 
+	db.AutoMigrate(&ReceptionType{})
 	db.AutoMigrate(&Admins{})
 	db.AutoMigrate(&Seasons{})
 	db.AutoMigrate(&Sports{})
@@ -79,6 +81,38 @@ func (a *AcquisitionService) RemplirBD(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		fmt.Println("ERROR : ")
 		fmt.Println(err)
+	}
+	reception := ReceptionType{Name: "Ballon conquis aérien"}
+	if db.NewRecord(reception) {
+		db.Create(&reception)
+	}
+	reception2 := ReceptionType{Name: "Ballon conquis sol"}
+	if db.NewRecord(reception2) {
+		db.Create(&reception2)
+	}
+	reception3 := ReceptionType{Name: "Ballon reçu sol"}
+	if db.NewRecord(reception3) {
+		db.Create(&reception3)
+	}
+	reception4 := ReceptionType{Name: "Ballon reçu aérien"}
+	if db.NewRecord(reception4) {
+		db.Create(&reception4)
+	}
+	reception5 := ReceptionType{Name: "Ballon reçu sur faute de l’adversaire"}
+	if db.NewRecord(reception5) {
+		db.Create(&reception5)
+	}
+	reception6 := ReceptionType{Name: "Ballon reçu sur remise en jeu"}
+	if db.NewRecord(reception6) {
+		db.Create(&reception6)
+	}
+	reception7 := ReceptionType{Name: "Passe reçue au sol"}
+	if db.NewRecord(reception7) {
+		db.Create(&reception7)
+	}
+	reception8 := ReceptionType{Name: "Passe reçue aérien"}
+	if db.NewRecord(reception8) {
+		db.Create(&reception8)
 	}
 
 	user := ActionsType{Description: "Passe offensive", TypeAction: "reception et action", Name: "Passe offensive"}
@@ -201,7 +235,7 @@ func (a *AcquisitionService) RemplirBD(w http.ResponseWriter, r *http.Request) {
 		db.Create(&equipe5)
 	}
 
-	Uneaction := Actions{ActionTypeID: 1, ZoneID: 1, GameID: 1, X1: 0, Y1: 0, X2: 0, Y2: 0, X3: 0, Y3: 0, Time: 10, HomeScore: 0, GuestScore: 0, PlayerID: 1}
+	Uneaction := Actions{ActionTypeID: 1, ReceptionTypeID: 1, ZoneID: 1, GameID: 1, X1: 0, Y1: 0, X2: 0, Y2: 0, X3: 0, Y3: 0, Time: 10, HomeScore: 0, GuestScore: 0, PlayerID: 1}
 	if db.NewRecord(Uneaction) {
 		db.Create(&Uneaction)
 	}

@@ -65,6 +65,26 @@ func (a *AcquisitionService) GetAllActionsTypes(w http.ResponseWriter, r *http.R
 
 	defer db.Close()
 }
+func (a *AcquisitionService) GetAllReceptionTypes(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
+	defer db.Close()
+
+	if err != nil {
+		a.ErrorHandler(w, err)
+		return
+	}
+
+	receptionType := []ReceptionType{}
+	db.Find(&receptionType)
+
+	receptionTypeJSON, _ := json.Marshal(receptionType)
+
+	w.Header().Set("Content-Type", "Application/json")
+	w.Write(receptionTypeJSON)
+
+	defer db.Close()
+}
 
 //PostActionType : Create new action type
 func (a *AcquisitionService) PostActionType(w http.ResponseWriter, r *http.Request) {
