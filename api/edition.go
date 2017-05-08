@@ -82,6 +82,8 @@ func (a *AcquisitionService) PostAction(w http.ResponseWriter, r *http.Request) 
 		a.ErrorHandler(w, err)
 		return
 	}
+	switch r.Method {
+	case "POST":
 
 	if db.NewRecord(t) {
 		db.Create(&t)
@@ -93,5 +95,9 @@ func (a *AcquisitionService) PostAction(w http.ResponseWriter, r *http.Request) 
 		w.Header().Set("Content-Type", "application/text")
 		w.Write([]byte("erreur"))
 	}
+	case "OPTIONS":
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.WriteHeader(http.StatusOK)
+	}	
 
 }

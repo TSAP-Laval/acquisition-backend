@@ -135,7 +135,7 @@ func (a *AcquisitionService) getRouter() http.Handler {
 	api.HandleFunc("/bd", a.FaireBD).Methods("POST")
 	// Actions
 	api.HandleFunc("/actions", a.GetActions).Methods("GET")
-	api.HandleFunc("/actions", a.PostAction).Methods("POST")
+	api.HandleFunc("/actions", a.PostAction).Methods("POST","OPTIONS")
 	// Joueurs
 	api.HandleFunc("/joueurs", a.HandleJoueur).Methods("POST")
 	api.HandleFunc("/joueurs/{id}", a.HandleJoueur).Methods("PUT", "OPTIONS", "DELETE")
