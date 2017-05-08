@@ -65,6 +65,8 @@ func (a *AcquisitionService) GetAllActionsTypes(w http.ResponseWriter, r *http.R
 
 	defer db.Close()
 }
+
+// GetAllReceptionTypes gestion du select pour les types de reception
 func (a *AcquisitionService) GetAllReceptionTypes(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
@@ -77,12 +79,7 @@ func (a *AcquisitionService) GetAllReceptionTypes(w http.ResponseWriter, r *http
 
 	receptionType := []ReceptionType{}
 	db.Find(&receptionType)
-
-	receptionTypeJSON, _ := json.Marshal(receptionType)
-
-	w.Header().Set("Content-Type", "Application/json")
-	w.Write(receptionTypeJSON)
-
+	Message(w, receptionType, http.StatusOK)
 	defer db.Close()
 }
 
