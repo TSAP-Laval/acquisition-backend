@@ -84,20 +84,19 @@ func (a *AcquisitionService) PostAction(w http.ResponseWriter, r *http.Request) 
 	}
 	switch r.Method {
 	case "POST":
+		if db.NewRecord(t) {
+			db.Create(&t)
+			db.NewRecord(t)
+			w.Header().Set("Content-Type", "application/text")
 
-	if db.NewRecord(t) {
-		db.Create(&t)
-		db.NewRecord(t)
-		w.Header().Set("Content-Type", "application/text")
+		} else {
 
-	} else {
-
-		w.Header().Set("Content-Type", "application/text")
-		w.Write([]byte("erreur"))
-	}
+			w.Header().Set("Content-Type", "application/text")
+			w.Write([]byte("erreur"))
+		}
 	case "OPTIONS":
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.WriteHeader(http.StatusOK)
-	}	
+	}
 
 }

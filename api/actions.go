@@ -71,7 +71,6 @@ func (a *AcquisitionService) GetAllReceptionTypes(w http.ResponseWriter, r *http
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
 	defer db.Close()
-
 	if err != nil {
 		a.ErrorHandler(w, err)
 		return
@@ -119,6 +118,8 @@ func (a *AcquisitionService) PostActionType(w http.ResponseWriter, r *http.Reque
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(body)
 }
+
+//GetActionsTypeHandler : Get actionstype
 func (a *AcquisitionService) GetActionsTypeHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	vars := mux.Vars(r)
