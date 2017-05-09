@@ -23,7 +23,7 @@ import (
 
 func (a *AcquisitionService) PostSaison(w http.ResponseWriter, r *http.Request) {
 	db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
-
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	defer db.Close()
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -56,7 +56,7 @@ func (a *AcquisitionService) PostSaison(w http.ResponseWriter, r *http.Request) 
 
 func (a *AcquisitionService) GetSeasons(w http.ResponseWriter, r *http.Request) {
 	db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
-
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	defer db.Close()
 	if err != nil {
 		a.ErrorHandler(w, err)
