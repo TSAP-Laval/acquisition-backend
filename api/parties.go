@@ -21,7 +21,7 @@ import (
 	"github.com/jasonwinn/geocoder"
 	"github.com/jinzhu/gorm"
 
-	// DarkSky api for historical weather
+	// DarkSky api pour la météo historique
 	forecast "github.com/mlbright/forecast/v2"
 )
 
@@ -75,18 +75,13 @@ func (a *AcquisitionService) PartiesHandler(w http.ResponseWriter, r *http.Reque
 				msg := map[string]string{"error": "Une partie de même date avec les mêmes equipes existe déjà!"}
 				Message(w, msg, http.StatusUnauthorized)
 			} else {
+				db.Create(&g)
 				if db.NewRecord(g) {
-					db.Create(&g)
-					if db.NewRecord(g) {
-						msg := map[string]string{"error": "Une erreur est survenue lors de la création de la partie. Veuillez réessayer!"}
-						Message(w, msg, http.StatusInternalServerError)
-					} else {
-						g = AjoutInfosPartie(db, g)
-						Message(w, g, http.StatusCreated)
-					}
+					msg := map[string]string{"error": "Une erreur est survenue lors de la création de la partie. Veuillez réessayer!"}
+					Message(w, msg, http.StatusInternalServerError)
 				} else {
-					msg := map[string]string{"error": "La partie existe déjà dans la base de donnée!"}
-					Message(w, msg, http.StatusBadRequest)
+					g = AjoutInfosPartie(db, g)
+					Message(w, g, http.StatusCreated)
 				}
 			}
 		} else {

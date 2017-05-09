@@ -84,9 +84,7 @@
 
 #### Dossier pour les configurations Nginx
 
-  ```bash
-  $ vi /usr/local/etc/nginx/nginx.conf
-  ```
+  ```$ vi /usr/local/etc/nginx/nginx.conf```
 
 ### Procédure pour tester l'API
   ```bash
@@ -97,7 +95,7 @@ enlever le -v pour un résultat abrégé
 ### Pour tester le code coverage en local
 
   ```bash
-  go test -v -cover -race -coverprofile=coverage.out ./api
+  $ go test -v -cover -race -coverprofile=coverage.out ./api
   ```
   pour voir les résultats et les correctifs à apporter en format html (ouvre le navigateur par défaut)
 

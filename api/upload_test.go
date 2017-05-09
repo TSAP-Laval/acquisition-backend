@@ -38,7 +38,7 @@ type MessageGameID struct {
 const videoPath = "../videos"
 const testPath = "../test"
 
-var gameID [4]string
+var gameID [6]string
 
 // Simule l'envoie d'aucune video
 func TestUploadNoVideo(t *testing.T) {
@@ -69,7 +69,7 @@ func TestUploadNoVideo(t *testing.T) {
 	var me MessageError
 	responseMapping(&me, res)
 
-	if !strings.Contains(me.Err, "Aucun fichier envoyé") {
+	if !strings.Contains(me.Err, "Aucun fichier n'a été envoyé ! Veuillez réessayer !") {
 		t.Errorf("Error expected: %s", me.Err)
 	}
 }
@@ -237,6 +237,100 @@ func TestUploadVideoWEBM(t *testing.T) {
 
 	if res.StatusCode != 201 {
 		t.Errorf("Response code expected: %d", res.StatusCode)
+	}
+}
+
+// Simule l'envoie d'une video au format mpg
+func TestUploadVideoMPG(t *testing.T) {
+	reader = strings.NewReader("")
+	req, err := http.NewRequest("POST", baseURL+"/api/parties", reader)
+	res, err := http.DefaultClient.Do(req)
+
+	var m MessageSuccess
+	responseMapping(&m, res)
+	gameID[4] = m.GameID
+
+	if gameID[4] == "" || gameID[4] == "0" {
+		t.Errorf("Game ID expected: %s", gameID[4])
+	}
+
+	path, err := filepath.Abs(testPath + "/small.mpg")
+	if err != nil {
+		t.Error(err)
+	}
+
+	res, err = sendUploadRequest([]string{path}, t, gameID[4])
+	if err != nil {
+		t.Error(err)
+	}
+
+	if res.StatusCode != 201 {
+		t.Errorf("Response code expected: %d", res.StatusCode)
+	}
+}
+
+// Simule l'envoie d'une video au format mov
+func TestUploadVideoMOV(t *testing.T) {
+	reader = strings.NewReader("")
+	req, err := http.NewRequest("POST", baseURL+"/api/parties", reader)
+	res, err := http.DefaultClient.Do(req)
+
+	var m MessageSuccess
+	responseMapping(&m, res)
+	gameID[5] = m.GameID
+
+	if gameID[5] == "" || gameID[5] == "0" {
+		t.Errorf("Game ID expected: %s", gameID[5])
+	}
+
+	path, err := filepath.Abs(testPath + "/small.mov")
+	if err != nil {
+		t.Error(err)
+	}
+
+	res, err = sendUploadRequest([]string{path}, t, gameID[5])
+	if err != nil {
+		t.Error(err)
+	}
+
+	if res.StatusCode != 201 {
+		t.Errorf("Response code expected: %d", res.StatusCode)
+	}
+}
+
+// Simule l'envoie d'une video au format wmv
+func TestUploadVideoWMV(t *testing.T) {
+	reader = strings.NewReader("")
+	req, err := http.NewRequest("POST", baseURL+"/api/parties", reader)
+	res, err := http.DefaultClient.Do(req)
+
+	var m MessageSuccess
+	responseMapping(&m, res)
+	gameID[2] = m.GameID
+
+	if gameID[2] == "" || gameID[2] == "0" {
+		t.Errorf("Game ID expected: %s", gameID[2])
+	}
+
+	path, err := filepath.Abs(testPath + "/small.wmv")
+	if err != nil {
+		t.Error(err)
+	}
+
+	res, err = sendUploadRequest([]string{path}, t, gameID[2])
+	if err != nil {
+		t.Error(err)
+	}
+
+	if res.StatusCode != 400 {
+		t.Errorf("Response code expected: %d", res.StatusCode)
+	}
+
+	var me MessageError
+	responseMapping(&me, res)
+
+	if !strings.Contains(me.Err, "n'est pas une vidéo de format valide") {
+		t.Errorf("Error expected: %s", me.Err)
 	}
 }
 
@@ -512,7 +606,7 @@ func newfileUploadRequest(paths []string, gameID string) (*http.Request, error) 
 		}
 		file.Close()
 
-		part, err := writer.CreateFormFile("file", fi.Name())
+		part, err := writer.CreateFormFile(fi.ModTime().Format("Mon Jan 02 2006 15:04:05 GMT-0400 (EST)"), fi.Name())
 		if err != nil {
 			return nil, err
 		}

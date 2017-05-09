@@ -23,34 +23,31 @@ _testmain.go
 *.test
 *.prof
 
-# Output of the go coverage tool, specifically when used with LiteIDE
-*.out
-
 # External packages folder
 vendor/
 
 # VSCODE
 .vscode
 
-#MAC
+# MAC
 .DS_Store
 
-#Debug
+# Debug
 debug
 debug~
 
-#Main (compilé)
+# Main (compilé)
 main
 
-#Le dossier contenant les videos
-video
+# Le dossier contenant les videos
+videos
 
 # SQL
 *.sql
 
-#TXT
+# TXT
 *.txt
 
-# coverage
+# Code coverage
 coverage
 coverage.out
