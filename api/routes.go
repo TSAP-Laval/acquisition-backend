@@ -10,12 +10,14 @@ package api
 import (
 	"io"
 	"log"
+	"time"
 
 	"encoding/json"
 
 	"net/http"
 
 	"github.com/braintree/manners"
+	"github.com/didip/tollbooth"
 	"github.com/gorilla/mux"
 )
 
@@ -32,6 +34,7 @@ type AcquisitionConfiguration struct {
 type Keys struct {
 	Geodecoder string
 	Weather    string
+	JWT        string
 }
 
 // AcquisitionService represents a single service instance
@@ -95,11 +98,31 @@ func (a *AcquisitionService) Middleware(h http.Handler) http.Handler {
 	})
 }
 
+// RateLimiter handler the rate limiter middlewares used by the endpoints
+// 2 requests per second maximum
+func (a *AcquisitionService) RateLimiter(h http.Handler) http.Handler {
+	return tollbooth.LimitHandler(tollbooth.NewLimiter(20, time.Second), h)
+}
+
+// AddMiddleware adds middleware to a Handler
+func AddMiddleware(h http.Handler, middleware ...func(http.Handler) http.Handler) http.Handler {
+	for _, mw := range middleware {
+		h = mw(h)
+	}
+	return h
+}
+
 func (a *AcquisitionService) getRouter() http.Handler {
 	r := mux.NewRouter()
 
 	api := r.PathPrefix("/api").Subrouter()
 
+	// Auth
+	api.Handle("/auth",
+		AddMiddleware(
+			http.HandlerFunc(a.Login),
+			a.RateLimiter,
+		)).Methods("POST", "OPTIONS")
 	// Actions
 	api.HandleFunc("/action/movementType", a.GetMovementTypeHandler).Methods("GET")
 	api.HandleFunc("/action/actiontype", a.GetAllActionsTypes).Methods("GET")
@@ -116,7 +139,12 @@ func (a *AcquisitionService) getRouter() http.Handler {
 	// Videos
 	api.HandleFunc("/parties/{id}/videos/{part}", a.VideoHandler).Methods("GET")
 	// Terrains
-	api.HandleFunc("/terrains", a.GetTerrainsHandler).Methods("GET")
+	api.Handle("/terrains",
+		AddMiddleware(
+			http.HandlerFunc(a.GetTerrainsHandler),
+			a.JWTMiddleware,
+			a.RateLimiter,
+		)).Methods("GET")
 	api.HandleFunc("/terrains/{nom}", a.GetTerrainHandler).Methods("GET")
 	api.HandleFunc("/terrains/{id}", a.TerrainsHandler).Methods("DELETE", "PUT")
 	api.HandleFunc("/terrains", a.CreerTerrainHandler).Methods("POST")
