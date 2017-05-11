@@ -15,6 +15,12 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+// Claims used to store data in jwt
+type Claims struct {
+	Admin bool `json:"admin"`
+	jwt.StandardClaims
+}
+
 // JWTMiddleware handler the JWT middleware
 func (a *AcquisitionService) JWTMiddleware(h http.Handler) http.Handler {
 	return jwtmiddleware.New(jwtmiddleware.Options{
@@ -74,7 +80,7 @@ func (a *AcquisitionService) Login(w http.ResponseWriter, r *http.Request) {
 		}
 
 		body, err := ioutil.ReadAll(r.Body)
-		fmt.Println(string(body))
+
 		var ad Admins
 		err = json.Unmarshal(body, &ad)
 		if err != nil {
@@ -84,40 +90,65 @@ func (a *AcquisitionService) Login(w http.ResponseWriter, r *http.Request) {
 
 		pass := []byte(ad.PassHash)
 
-		fmt.Println("Email : ", ad.Email)
-		fmt.Println("Pass : ", pass)
 		db.Where("email = ?", ad.Email).First(&ad)
 
 		if ad.Email != "" {
-			if err = bcrypt.CompareHashAndPassword([]byte(ad.PassHash), pass); err != nil {
-				a.ErrorHandler(w, err)
-				return
+			if err = bcrypt.CompareHashAndPassword([]byte(ad.PassHash), pass); err == nil {
+				if ad.TokenLogin != "" {
+					token, _ := jwt.ParseWithClaims(ad.TokenLogin, &Claims{}, func(token *jwt.Token) (interface{}, error) {
+						return []byte(a.keys.JWT), nil
+					})
+
+					if claims, ok := token.Claims.(*Claims); ok && token.Valid {
+						fmt.Println(time.Now().Unix())
+						fmt.Println(claims.ExpiresAt)
+						if !claims.VerifyExpiresAt((time.Now().Unix()), false) {
+							setToken(db, ad, w, a)
+							return
+						}
+						tokenString, _ := token.SignedString([]byte(a.keys.JWT))
+						msg := map[string]string{"token": tokenString}
+						Message(w, msg, http.StatusOK)
+						return
+					}
+				} else {
+					setToken(db, ad, w, a)
+					return
+				}
 			}
-
-			// Create the token
-			token := jwt.New(jwt.SigningMethodHS256)
-
-			// Create a map to store our claims
-			claims := token.Claims.(jwt.MapClaims)
-
-			// Set token claims
-			claims["admin"] = true
-			claims["name"] = "admin"
-			claims["exp"] = time.Now().Add(time.Hour * 24).Unix()
-
-			// Sign the token with our secret
-			tokenString, _ := token.SignedString([]byte(a.keys.JWT))
-			msg := map[string]string{"token": tokenString}
-
-			Message(w, msg, http.StatusOK)
-		} else {
-			msg := map[string]string{"error": "Le mot de passe ou l'adresse email entrées est invalide."}
-			Message(w, msg, http.StatusBadRequest)
 		}
+		// Dans le cas où le mot de passe où l'adresse courriel est invalide,
+		// on envoie un message d'erreur au client.
+		msg := map[string]string{"error": "Le mot de passe ou l'adresse email entrées est invalide."}
+		Message(w, msg, http.StatusBadRequest)
 	case "OPTIONS":
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.WriteHeader(http.StatusOK)
 	}
+}
+
+func setToken(db *gorm.DB, ad Admins, w http.ResponseWriter, a *AcquisitionService) {
+	// Set token claims
+	claims := Claims{}
+	claims.Admin = true
+	claims.ExpiresAt = time.Now().Add(time.Hour * 24).Unix()
+
+	// Create the token
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+
+	// Sign the token with our secret, in case the secret is not set,
+	// an empty string will be used
+	tokenString, _ := token.SignedString([]byte(a.keys.JWT))
+
+	var adm Admins
+	adm.Email = ad.Email
+	adm.PassHash = ad.PassHash
+	adm.TokenLogin = tokenString
+	db.Model(&Admins{}).Where("email = ?", ad.Email).Updates(adm)
+	fmt.Printf("%o", adm)
+
+	msg := map[string]string{"token": tokenString}
+	Message(w, msg, http.StatusOK)
 }
 
 // Authenticate provides Authentication middleware for handlers
@@ -133,7 +164,6 @@ func (a *AcquisitionService) Authenticate(next http.Handler) http.Handler {
 			token = strings.TrimPrefix(token, "Bearer ")
 		}
 
-		// If the token is empty...
 		if token == "" {
 			// If we get here, the required token is missing
 			http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
