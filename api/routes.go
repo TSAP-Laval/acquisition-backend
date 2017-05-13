@@ -124,15 +124,28 @@ func (a *AcquisitionService) getRouter() http.Handler {
 			a.RateLimiter,
 		)).Methods("POST", "OPTIONS")
 	// Actions
-	api.HandleFunc("/action/movementType", a.GetMovementTypeHandler).Methods("GET")
-	api.HandleFunc("/action/actiontype", a.GetAllActionsTypes).Methods("GET")
-	api.HandleFunc("/action/addactiontype", a.PostActionType).Methods("POST")
-	api.HandleFunc("/actionType/{id}", a.GetActionsTypeHandler).Methods("GET")
-	api.HandleFunc("/action/addactiontype", a.PostActionType).Methods("POST")
+	api.Handle("/actions/types/{id}",
+		AddMiddleware(
+			a.SecureHeaders(http.HandlerFunc(a.GetActionsTypeHandler)),
+			a.JWTMiddleware,
+			a.RateLimiter,
+		)).Methods("GET")
+	api.Handle("/actions/types",
+		AddMiddleware(
+			a.SecureHeaders(http.HandlerFunc(a.GetActionsTypeHandler)),
+			a.JWTMiddleware,
+			a.RateLimiter,
+		)).Methods("GET")
+	api.Handle("/actions/types",
+		AddMiddleware(
+			a.SecureHeaders(http.HandlerFunc(a.CreerActionsType)),
+			a.JWTMiddleware,
+			a.RateLimiter,
+		)).Methods("POST")
 	//Coachs
-	api.HandleFunc("/coachs/coachs", a.GetCoachsHandler).Methods("GET")
-	api.HandleFunc("/coachs/addcoach", a.PostCoachHandler).Methods("POST")
-	api.HandleFunc("/coachs/addCoachTeam/{id}", a.AssignerEquipeCoach).Methods("PUT")
+	api.HandleFunc("/coaches", a.GetCoachsHandler).Methods("GET")
+	api.HandleFunc("/coaches", a.PostCoachHandler).Methods("POST")
+	api.HandleFunc("/coaches/{id}", a.AssignerEquipeCoach).Methods("PUT")
 
 	// Upload
 	api.Handle("/upload",
@@ -238,11 +251,11 @@ func (a *AcquisitionService) getRouter() http.Handler {
 	api.HandleFunc("/joueurs/{id}", a.HandleJoueur).Methods("PUT", "OPTIONS", "DELETE")
 	api.HandleFunc("/joueurs", a.GetJoueurs).Methods("GET")
 	// Saisons
-	api.HandleFunc("/saison", a.GetSeasons).Methods("GET")
-	api.HandleFunc("/saison", a.PostSaison).Methods("POST")
+	api.HandleFunc("/saisons", a.GetSeasons).Methods("GET")
+	api.HandleFunc("/saisons", a.PostSaison).Methods("POST")
 	// Autres
 	api.HandleFunc("/sports", a.GetSports).Methods("GET")
-	api.HandleFunc("/niveau", a.GetNiveau).Methods("GET")
+	api.HandleFunc("/niveaux", a.GetNiveau).Methods("GET")
 	return a.Middleware(api)
 }
 

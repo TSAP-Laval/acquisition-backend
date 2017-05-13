@@ -35,6 +35,7 @@ vendor/
 # Debug
 debug
 debug~
+debug.test
 
 # Main (compilé)
 main

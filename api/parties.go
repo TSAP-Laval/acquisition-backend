@@ -73,7 +73,7 @@ func (a *AcquisitionService) PartiesHandler(w http.ResponseWriter, r *http.Reque
 
 			if len(game) > 0 {
 				msg := map[string]string{"error": "Une partie de même date avec les mêmes equipes existe déjà!"}
-				Message(w, msg, http.StatusUnauthorized)
+				Message(w, msg, http.StatusBadRequest)
 			} else {
 				db.Create(&g)
 				if db.NewRecord(g) {

@@ -62,6 +62,29 @@ func TestGetVideo(t *testing.T) {
 
 }
 
+// TestGetVideoInexistante test la récupération d'une vidéo inexistante dans la base de données
+func TestGetVideoInexistante(t *testing.T) {
+	reader = strings.NewReader("")
+	request, err := http.NewRequest("GET", baseURL+"/api/parties/"+gameID[0]+"/videos/10", reader)
+	res, err := SecureRequest(request)
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	if res.StatusCode != 404 {
+		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
+		return
+	}
+
+	var m MessageError
+	responseMapping(&m, res)
+
+	if !strings.Contains(m.Err, "Fichier inexistant") {
+		t.Errorf("Error expected: %s", m.Err)
+	}
+}
+
 // Simule la suppression de la première partie (avec la vidéo)
 func TestUploadDeleteVideoMP4Envoye(t *testing.T) {
 	reader = strings.NewReader("")
