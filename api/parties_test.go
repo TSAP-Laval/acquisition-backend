@@ -23,7 +23,7 @@ import (
 func TestGetParties(t *testing.T) {
 	reader = strings.NewReader("")
 	request, err := http.NewRequest("GET", baseURL+"/api/parties", reader)
-	res, err := http.DefaultClient.Do(request)
+	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
@@ -38,7 +38,7 @@ func TestGetParties(t *testing.T) {
 	}
 
 	if res.StatusCode != 200 {
-		t.Errorf("Response code expected: %d", res.StatusCode)
+		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
 	}
 
 	// On s'assure qu'il y ait au moins une partie à la base
@@ -63,7 +63,7 @@ func TestCreerPartie(t *testing.T) {
 		}`)
 
 	request, err := http.NewRequest("POST", baseURL+"/api/parties", reader)
-	res, err := http.DefaultClient.Do(request)
+	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
@@ -78,7 +78,7 @@ func TestCreerPartie(t *testing.T) {
 	}
 
 	if res.StatusCode != 201 {
-		t.Errorf("Response code expected: %d", res.StatusCode)
+		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
 		var me MessageError
 		responseMapping(&me, res)
 		t.Errorf("Error: %s", me.Err)
@@ -128,14 +128,14 @@ func TestCreerPartieErrEmpty(t *testing.T) {
 		}`)
 
 	request, err := http.NewRequest("POST", baseURL+"/api/parties", reader)
-	res, err := http.DefaultClient.Do(request)
+	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
 	if res.StatusCode != 401 {
-		t.Errorf("Response code expected: %d", res.StatusCode)
+		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
 	}
 
 	var me MessageError
@@ -155,14 +155,14 @@ func TestCreerPartieMauvaiseInfo(t *testing.T) {
 		}`)
 
 	request, err := http.NewRequest("POST", baseURL+"/api/parties", reader)
-	res, err := http.DefaultClient.Do(request)
+	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	if res.StatusCode != 404 {
-		t.Errorf("Response code expected: %d", res.StatusCode)
+	if res.StatusCode != 400 {
+		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
 	}
 }
 
@@ -172,7 +172,7 @@ func TestCreerPartieVide(t *testing.T) {
 	reader = strings.NewReader(``)
 
 	request, err := http.NewRequest("POST", baseURL+"/api/parties", reader)
-	res, err := http.DefaultClient.Do(request)
+	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
@@ -185,7 +185,7 @@ func TestCreerPartieVide(t *testing.T) {
 	rmID = me.GameID
 
 	if res.StatusCode != 201 {
-		t.Errorf("Response code expected: %d", res.StatusCode)
+		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
 	}
 }
 
@@ -204,14 +204,14 @@ func TestCreerPartieErrExiste(t *testing.T) {
 		}`)
 
 	request, err := http.NewRequest("POST", baseURL+"/api/parties", reader)
-	res, err := http.DefaultClient.Do(request)
+	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
 	if res.StatusCode != 401 {
-		t.Errorf("Response code expected: %d", res.StatusCode)
+		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
 	}
 
 	var me MessageError
@@ -226,7 +226,7 @@ func TestCreerPartieErrExiste(t *testing.T) {
 func TestGetPartie(t *testing.T) {
 	reader = strings.NewReader("")
 	request, err := http.NewRequest("GET", baseURL+"/api/parties/"+rmID, reader)
-	res, err := http.DefaultClient.Do(request)
+	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
@@ -241,7 +241,7 @@ func TestGetPartie(t *testing.T) {
 	}
 
 	if res.StatusCode != 200 {
-		t.Errorf("Response code expected: %d", res.StatusCode)
+		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
 	}
 }
 
@@ -260,7 +260,7 @@ func TestModifierPartie(t *testing.T) {
 
 	// rmID est utilisé ici pour permettre la modification de la partie créée plus haut
 	request, err := http.NewRequest("PUT", baseURL+"/api/parties/"+rmID, reader)
-	res, err := http.DefaultClient.Do(request)
+	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
@@ -275,7 +275,7 @@ func TestModifierPartie(t *testing.T) {
 	}
 
 	if res.StatusCode != 200 {
-		t.Errorf("Response code expected: %d", res.StatusCode)
+		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
 		var me MessageError
 		json.Unmarshal(bodyBuffer, &me)
 		if me.Err != "" {
@@ -326,14 +326,14 @@ func TestModifierPartieVide(t *testing.T) {
 
 	// rmID est utilisé ici pour permettre la modification de la partie créée plus haut
 	request, err := http.NewRequest("PUT", baseURL+"/api/parties/"+rmID, reader)
-	res, err := http.DefaultClient.Do(request)
+	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
 	if res.StatusCode != 400 {
-		t.Errorf("Response code expected: %d", res.StatusCode)
+		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
 	}
 
 	var me MessageError
@@ -352,14 +352,14 @@ func TestModifierPartieMauvaiseInfo(t *testing.T) {
 
 	// rmID est utilisé ici pour permettre la modification de la partie créée plus haut
 	request, err := http.NewRequest("PUT", baseURL+"/api/parties/"+rmID, reader)
-	res, err := http.DefaultClient.Do(request)
+	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	if res.StatusCode != 404 {
-		t.Errorf("Response code expected: %d", res.StatusCode)
+	if res.StatusCode != 400 {
+		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
 	}
 }
 
@@ -371,14 +371,14 @@ func TestModifierPartieCreer(t *testing.T) {
 
 	// rmID est utilisé ici pour permettre la modification de la partie créée plus haut
 	request, err := http.NewRequest("PUT", baseURL+"/api/parties/0", reader)
-	res, err := http.DefaultClient.Do(request)
+	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
 	if res.StatusCode != 201 {
-		t.Errorf("Response code expected: %d", res.StatusCode)
+		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
 	}
 }
 
@@ -386,14 +386,14 @@ func TestModifierPartieCreer(t *testing.T) {
 func TestSupprimerPartie(t *testing.T) {
 	reader = strings.NewReader("")
 	request, err := http.NewRequest("DELETE", baseURL+"/api/parties/"+rmID, reader)
-	res, err := http.DefaultClient.Do(request)
+	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
 	if res.StatusCode != 204 {
-		t.Errorf("Response code expected: %d", res.StatusCode)
+		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
 	}
 }
 
@@ -401,14 +401,14 @@ func TestSupprimerPartie(t *testing.T) {
 func TestGetPartieErr(t *testing.T) {
 	reader = strings.NewReader("")
 	request, err := http.NewRequest("GET", baseURL+"/api/parties/"+rmID, reader)
-	res, err := http.DefaultClient.Do(request)
+	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
 	if res.StatusCode != 404 {
-		t.Errorf("Response code expected: %d", res.StatusCode)
+		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
 	}
 
 	var me MessageError
@@ -423,14 +423,14 @@ func TestGetPartieErr(t *testing.T) {
 func TestSupprimerPartieSupprime(t *testing.T) {
 	reader = strings.NewReader("")
 	request, err := http.NewRequest("DELETE", baseURL+"/api/parties/"+rmID, reader)
-	res, err := http.DefaultClient.Do(request)
+	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
 	if res.StatusCode != 400 {
-		t.Errorf("Response code expected: %d", res.StatusCode)
+		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
 	}
 
 	var me MessageError
@@ -445,7 +445,7 @@ func TestSupprimerPartieSupprime(t *testing.T) {
 func TestGetPartiesMulti(t *testing.T) {
 	reader = strings.NewReader("")
 	request, err := http.NewRequest("GET", baseURL+"/api/parties", reader)
-	res, err := http.DefaultClient.Do(request)
+	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
@@ -460,7 +460,7 @@ func TestGetPartiesMulti(t *testing.T) {
 	}
 
 	if res.StatusCode != 200 {
-		t.Errorf("Response code expected: %d", res.StatusCode)
+		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
 	}
 
 	// On s'assure qu'il y ait au moins une partie à la base
@@ -472,14 +472,14 @@ func TestGetPartiesMulti(t *testing.T) {
 // Simule l'envoie d'une requête d'options pour une partie
 func TestSendOptionsParies(t *testing.T) {
 	reader = strings.NewReader("")
-	req, err := http.NewRequest("OPTIONS", baseURL+"/api/upload/0", reader)
-	res, err := http.DefaultClient.Do(req)
+	request, err := http.NewRequest("OPTIONS", baseURL+"/api/upload/0", reader)
+	res, err := http.DefaultClient.Do(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
 	if res.StatusCode != 200 {
-		t.Errorf("Response code expected: %d", res.StatusCode)
+		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
 	}
 }

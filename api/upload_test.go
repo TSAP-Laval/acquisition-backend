@@ -43,8 +43,8 @@ var gameID [6]string
 // Simule l'envoie d'aucune video
 func TestUploadNoVideo(t *testing.T) {
 	reader = strings.NewReader("")
-	req, err := http.NewRequest("POST", baseURL+"/api/parties", reader)
-	res, err := http.DefaultClient.Do(req)
+	request, err := http.NewRequest("POST", baseURL+"/api/parties", reader)
+	res, err := SecureRequest(request)
 
 	var m MessageSuccess
 	responseMapping(&m, res)
@@ -55,37 +55,37 @@ func TestUploadNoVideo(t *testing.T) {
 	}
 
 	reader = strings.NewReader("")
-	req, err = http.NewRequest("POST", baseURL+"/api/upload/"+gameID, reader)
-	res, err = http.DefaultClient.Do(req)
+	request, err = http.NewRequest("POST", baseURL+"/api/upload/"+gameID, reader)
+	res, err = SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
 	if res.StatusCode != 400 {
-		t.Errorf("Response code expected: %d", res.StatusCode)
+		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
 	}
 
 	var me MessageError
 	responseMapping(&me, res)
 
 	if !strings.Contains(me.Err, "Aucun fichier n'a été envoyé ! Veuillez réessayer !") {
-		t.Errorf("Error expected: %s", me.Err)
+		LogErrors(Messages{t, "Error expected: %s", me.Err, true, request, res})
 	}
 }
 
 // Simule l'envoie d'une video au format mp4
 func TestUploadVideoMP4(t *testing.T) {
 	reader = strings.NewReader("")
-	req, err := http.NewRequest("POST", baseURL+"/api/parties", reader)
-	res, err := http.DefaultClient.Do(req)
+	request, err := http.NewRequest("POST", baseURL+"/api/parties", reader)
+	res, err := SecureRequest(request)
 
 	var m MessageSuccess
 	responseMapping(&m, res)
 	gameID[0] = m.GameID
 
 	if gameID[0] == "" || gameID[0] == "0" {
-		t.Errorf("Game ID expected: %s", gameID[0])
+		LogErrors(Messages{t, "Game ID expected: %s", gameID[0], false, nil, nil})
 	}
 
 	path, err := filepath.Abs(testPath + "/small.mp4")
@@ -99,15 +99,15 @@ func TestUploadVideoMP4(t *testing.T) {
 	}
 
 	if res.StatusCode != 201 {
-		t.Errorf("Response code expected: %d", res.StatusCode)
+		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
 	}
 }
 
 // Simule l'envoie d'une video au format 3gp
 func TestUploadVideo3GP(t *testing.T) {
 	reader = strings.NewReader("")
-	req, err := http.NewRequest("POST", baseURL+"/api/parties", reader)
-	res, err := http.DefaultClient.Do(req)
+	request, err := http.NewRequest("POST", baseURL+"/api/parties", reader)
+	res, err := SecureRequest(request)
 
 	var m MessageSuccess
 	responseMapping(&m, res)
@@ -128,7 +128,7 @@ func TestUploadVideo3GP(t *testing.T) {
 	}
 
 	if res.StatusCode != 400 {
-		t.Errorf("Response code expected: %d", res.StatusCode)
+		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
 	}
 
 	var me MessageError
@@ -142,8 +142,8 @@ func TestUploadVideo3GP(t *testing.T) {
 // Simule l'envoie d'une video au format flv
 func TestUploadVideoFLV(t *testing.T) {
 	reader = strings.NewReader("")
-	req, err := http.NewRequest("POST", baseURL+"/api/parties", reader)
-	res, err := http.DefaultClient.Do(req)
+	request, err := http.NewRequest("POST", baseURL+"/api/parties", reader)
+	res, err := SecureRequest(request)
 
 	var m MessageSuccess
 	responseMapping(&m, res)
@@ -164,7 +164,7 @@ func TestUploadVideoFLV(t *testing.T) {
 	}
 
 	if res.StatusCode != 400 {
-		t.Errorf("Response code expected: %d", res.StatusCode)
+		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
 	}
 
 	var me MessageError
@@ -178,8 +178,8 @@ func TestUploadVideoFLV(t *testing.T) {
 // Simule l'envoie d'une video au format ogv
 func TestUploadVideoOGV(t *testing.T) {
 	reader = strings.NewReader("")
-	req, err := http.NewRequest("POST", baseURL+"/api/parties", reader)
-	res, err := http.DefaultClient.Do(req)
+	request, err := http.NewRequest("POST", baseURL+"/api/parties", reader)
+	res, err := SecureRequest(request)
 
 	var m MessageSuccess
 	responseMapping(&m, res)
@@ -200,7 +200,7 @@ func TestUploadVideoOGV(t *testing.T) {
 	}
 
 	if res.StatusCode != 400 {
-		t.Errorf("Response code expected: %d", res.StatusCode)
+		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
 	}
 
 	var me MessageError
@@ -214,8 +214,8 @@ func TestUploadVideoOGV(t *testing.T) {
 // Simule l'envoie d'une video au format webm
 func TestUploadVideoWEBM(t *testing.T) {
 	reader = strings.NewReader("")
-	req, err := http.NewRequest("POST", baseURL+"/api/parties", reader)
-	res, err := http.DefaultClient.Do(req)
+	request, err := http.NewRequest("POST", baseURL+"/api/parties", reader)
+	res, err := SecureRequest(request)
 
 	var m MessageSuccess
 	responseMapping(&m, res)
@@ -236,15 +236,15 @@ func TestUploadVideoWEBM(t *testing.T) {
 	}
 
 	if res.StatusCode != 201 {
-		t.Errorf("Response code expected: %d", res.StatusCode)
+		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
 	}
 }
 
 // Simule l'envoie d'une video au format mpg
 func TestUploadVideoMPG(t *testing.T) {
 	reader = strings.NewReader("")
-	req, err := http.NewRequest("POST", baseURL+"/api/parties", reader)
-	res, err := http.DefaultClient.Do(req)
+	request, err := http.NewRequest("POST", baseURL+"/api/parties", reader)
+	res, err := SecureRequest(request)
 
 	var m MessageSuccess
 	responseMapping(&m, res)
@@ -265,15 +265,15 @@ func TestUploadVideoMPG(t *testing.T) {
 	}
 
 	if res.StatusCode != 201 {
-		t.Errorf("Response code expected: %d", res.StatusCode)
+		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
 	}
 }
 
 // Simule l'envoie d'une video au format mov
 func TestUploadVideoMOV(t *testing.T) {
 	reader = strings.NewReader("")
-	req, err := http.NewRequest("POST", baseURL+"/api/parties", reader)
-	res, err := http.DefaultClient.Do(req)
+	request, err := http.NewRequest("POST", baseURL+"/api/parties", reader)
+	res, err := SecureRequest(request)
 
 	var m MessageSuccess
 	responseMapping(&m, res)
@@ -294,15 +294,15 @@ func TestUploadVideoMOV(t *testing.T) {
 	}
 
 	if res.StatusCode != 201 {
-		t.Errorf("Response code expected: %d", res.StatusCode)
+		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
 	}
 }
 
 // Simule l'envoie d'une video au format wmv
 func TestUploadVideoWMV(t *testing.T) {
 	reader = strings.NewReader("")
-	req, err := http.NewRequest("POST", baseURL+"/api/parties", reader)
-	res, err := http.DefaultClient.Do(req)
+	request, err := http.NewRequest("POST", baseURL+"/api/parties", reader)
+	res, err := SecureRequest(request)
 
 	var m MessageSuccess
 	responseMapping(&m, res)
@@ -323,7 +323,7 @@ func TestUploadVideoWMV(t *testing.T) {
 	}
 
 	if res.StatusCode != 400 {
-		t.Errorf("Response code expected: %d", res.StatusCode)
+		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
 	}
 
 	var me MessageError
@@ -337,8 +337,8 @@ func TestUploadVideoWMV(t *testing.T) {
 // Simule l'envoie de 2 videos au format mp4 et webm
 func TestUploadVideos(t *testing.T) {
 	reader = strings.NewReader("")
-	req, err := http.NewRequest("POST", baseURL+"/api/parties", reader)
-	res, err := http.DefaultClient.Do(req)
+	request, err := http.NewRequest("POST", baseURL+"/api/parties", reader)
+	res, err := SecureRequest(request)
 
 	var m MessageSuccess
 	responseMapping(&m, res)
@@ -364,15 +364,15 @@ func TestUploadVideos(t *testing.T) {
 	}
 
 	if res.StatusCode != 201 {
-		t.Errorf("Response code expected: %d", res.StatusCode)
+		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
 	}
 }
 
 // Simule l'envoie d'une video au format webm pour suppression
 func TestUploadVideoWEBMDel(t *testing.T) {
 	reader = strings.NewReader("")
-	req, err := http.NewRequest("POST", baseURL+"/api/parties", reader)
-	res, err := http.DefaultClient.Do(req)
+	request, err := http.NewRequest("POST", baseURL+"/api/parties", reader)
+	res, err := SecureRequest(request)
 
 	var m MessageSuccess
 	responseMapping(&m, res)
@@ -393,37 +393,37 @@ func TestUploadVideoWEBMDel(t *testing.T) {
 	}
 
 	if res.StatusCode != 201 {
-		t.Errorf("Response code expected: %d", res.StatusCode)
+		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
 	}
 }
 
-// Simule l'envoie d'une requête d'options pour l'upload
+// Simule l'envoie d'une requestuête d'options pour l'upload
 func TestSendOptionsUpload(t *testing.T) {
 	reader = strings.NewReader("")
-	req, err := http.NewRequest("OPTIONS", baseURL+"/api/parties/0", reader)
-	res, err := http.DefaultClient.Do(req)
+	request, err := http.NewRequest("OPTIONS", baseURL+"/api/parties/0", reader)
+	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
 	if res.StatusCode != 200 {
-		t.Errorf("Response code expected: %d", res.StatusCode)
+		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
 	}
 }
 
 // Simule la suppression d'une fausse vidéo
 func TestUploadDeleteFalseVideo(t *testing.T) {
 	reader = strings.NewReader("")
-	req, err := http.NewRequest("DELETE", baseURL+"/api/upload/0", reader)
-	res, err := http.DefaultClient.Do(req)
+	request, err := http.NewRequest("DELETE", baseURL+"/api/upload/0", reader)
+	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
 	if res.StatusCode != 404 {
-		t.Errorf("Response code expected: %d", res.StatusCode)
+		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
 	}
 
 	var m MessageError
@@ -437,15 +437,15 @@ func TestUploadDeleteFalseVideo(t *testing.T) {
 // Simule la suppression de la première partie (avec la vidéo)
 func TestUploadDeleteVideoMP4(t *testing.T) {
 	reader = strings.NewReader("")
-	req, err := http.NewRequest("DELETE", baseURL+"/api/upload/"+gameID[0], reader)
-	res, err := http.DefaultClient.Do(req)
+	request, err := http.NewRequest("DELETE", baseURL+"/api/upload/"+gameID[0], reader)
+	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
 	if res.StatusCode != 204 {
-		t.Errorf("Response code expected: %d", res.StatusCode)
+		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
 		var m MessageError
 		responseMapping(&m, res)
 		t.Errorf("Error: %s", m.Err)
@@ -455,15 +455,15 @@ func TestUploadDeleteVideoMP4(t *testing.T) {
 // Simule la suppression de la deuxième partie (avec la vidéo)
 func TestUploadDeleteVideoWEBM(t *testing.T) {
 	reader = strings.NewReader("")
-	req, err := http.NewRequest("DELETE", baseURL+"/api/upload/"+gameID[1], reader)
-	res, err := http.DefaultClient.Do(req)
+	request, err := http.NewRequest("DELETE", baseURL+"/api/upload/"+gameID[1], reader)
+	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
 	if res.StatusCode != 204 {
-		t.Errorf("Response code expected: %d", res.StatusCode)
+		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
 		var m MessageError
 		responseMapping(&m, res)
 		t.Errorf("Error: %s", m.Err)
@@ -473,8 +473,8 @@ func TestUploadDeleteVideoWEBM(t *testing.T) {
 // Simule la suppression de la troisième partie (avec les vidéos)
 func TestUploadDeleteVideos(t *testing.T) {
 	reader = strings.NewReader("")
-	req, err := http.NewRequest("DELETE", baseURL+"/api/upload/"+gameID[2], reader)
-	res, err := http.DefaultClient.Do(req)
+	request, err := http.NewRequest("DELETE", baseURL+"/api/upload/"+gameID[2], reader)
+	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
@@ -493,15 +493,15 @@ func TestUploadDeleteVideoWEBMDel(t *testing.T) {
 	removeContents(videoPath)
 
 	reader = strings.NewReader("")
-	req, err := http.NewRequest("DELETE", baseURL+"/api/upload/"+gameID[3], reader)
-	res, err := http.DefaultClient.Do(req)
+	request, err := http.NewRequest("DELETE", baseURL+"/api/upload/"+gameID[3], reader)
+	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
 	if res.StatusCode != 404 {
-		t.Errorf("Response code expected: %d", res.StatusCode)
+		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
 		return
 	}
 
@@ -567,14 +567,14 @@ func removeContents(dir string) error {
 	return nil
 }
 
-// Envoie la requête d'upload du fichier
+// Envoie la requestuête d'upload du fichier
 func sendUploadRequest(path []string, t *testing.T, gameID string) (*http.Response, error) {
-	req, err := newfileUploadRequest(path, gameID)
+	request, err := newfileUploadRequest(path, gameID)
 	if err != nil {
 		t.Error(err)
 	}
 
-	return http.DefaultClient.Do(req)
+	return SecureRequest(request)
 }
 
 func responseMapping(m interface{}, res *http.Response) {
@@ -582,7 +582,7 @@ func responseMapping(m interface{}, res *http.Response) {
 	json.Unmarshal(body, m)
 }
 
-// Créé une requête pour l'envoie de fichier
+// Créé une requestuête pour l'envoie de fichier
 func newfileUploadRequest(paths []string, gameID string) (*http.Request, error) {
 
 	body := new(bytes.Buffer)

@@ -225,7 +225,7 @@ func (a *AcquisitionService) ErrorHandler(w http.ResponseWriter, err error) {
 	if err != nil {
 		a.Error(fmt.Sprintf("ERROR : %s", err))
 		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusNotFound)
+		w.WriteHeader(http.StatusBadRequest)
 		a.ErrorWrite(err.Error(), w)
 	}
 	return

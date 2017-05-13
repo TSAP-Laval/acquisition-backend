@@ -98,8 +98,8 @@ func (a *AcquisitionService) Middleware(h http.Handler) http.Handler {
 	})
 }
 
-// RateLimiter handler the rate limiter middlewares used by the endpoints
-// 2 requests per second maximum
+// RateLimiter est le middlewares limiteurs de débit utilisés par les endpoints
+// 5 requêtes par seconde maximum
 func (a *AcquisitionService) RateLimiter(h http.Handler) http.Handler {
 	return tollbooth.LimitHandler(tollbooth.NewLimiter(20, time.Second), h)
 }
@@ -133,11 +133,29 @@ func (a *AcquisitionService) getRouter() http.Handler {
 	api.HandleFunc("/coachs/coachs", a.GetCoachsHandler).Methods("GET")
 	api.HandleFunc("/coachs/addcoach", a.PostCoachHandler).Methods("POST")
 	api.HandleFunc("/coachs/addCoachTeam/{id}", a.AssignerEquipeCoach).Methods("PUT")
+
 	// Upload
-	api.HandleFunc("/upload", a.UploadHandler)
-	api.HandleFunc("/upload/{game-id}", a.UploadHandler).Methods("DELETE", "POST", "OPTIONS")
+	api.Handle("/upload",
+		AddMiddleware(
+			a.SecureHeaders(http.HandlerFunc(a.UploadHandler)),
+			a.JWTMiddleware,
+			a.RateLimiter,
+		))
+	api.Handle("/upload/{game-id}",
+		AddMiddleware(
+			a.SecureHeaders(http.HandlerFunc(a.UploadHandler)),
+			a.JWTMiddleware,
+			a.RateLimiter,
+		)).Methods("DELETE", "POST", "OPTIONS")
+
 	// Videos
-	api.HandleFunc("/parties/{id}/videos/{part}", a.VideoHandler).Methods("GET")
+	api.Handle("/parties/{id}/videos/{part}",
+		AddMiddleware(
+			http.HandlerFunc(a.VideoHandler),
+			a.JWTMiddleware,
+			a.RateLimiter,
+		)).Methods("GET")
+
 	// Terrains
 	api.Handle("/terrains",
 		AddMiddleware(
@@ -145,18 +163,70 @@ func (a *AcquisitionService) getRouter() http.Handler {
 			a.JWTMiddleware,
 			a.RateLimiter,
 		)).Methods("GET")
-	api.HandleFunc("/terrains/{nom}", a.GetTerrainHandler).Methods("GET")
-	api.HandleFunc("/terrains/{id}", a.TerrainsHandler).Methods("DELETE", "PUT")
-	api.HandleFunc("/terrains", a.CreerTerrainHandler).Methods("POST")
+	api.Handle("/terrains/{nom}",
+		AddMiddleware(
+			a.SecureHeaders(http.HandlerFunc(a.GetTerrainHandler)),
+			a.JWTMiddleware,
+			a.RateLimiter,
+		)).Methods("GET")
+	api.Handle("/terrains/{id}",
+		AddMiddleware(
+			http.HandlerFunc(a.TerrainsHandler),
+			a.JWTMiddleware,
+			a.RateLimiter,
+		)).Methods("DELETE", "PUT")
+	api.Handle("/terrains",
+		AddMiddleware(
+			http.HandlerFunc(a.CreerTerrainHandler),
+			a.JWTMiddleware,
+			a.RateLimiter,
+		)).Methods("POST")
+
 	// Equipes
-	api.HandleFunc("/equipes", a.GetEquipesHandler).Methods("GET")
-	api.HandleFunc("/equipes/{nom}", a.GetEquipeHandler).Methods("GET")
-	api.HandleFunc("/equipes/{id}", a.EquipesHandler).Methods("DELETE", "PUT")
-	api.HandleFunc("/equipes", a.CreerEquipeHandler).Methods("POST")
+	api.Handle("/equipes",
+		AddMiddleware(
+			http.HandlerFunc(a.GetEquipesHandler),
+			a.JWTMiddleware,
+			a.RateLimiter,
+		)).Methods("GET")
+	api.Handle("/equipes/{nom}",
+		AddMiddleware(
+			http.HandlerFunc(a.GetEquipeHandler),
+			a.JWTMiddleware,
+			a.RateLimiter,
+		)).Methods("GET")
+	api.Handle("/equipes/{id}",
+		AddMiddleware(
+			http.HandlerFunc(a.EquipesHandler),
+			a.JWTMiddleware,
+			a.RateLimiter,
+		)).Methods("DELETE", "PUT")
+	api.Handle("/equipes",
+		AddMiddleware(
+			http.HandlerFunc(a.CreerEquipeHandler),
+			a.JWTMiddleware,
+			a.RateLimiter,
+		)).Methods("POST")
+
 	// Parties
-	api.HandleFunc("/parties", a.PartiesHandler).Methods("GET", "POST")
-	api.HandleFunc("/parties/{id}", a.PartieHandler).Methods("GET", "PUT", "OPTIONS")
-	api.HandleFunc("/parties/{id}", a.SupprimerPartiesHandler).Methods("DELETE")
+	api.Handle("/parties",
+		AddMiddleware(
+			http.HandlerFunc(a.PartiesHandler),
+			a.JWTMiddleware,
+			a.RateLimiter,
+		)).Methods("GET", "POST")
+	api.Handle("/parties/{id}",
+		AddMiddleware(
+			http.HandlerFunc(a.PartieHandler),
+			a.JWTMiddleware,
+			a.RateLimiter,
+		)).Methods("GET", "PUT", "OPTIONS")
+	api.Handle("/parties/{id}",
+		AddMiddleware(
+			http.HandlerFunc(a.SupprimerPartiesHandler),
+			a.JWTMiddleware,
+			a.RateLimiter,
+		)).Methods("DELETE")
 	// BD
 	api.HandleFunc("/seed", a.RemplirBD).Methods("POST")
 	api.HandleFunc("/bd", a.FaireBD).Methods("POST")

@@ -20,8 +20,8 @@ import (
 // Simule l'envoie d'une video au format mp4
 func TestUploadVideoMP4PourEnvoie(t *testing.T) {
 	reader = strings.NewReader("")
-	req, err := http.NewRequest("POST", baseURL+"/api/parties", reader)
-	res, err := http.DefaultClient.Do(req)
+	request, err := http.NewRequest("POST", baseURL+"/api/parties", reader)
+	res, err := SecureRequest(request)
 
 	var m MessageSuccess
 	responseMapping(&m, res)
@@ -50,7 +50,7 @@ func TestUploadVideoMP4PourEnvoie(t *testing.T) {
 func TestGetVideo(t *testing.T) {
 	reader = strings.NewReader("")
 	request, err := http.NewRequest("GET", baseURL+"/api/parties/"+gameID[0]+"/videos/1", reader)
-	res, err := http.DefaultClient.Do(request)
+	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
@@ -65,8 +65,8 @@ func TestGetVideo(t *testing.T) {
 // Simule la suppression de la première partie (avec la vidéo)
 func TestUploadDeleteVideoMP4Envoye(t *testing.T) {
 	reader = strings.NewReader("")
-	req, err := http.NewRequest("DELETE", baseURL+"/api/upload/"+gameID[0], reader)
-	res, err := http.DefaultClient.Do(req)
+	request, err := http.NewRequest("DELETE", baseURL+"/api/upload/"+gameID[0], reader)
+	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)

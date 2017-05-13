@@ -9,8 +9,8 @@ import (
 // Admins les administrateurs
 type Admins struct {
 	gorm.Model
-	Email      string
-	PassHash   string
+	Email      string `json:"email"`
+	PassHash   string `json:"pass_hash"`
 	TokenReset string
 	TokenLogin string
 }

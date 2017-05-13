@@ -201,6 +201,11 @@ func (a *AcquisitionService) RemplirBD(w http.ResponseWriter, r *http.Request) {
 		db.Create(&equipe5)
 	}
 
+	admin := Admins{Email: "admin@admin.ca", PassHash: "$2a$10$nrfobAUs0x1dAQe9jubLhO/YWe4w2kViPNFAmZfWEah28vkWMa9q6"}
+	if db.NewRecord(admin) {
+		db.Create(&admin)
+	}
+
 	Uneaction := Actions{ActionTypeID: 1, ZoneID: 1, GameID: 1, X1: 0, Y1: 0, X2: 0, Y2: 0, X3: 0, Y3: 0, Time: 10, HomeScore: 0, GuestScore: 0, PlayerID: 1}
 	if db.NewRecord(Uneaction) {
 		db.Create(&Uneaction)

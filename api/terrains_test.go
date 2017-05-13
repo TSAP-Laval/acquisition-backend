@@ -24,7 +24,7 @@ import (
 func TestGetTerrains(t *testing.T) {
 	reader = strings.NewReader("")
 	request, err := http.NewRequest("GET", baseURL+"/api/terrains", reader)
-	res, err := http.DefaultClient.Do(request)
+	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
@@ -59,7 +59,7 @@ func TestCreerTerrain(t *testing.T) {
 		}`)
 
 	request, err := http.NewRequest("POST", baseURL+"/api/terrains", reader)
-	res, err := http.DefaultClient.Do(request)
+	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
@@ -105,7 +105,7 @@ func TestCreerTerrainErrEmpty(t *testing.T) {
 		}`)
 
 	request, err := http.NewRequest("POST", baseURL+"/api/terrains", reader)
-	res, err := http.DefaultClient.Do(request)
+	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
@@ -132,7 +132,7 @@ func TestCreerTerrainErrMauvaiseInfos(t *testing.T) {
 		}`)
 
 	request, err := http.NewRequest("POST", baseURL+"/api/terrains", reader)
-	res, err := http.DefaultClient.Do(request)
+	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
@@ -161,7 +161,7 @@ func TestCreerTerrainErrExiste(t *testing.T) {
 		}`)
 
 	request, err := http.NewRequest("POST", baseURL+"/api/terrains", reader)
-	res, err := http.DefaultClient.Do(request)
+	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
@@ -184,7 +184,7 @@ func TestCreerTerrainErrExiste(t *testing.T) {
 func TestCreerTerrainVide(t *testing.T) {
 	reader = strings.NewReader("")
 	request, err := http.NewRequest("POST", baseURL+"/api/terrains", reader)
-	res, err := http.DefaultClient.Do(request)
+	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
@@ -212,13 +212,13 @@ func TestCreerTerrainMauvaiseInfo(t *testing.T) {
 		}`)
 
 	request, err := http.NewRequest("POST", baseURL+"/api/terrains", reader)
-	res, err := http.DefaultClient.Do(request)
+	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	if res.StatusCode != 404 {
+	if res.StatusCode != 400 {
 		t.Errorf("Response code expected: %d", res.StatusCode)
 	}
 }
@@ -227,7 +227,7 @@ func TestCreerTerrainMauvaiseInfo(t *testing.T) {
 func TestGetTerrain(t *testing.T) {
 	reader = strings.NewReader("")
 	request, err := http.NewRequest("GET", baseURL+"/api/terrains/LE", reader)
-	res, err := http.DefaultClient.Do(request)
+	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
@@ -273,7 +273,7 @@ func TestModifierTerrain(t *testing.T) {
 
 	// rmID est utilisé ici pour permettre la modification de le terrain créée plus haut
 	request, err := http.NewRequest("PUT", baseURL+"/api/terrains/"+rmID, reader)
-	res, err := http.DefaultClient.Do(request)
+	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
@@ -316,7 +316,7 @@ func TestModifierTerrainAutresInfos(t *testing.T) {
 
 	// rmID est utilisé ici pour permettre la modification de le terrain créée plus haut
 	request, err := http.NewRequest("PUT", baseURL+"/api/terrains/"+rmID, reader)
-	res, err := http.DefaultClient.Do(request)
+	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
@@ -354,7 +354,7 @@ func TestModifierTerrainVide(t *testing.T) {
 
 	// rmID est utilisé ici pour permettre la modification de le terrain créée plus haut
 	request, err := http.NewRequest("PUT", baseURL+"/api/terrains/"+rmID, reader)
-	res, err := http.DefaultClient.Do(request)
+	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
@@ -376,13 +376,13 @@ func TestModifierTerrainMauvaiseInfo(t *testing.T) {
 
 	// rmID est utilisé ici pour permettre la modification de le terrain créée plus haut
 	request, err := http.NewRequest("PUT", baseURL+"/api/terrains/"+rmID, reader)
-	res, err := http.DefaultClient.Do(request)
+	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	if res.StatusCode != 404 {
+	if res.StatusCode != 400 {
 		t.Errorf("Response code expected: %d", res.StatusCode)
 	}
 
@@ -392,7 +392,7 @@ func TestModifierTerrainMauvaiseInfo(t *testing.T) {
 func TestSupprimerTerrain(t *testing.T) {
 	reader = strings.NewReader("")
 	request, err := http.NewRequest("DELETE", baseURL+"/api/terrains/"+rmID, reader)
-	res, err := http.DefaultClient.Do(request)
+	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
@@ -410,7 +410,7 @@ func TestSupprimerTerrain(t *testing.T) {
 func TestGetTerrainErr(t *testing.T) {
 	reader = strings.NewReader("")
 	request, err := http.NewRequest("GET", baseURL+"/api/terrains/LE", reader)
-	res, err := http.DefaultClient.Do(request)
+	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
@@ -437,7 +437,7 @@ func TestGetTerrainErr(t *testing.T) {
 func TestSupprimerTerrainSupprime(t *testing.T) {
 	reader = strings.NewReader("")
 	request, err := http.NewRequest("DELETE", baseURL+"/api/terrains/"+rmID, reader)
-	res, err := http.DefaultClient.Do(request)
+	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)

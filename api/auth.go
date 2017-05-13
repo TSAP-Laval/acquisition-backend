@@ -2,26 +2,26 @@ package api
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net/http"
-	"strings"
 	"time"
+
 	// JSON Web Token
 	jwtmiddleware "github.com/auth0/go-jwt-middleware"
 	jwt "github.com/dgrijalva/jwt-go"
-	"github.com/gorilla/context"
+
 	"github.com/jinzhu/gorm"
+	// Algorithme utilisé pour l'encryption du mot de passe
 	"golang.org/x/crypto/bcrypt"
 )
 
-// Claims used to store data in jwt
+// Claims utilisé pour stocker des données dans les JSON Web Token (JWT)
 type Claims struct {
 	Admin bool `json:"admin"`
 	jwt.StandardClaims
 }
 
-// JWTMiddleware handler the JWT middleware
+// JWTMiddleware gère le middleware pour les JSON Web Token (JWT)
 func (a *AcquisitionService) JWTMiddleware(h http.Handler) http.Handler {
 	return jwtmiddleware.New(jwtmiddleware.Options{
 		ValidationKeyGetter: func(token *jwt.Token) (interface{}, error) {
@@ -32,9 +32,9 @@ func (a *AcquisitionService) JWTMiddleware(h http.Handler) http.Handler {
 }
 
 // SecureHeaders adds secure headers to the API
-/*func (a *AcquisitionService) SecureHeaders(next http.Handler) http.Handler {
+func (a *AcquisitionService) SecureHeaders(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		var err error
+		/*var err error
 		if len(a.allowedHosts) > 0 {
 			isGoodHost := false
 			for _, allowedHost := range a.allowedHosts {
@@ -52,7 +52,7 @@ func (a *AcquisitionService) JWTMiddleware(h http.Handler) http.Handler {
 		if err != nil {
 			Message(w, "Failed to check allowed hosts", http.StatusInternalServerError)
 			return
-		}
+		}*/
 
 		// Add X-XSS-Protection header
 		w.Header().Add("X-XSS-Protection", "1")
@@ -65,9 +65,9 @@ func (a *AcquisitionService) JWTMiddleware(h http.Handler) http.Handler {
 
 		next.ServeHTTP(w, r)
 	})
-}*/
+}
 
-// Login handle jwt creation
+// Login gère la création des JSON Web Token (JWT)
 func (a *AcquisitionService) Login(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "POST":
@@ -90,20 +90,23 @@ func (a *AcquisitionService) Login(w http.ResponseWriter, r *http.Request) {
 
 		pass := []byte(ad.PassHash)
 
-		db.Where("email = ?", ad.Email).First(&ad)
+		var dbAd Admins
+		db.Where("email = ?", ad.Email).First(&dbAd)
 
-		if ad.Email != "" {
-			if err = bcrypt.CompareHashAndPassword([]byte(ad.PassHash), pass); err == nil {
-				if ad.TokenLogin != "" {
-					token, _ := jwt.ParseWithClaims(ad.TokenLogin, &Claims{}, func(token *jwt.Token) (interface{}, error) {
+		if dbAd.Email != "" {
+			// Vérification que le mot de passe envoyé est bel et bien celui contenu dans la base de données et
+			// faisant référence à celui correspondant au email entré
+			if err = bcrypt.CompareHashAndPassword([]byte(dbAd.PassHash), pass); err == nil && string(pass) != "" {
+				if dbAd.TokenLogin != "" {
+					token, _ := jwt.ParseWithClaims(dbAd.TokenLogin, &Claims{}, func(token *jwt.Token) (interface{}, error) {
 						return []byte(a.keys.JWT), nil
 					})
 
 					if claims, ok := token.Claims.(*Claims); ok && token.Valid {
-						fmt.Println(time.Now().Unix())
-						fmt.Println(claims.ExpiresAt)
 						if !claims.VerifyExpiresAt((time.Now().Unix()), false) {
-							setToken(db, ad, w, a)
+							// Crée un nouveau token, le sauvegarde dans la base de données
+							// et l'envoie au client.
+							setToken(db, dbAd, w, a)
 							return
 						}
 						tokenString, _ := token.SignedString([]byte(a.keys.JWT))
@@ -112,7 +115,9 @@ func (a *AcquisitionService) Login(w http.ResponseWriter, r *http.Request) {
 						return
 					}
 				} else {
-					setToken(db, ad, w, a)
+					// Crée un nouveau token, le sauvegarde dans la base de données
+					// et l'envoie au client.
+					setToken(db, dbAd, w, a)
 					return
 				}
 			}
@@ -127,17 +132,19 @@ func (a *AcquisitionService) Login(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// setToken crée un token avec les informations du client, le signe avec les secret
+// contenu dans une variable d'environnement, le sauvegarde dans la base de données
+// et l'envoie au client
 func setToken(db *gorm.DB, ad Admins, w http.ResponseWriter, a *AcquisitionService) {
-	// Set token claims
+	// Création des informations sauvegardées dans la token
 	claims := Claims{}
 	claims.Admin = true
 	claims.ExpiresAt = time.Now().Add(time.Hour * 24).Unix()
 
-	// Create the token
+	// Création du token
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
-	// Sign the token with our secret, in case the secret is not set,
-	// an empty string will be used
+	// Signature du token avec le secret contenu dans une variable d'environnement
 	tokenString, _ := token.SignedString([]byte(a.keys.JWT))
 
 	var adm Admins
@@ -145,54 +152,7 @@ func setToken(db *gorm.DB, ad Admins, w http.ResponseWriter, a *AcquisitionServi
 	adm.PassHash = ad.PassHash
 	adm.TokenLogin = tokenString
 	db.Model(&Admins{}).Where("email = ?", ad.Email).Updates(adm)
-	fmt.Printf("%o", adm)
 
 	msg := map[string]string{"token": tokenString}
 	Message(w, msg, http.StatusOK)
-}
-
-// Authenticate provides Authentication middleware for handlers
-func (a *AcquisitionService) Authenticate(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		var token string
-
-		// Get token from the Authorization header
-		// format: Authorization: Bearer
-		tokens, ok := r.Header["Authorization"]
-		if ok && len(tokens) >= 1 {
-			token = tokens[0]
-			token = strings.TrimPrefix(token, "Bearer ")
-		}
-
-		if token == "" {
-			// If we get here, the required token is missing
-			http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
-			return
-		}
-
-		// Now parse the token
-		parsedToken, err := jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
-			// Don't forget to validate the alg is what you expect:
-			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-				msg := fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
-				return nil, msg
-			}
-			return []byte(a.keys.JWT), nil
-		})
-		if err != nil {
-			http.Error(w, "Error parsing token", http.StatusUnauthorized)
-			return
-		}
-
-		// Check token is valid
-		if parsedToken != nil && parsedToken.Valid {
-			// Everything worked! Set the user in the context.
-			context.Set(r, "user", parsedToken)
-			next.ServeHTTP(w, r)
-		}
-
-		// Token is invalid
-		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
-		return
-	})
 }

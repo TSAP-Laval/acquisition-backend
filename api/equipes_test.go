@@ -26,14 +26,14 @@ import (
 func TestBD(t *testing.T) {
 	reader = strings.NewReader("")
 	request, err := http.NewRequest("POST", baseURL+"/api/bd", reader)
-	res, err := http.DefaultClient.Do(request)
+	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
 	if res.StatusCode != 200 {
-		t.Errorf("Response code expected: %d", res.StatusCode)
+		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
 	}
 }
 
@@ -41,14 +41,171 @@ func TestBD(t *testing.T) {
 func TestSeed(t *testing.T) {
 	reader = strings.NewReader("")
 	request, err := http.NewRequest("POST", baseURL+"/api/seed", reader)
-	res, err := http.DefaultClient.Do(request)
+	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
 	if res.StatusCode != 200 {
-		t.Errorf("Response code expected: %d", res.StatusCode)
+		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
+	}
+}
+
+// TestGetTokenErr test la récupération d'un token avec des informations au mauvais format
+func TestGetTokenErr(t *testing.T) {
+	reader = strings.NewReader(
+		`{
+			"email "admin@admin.ca",
+			"pass_hash": "12345"
+		}`,
+	)
+	request, err := http.NewRequest("POST", baseURL+"/api/auth", reader)
+	res, err := http.DefaultClient.Do(request)
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	bodyBuffer, _ := ioutil.ReadAll(res.Body)
+
+	err = json.Unmarshal(bodyBuffer, &token)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	if res.StatusCode != 400 {
+		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, nil, res})
+	}
+}
+
+// TestGetTokenInvalid test la récupération d'un token avec des informations invalides
+func TestGetTokenInvalid(t *testing.T) {
+	reader = strings.NewReader(
+		`{
+			"email": "admin@admin.ca",
+			"pass_hash": "1234534523"
+		}`,
+	)
+	request, err := http.NewRequest("POST", baseURL+"/api/auth", reader)
+	res, err := http.DefaultClient.Do(request)
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	bodyBuffer, _ := ioutil.ReadAll(res.Body)
+
+	err = json.Unmarshal(bodyBuffer, &token)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if res.StatusCode != 400 {
+		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, nil, res})
+	}
+
+	if token.Token != "" {
+		t.Error("Token :", token.Token)
+		t.Error("Token is not empty !")
+	}
+}
+
+// TestGetTokenInvalidEmail test la récupération d'un token avec des informations invalides
+func TestGetTokenInvalidEmail(t *testing.T) {
+	reader = strings.NewReader(
+		`{
+			"email": "admin@admin.com",
+			"pass_hash": "12345"
+		}`,
+	)
+	request, err := http.NewRequest("POST", baseURL+"/api/auth", reader)
+	res, err := http.DefaultClient.Do(request)
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	bodyBuffer, _ := ioutil.ReadAll(res.Body)
+
+	err = json.Unmarshal(bodyBuffer, &token)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if res.StatusCode != 400 {
+		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, nil, res})
+	}
+
+	if token.Token != "" {
+		t.Error("Token :", token.Token)
+		t.Error("Token is not empty !")
+	}
+}
+
+// TestGetToken test la récupération d'un token avec les informations d'authentification d'un administrateur
+func TestGetToken(t *testing.T) {
+	reader = strings.NewReader(
+		`{
+			"email": "admin@admin.ca",
+			"pass_hash": "12345"
+		}`,
+	)
+	request, err := http.NewRequest("POST", baseURL+"/api/auth", reader)
+	res, err := http.DefaultClient.Do(request)
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	bodyBuffer, _ := ioutil.ReadAll(res.Body)
+
+	err = json.Unmarshal(bodyBuffer, &token)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if res.StatusCode != 200 {
+		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, nil, res})
+	}
+
+	if token.Token == "" {
+		t.Error("Token is empty")
+	}
+}
+
+// TestGetTokenSecondTime test la récupération d'un token avec les informations d'authentification d'un administrateur
+func TestGetTokenSecondTime(t *testing.T) {
+	reader = strings.NewReader(
+		`{
+			"email": "admin@admin.ca",
+			"pass_hash": "12345"
+		}`,
+	)
+	request, err := http.NewRequest("POST", baseURL+"/api/auth", reader)
+	res, err := http.DefaultClient.Do(request)
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	bodyBuffer, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		t.Error(err)
+	}
+
+	err = json.Unmarshal(bodyBuffer, &token)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if res.StatusCode != 200 {
+		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, nil, res})
+	}
+
+	if token.Token == "" {
+		t.Error("Token is empty")
 	}
 }
 
@@ -56,7 +213,7 @@ func TestSeed(t *testing.T) {
 func TestGetEquipes(t *testing.T) {
 	reader = strings.NewReader("")
 	request, err := http.NewRequest("GET", baseURL+"/api/equipes", reader)
-	res, err := http.DefaultClient.Do(request)
+	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
@@ -71,7 +228,7 @@ func TestGetEquipes(t *testing.T) {
 	}
 
 	if res.StatusCode != 200 {
-		t.Errorf("Response code expected: %d", res.StatusCode)
+		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
 	}
 
 	// On s'assure qu'il y ait au moins une équipe à la base
@@ -93,7 +250,7 @@ func TestCreerEquipe(t *testing.T) {
 		}`)
 
 	request, err := http.NewRequest("POST", baseURL+"/api/equipes", reader)
-	res, err := http.DefaultClient.Do(request)
+	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
@@ -112,7 +269,7 @@ func TestCreerEquipe(t *testing.T) {
 	rmID = fmt.Sprintf("%d", te.ID)
 
 	if res.StatusCode != 201 {
-		t.Errorf("Response code expected: %d", res.StatusCode)
+		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
 	}
 
 	if te.Name != "Lequipe" {
@@ -144,14 +301,14 @@ func TestCreerEquipeErrEmpty(t *testing.T) {
 		}`)
 
 	request, err := http.NewRequest("POST", baseURL+"/api/equipes", reader)
-	res, err := http.DefaultClient.Do(request)
+	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
 	if res.StatusCode != 400 {
-		t.Errorf("Response code expected: %d", res.StatusCode)
+		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
 	}
 
 	var me MessageError
@@ -171,14 +328,14 @@ func TestCreerEquipeMauvaiseInfo(t *testing.T) {
 		`)
 
 	request, err := http.NewRequest("POST", baseURL+"/api/equipes", reader)
-	res, err := http.DefaultClient.Do(request)
+	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	if res.StatusCode != 404 {
-		t.Errorf("Response code expected: %d", res.StatusCode)
+	if res.StatusCode != 400 {
+		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
 	}
 }
 
@@ -188,14 +345,14 @@ func TestCreerEquipeVide(t *testing.T) {
 	reader = strings.NewReader(``)
 
 	request, err := http.NewRequest("POST", baseURL+"/api/equipes", reader)
-	res, err := http.DefaultClient.Do(request)
+	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
 	if res.StatusCode != 400 {
-		t.Errorf("Response code expected: %d", res.StatusCode)
+		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
 	}
 
 	var me MessageError
@@ -218,14 +375,14 @@ func TestCreerEquipeErrExiste(t *testing.T) {
 		}`)
 
 	request, err := http.NewRequest("POST", baseURL+"/api/equipes", reader)
-	res, err := http.DefaultClient.Do(request)
+	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
 	if res.StatusCode != 401 {
-		t.Errorf("Response code expected: %d", res.StatusCode)
+		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
 	}
 
 	var me MessageError
@@ -240,7 +397,7 @@ func TestCreerEquipeErrExiste(t *testing.T) {
 func TestGetEquipe(t *testing.T) {
 	reader = strings.NewReader("")
 	request, err := http.NewRequest("GET", baseURL+"/api/equipes/LE", reader)
-	res, err := http.DefaultClient.Do(request)
+	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
@@ -255,7 +412,7 @@ func TestGetEquipe(t *testing.T) {
 	}
 
 	if res.StatusCode != 200 {
-		t.Errorf("Response code expected: %d", res.StatusCode)
+		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
 	}
 
 	if te[0].Name != "Lequipe" {
@@ -287,7 +444,7 @@ func TestModifierEquipe(t *testing.T) {
 
 	// rmID est utilisé ici pour permettre la modification de la partie créée plus haut
 	request, err := http.NewRequest("PUT", baseURL+"/api/equipes/"+rmID, reader)
-	res, err := http.DefaultClient.Do(request)
+	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
@@ -302,7 +459,7 @@ func TestModifierEquipe(t *testing.T) {
 	}
 
 	if res.StatusCode != 201 {
-		t.Errorf("Response code expected: %d", res.StatusCode)
+		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
 	}
 
 	if te.Name != "LE equipe" {
@@ -326,7 +483,7 @@ func TestModifierEquipeName(t *testing.T) {
 
 	// rmID est utilisé ici pour permettre la modification de la partie créée plus haut
 	request, err := http.NewRequest("PUT", baseURL+"/api/equipes/"+rmID, reader)
-	res, err := http.DefaultClient.Do(request)
+	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
@@ -341,7 +498,7 @@ func TestModifierEquipeName(t *testing.T) {
 	}
 
 	if res.StatusCode != 201 {
-		t.Errorf("Response code expected: %d", res.StatusCode)
+		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
 	}
 
 	if te.Name != "LES equipe" {
@@ -365,7 +522,7 @@ func TestModifierEquipeCity(t *testing.T) {
 
 	// rmID est utilisé ici pour permettre la modification de la partie créée plus haut
 	request, err := http.NewRequest("PUT", baseURL+"/api/equipes/"+rmID, reader)
-	res, err := http.DefaultClient.Do(request)
+	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
@@ -380,7 +537,7 @@ func TestModifierEquipeCity(t *testing.T) {
 	}
 
 	if res.StatusCode != 201 {
-		t.Errorf("Response code expected: %d", res.StatusCode)
+		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
 	}
 
 	if te.Name != "LES equipe" {
@@ -398,14 +555,14 @@ func TestModifierEquipeVide(t *testing.T) {
 
 	// rmID est utilisé ici pour permettre la modification de la partie créée plus haut
 	request, err := http.NewRequest("PUT", baseURL+"/api/equipes/"+rmID, reader)
-	res, err := http.DefaultClient.Do(request)
+	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
 	if res.StatusCode != 400 {
-		t.Errorf("Response code expected: %d", res.StatusCode)
+		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
 	}
 
 	var me MessageError
@@ -424,14 +581,14 @@ func TestModifierEquipeMauvaiseInfo(t *testing.T) {
 
 	// rmID est utilisé ici pour permettre la modification de la partie créée plus haut
 	request, err := http.NewRequest("PUT", baseURL+"/api/equipes/"+rmID, reader)
-	res, err := http.DefaultClient.Do(request)
+	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	if res.StatusCode != 404 {
-		t.Errorf("Response code expected: %d", res.StatusCode)
+	if res.StatusCode != 400 {
+		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
 	}
 }
 
@@ -439,14 +596,14 @@ func TestModifierEquipeMauvaiseInfo(t *testing.T) {
 func TestSupprimerEquipe(t *testing.T) {
 	reader = strings.NewReader("")
 	request, err := http.NewRequest("DELETE", baseURL+"/api/equipes/"+rmID, reader)
-	res, err := http.DefaultClient.Do(request)
+	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
 	if res.StatusCode != 204 {
-		t.Errorf("Response code expected: %d", res.StatusCode)
+		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
 	}
 }
 
@@ -454,14 +611,14 @@ func TestSupprimerEquipe(t *testing.T) {
 func TestGetEquipeErr(t *testing.T) {
 	reader = strings.NewReader("")
 	request, err := http.NewRequest("GET", baseURL+"/api/equipes/LE", reader)
-	res, err := http.DefaultClient.Do(request)
+	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
 	if res.StatusCode != 200 {
-		t.Errorf("Response code expected: %d", res.StatusCode)
+		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
 	}
 
 	bodyBuffer, _ := ioutil.ReadAll(res.Body)
@@ -482,14 +639,14 @@ func TestGetEquipeErr(t *testing.T) {
 func TestSupprimerEquipeSupprime(t *testing.T) {
 	reader = strings.NewReader("")
 	request, err := http.NewRequest("DELETE", baseURL+"/api/equipes/"+rmID, reader)
-	res, err := http.DefaultClient.Do(request)
+	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
 	if res.StatusCode != 400 {
-		t.Errorf("Response code expected: %d", res.StatusCode)
+		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
 	}
 
 	var me MessageError
