@@ -22,6 +22,7 @@ database:
     - createdb tsap_acquisition
     - psql -U postgres 'tsap_acquisition' < postgres.pgsql
     - psql -c "\dt" tsap_acquisition
+    - psql -c "select * from admins;" tsap_acquisition
 
 machine:
   python:
