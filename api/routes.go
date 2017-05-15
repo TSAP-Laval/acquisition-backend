@@ -261,13 +261,11 @@ func (a *AcquisitionService) getRouter() http.Handler {
 	api.Handle("/seed",
 		AddMiddleware(
 			a.SecureHeaders(http.HandlerFunc(a.RemplirBD)),
-			a.JWTMiddleware,
 			a.RateLimiter,
 		)).Methods("POST")
 	api.Handle("/bd",
 		AddMiddleware(
 			a.SecureHeaders(http.HandlerFunc(a.FaireBD)),
-			a.JWTMiddleware,
 			a.RateLimiter,
 		)).Methods("POST")
 

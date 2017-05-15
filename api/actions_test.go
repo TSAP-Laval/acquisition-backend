@@ -22,6 +22,98 @@ import (
 	"github.com/TSAP-Laval/acquisition-backend/api"
 )
 
+// TestBD test la création de la base de donnée avec erreur de connexion à la base de données
+// avec erreur de connexion à la base de données
+func TestBDErr(t *testing.T) {
+	acqConf.ConnectionString = "host=localhost user=aaaaa dbname=tsap_acquisition sslmode=disable password="
+	reader = strings.NewReader("")
+	request, err := http.NewRequest("POST", baseURL+"/api/bd", reader)
+	res, err := http.DefaultClient.Do(request)
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	bodyBuffer, _ := ioutil.ReadAll(res.Body)
+
+	var me MessageError
+	err = json.Unmarshal(bodyBuffer, &me)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	if res.StatusCode != 400 {
+		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
+	}
+
+	if !strings.Contains(me.Err, "pq: role \"aaaaa\" does not exist") {
+		t.Error("Error expected : ", me.Err)
+	}
+}
+
+// TestBD test la création de la base de donnée
+func TestBD(t *testing.T) {
+	acqConf.ConnectionString = "host=localhost user=postgres dbname=tsap_acquisition sslmode=disable password="
+	reader = strings.NewReader("")
+	request, err := http.NewRequest("POST", baseURL+"/api/bd", reader)
+	res, err := http.DefaultClient.Do(request)
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	if res.StatusCode != 200 {
+		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
+	}
+}
+
+// TestSeedErr test le remplissage de la base de donnée avec des informations bidons
+// et erreur de connexion à la base de données
+func TestSeedErr(t *testing.T) {
+	acqConf.ConnectionString = "host=localhost user=aaaaa dbname=tsap_acquisition sslmode=disable password="
+	reader = strings.NewReader("")
+	request, err := http.NewRequest("POST", baseURL+"/api/seed", reader)
+	res, err := http.DefaultClient.Do(request)
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	bodyBuffer, _ := ioutil.ReadAll(res.Body)
+
+	var me MessageError
+	err = json.Unmarshal(bodyBuffer, &me)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	if res.StatusCode != 400 {
+		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
+	}
+
+	if !strings.Contains(me.Err, "pq: role \"aaaaa\" does not exist") {
+		t.Error("Error expected : ", me.Err)
+	}
+}
+
+// TestSeed test le remplissage de la base de donnée avec des informations bidons
+func TestSeed(t *testing.T) {
+	acqConf.ConnectionString = "host=localhost user=postgres dbname=tsap_acquisition sslmode=disable password="
+	reader = strings.NewReader("")
+	request, err := http.NewRequest("POST", baseURL+"/api/seed", reader)
+	res, err := http.DefaultClient.Do(request)
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	if res.StatusCode != 200 {
+		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
+	}
+}
+
 // TestGetTokenErr test la récupération d'un token avec des informations au mauvais format
 // et avec erreur de connexion à la base de données
 func TestGetTokenErr(t *testing.T) {
@@ -276,98 +368,6 @@ func TestGetTokenOptions(t *testing.T) {
 
 	if res.StatusCode != 200 {
 		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, nil, res})
-	}
-}
-
-// TestBD test la création de la base de donnée avec erreur de connexion à la base de données
-// avec erreur de connexion à la base de données
-func TestBDErr(t *testing.T) {
-	acqConf.ConnectionString = "host=localhost user=aaaaa dbname=tsap_acquisition sslmode=disable password="
-	reader = strings.NewReader("")
-	request, err := http.NewRequest("POST", baseURL+"/api/bd", reader)
-	res, err := SecureRequest(request)
-
-	if err != nil {
-		t.Error(err)
-	}
-
-	bodyBuffer, _ := ioutil.ReadAll(res.Body)
-
-	var me MessageError
-	err = json.Unmarshal(bodyBuffer, &me)
-	if err != nil {
-		t.Error(err)
-		return
-	}
-
-	if res.StatusCode != 400 {
-		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
-	}
-
-	if !strings.Contains(me.Err, "pq: role \"aaaaa\" does not exist") {
-		t.Error("Error expected : ", me.Err)
-	}
-}
-
-// TestBD test la création de la base de donnée
-func TestBD(t *testing.T) {
-	acqConf.ConnectionString = "host=localhost user=postgres dbname=tsap_acquisition sslmode=disable password="
-	reader = strings.NewReader("")
-	request, err := http.NewRequest("POST", baseURL+"/api/bd", reader)
-	res, err := SecureRequest(request)
-
-	if err != nil {
-		t.Error(err)
-	}
-
-	if res.StatusCode != 200 {
-		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
-	}
-}
-
-// TestSeedErr test le remplissage de la base de donnée avec des informations bidons
-// et erreur de connexion à la base de données
-func TestSeedErr(t *testing.T) {
-	acqConf.ConnectionString = "host=localhost user=aaaaa dbname=tsap_acquisition sslmode=disable password="
-	reader = strings.NewReader("")
-	request, err := http.NewRequest("POST", baseURL+"/api/seed", reader)
-	res, err := SecureRequest(request)
-
-	if err != nil {
-		t.Error(err)
-	}
-
-	bodyBuffer, _ := ioutil.ReadAll(res.Body)
-
-	var me MessageError
-	err = json.Unmarshal(bodyBuffer, &me)
-	if err != nil {
-		t.Error(err)
-		return
-	}
-
-	if res.StatusCode != 400 {
-		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
-	}
-
-	if !strings.Contains(me.Err, "pq: role \"aaaaa\" does not exist") {
-		t.Error("Error expected : ", me.Err)
-	}
-}
-
-// TestSeed test le remplissage de la base de donnée avec des informations bidons
-func TestSeed(t *testing.T) {
-	acqConf.ConnectionString = "host=localhost user=postgres dbname=tsap_acquisition sslmode=disable password="
-	reader = strings.NewReader("")
-	request, err := http.NewRequest("POST", baseURL+"/api/seed", reader)
-	res, err := SecureRequest(request)
-
-	if err != nil {
-		t.Error(err)
-	}
-
-	if res.StatusCode != 200 {
-		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
 	}
 }
 
