@@ -1,3 +1,11 @@
+//
+// Fichier     : auth.go
+// Développeur : Laurent Leclerc Poulin
+//
+// Permet d'ajouter une couche de sécurité avec
+// l'authentification et la gestion de JSON Web Token (JWT)
+//
+
 package api
 
 import (
@@ -102,24 +110,21 @@ func (a *AcquisitionService) Login(w http.ResponseWriter, r *http.Request) {
 						return []byte(a.keys.JWT), nil
 					})
 
-					if claims, ok := token.Claims.(*Claims); ok && token.Valid {
-						if !claims.VerifyExpiresAt((time.Now().Unix()), false) {
-							// Crée un nouveau token, le sauvegarde dans la base de données
-							// et l'envoie au client.
-							setToken(db, dbAd, w, a)
-							return
-						}
+					if _, ok := token.Claims.(*Claims); ok && token.Valid {
 						tokenString, _ := token.SignedString([]byte(a.keys.JWT))
 						msg := map[string]string{"token": tokenString}
 						Message(w, msg, http.StatusOK)
 						return
 					}
-				} else {
 					// Crée un nouveau token, le sauvegarde dans la base de données
 					// et l'envoie au client.
 					setToken(db, dbAd, w, a)
 					return
 				}
+				// Crée un nouveau token, le sauvegarde dans la base de données
+				// et l'envoie au client.
+				setToken(db, dbAd, w, a)
+				return
 			}
 		}
 		// Dans le cas où le mot de passe où l'adresse courriel est invalide,
@@ -139,7 +144,7 @@ func setToken(db *gorm.DB, ad Admins, w http.ResponseWriter, a *AcquisitionServi
 	// Création des informations sauvegardées dans la token
 	claims := Claims{}
 	claims.Admin = true
-	claims.ExpiresAt = time.Now().Add(time.Hour * 24).Unix()
+	claims.ExpiresAt = time.Now().Add(24 * time.Hour).Unix()
 
 	// Création du token
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)

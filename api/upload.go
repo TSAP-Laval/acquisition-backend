@@ -105,7 +105,7 @@ func (a *AcquisitionService) UploadHandler(w http.ResponseWriter, r *http.Reques
 
 					if err != nil {
 						msg := map[string]string{"error": "Une erreur est survenue lors de l'envoie de la vidéo!"}
-						Message(w, msg, http.StatusInternalServerError)
+						Message(w, msg, http.StatusBadRequest)
 						return
 					}
 				}
@@ -160,12 +160,7 @@ func (a *AcquisitionService) UploadHandler(w http.ResponseWriter, r *http.Reques
 
 				filename := timestamp + ext[0]
 
-				var dest *os.File
-				if dest, err = os.OpenFile(videoPath+filename, os.O_WRONLY|os.O_CREATE, 0777); err != nil {
-					msg := map[string]string{"error": "Une erreur inconnue est survenue lors de l'écriture du fichier \"" + part.FileName() + "\". Veuillez réessayer !"}
-					Message(w, msg, http.StatusBadRequest)
-					return
-				}
+				dest, _ := os.OpenFile(videoPath+filename, os.O_WRONLY|os.O_CREATE, 0777)
 				defer dest.Close()
 
 				// Écriture de l'en-tête venant d'être lue
@@ -185,10 +180,6 @@ func (a *AcquisitionService) UploadHandler(w http.ResponseWriter, r *http.Reques
 				// Création de la vidéo dans la base de données
 				if db.NewRecord(v) {
 					db.Create(&v)
-					if db.NewRecord(v) {
-						msg := map[string]string{"error": "Une erreur est survenue lors de la création de la video dans la base de données. Veuillez réessayer!"}
-						Message(w, msg, http.StatusInternalServerError)
-					}
 					videos = append(videos, &v)
 				}
 
@@ -204,8 +195,6 @@ func (a *AcquisitionService) UploadHandler(w http.ResponseWriter, r *http.Reques
 
 					if cBytes != 0 {
 						dest.Write(buffer[0:cBytes])
-					} else {
-						break
 					}
 
 					if err == io.EOF {
@@ -226,10 +215,7 @@ func (a *AcquisitionService) UploadHandler(w http.ResponseWriter, r *http.Reques
 
 				// Ajout du noméro de la partie de la vidéo dans la base de données
 				for j, video := range videos {
-					var index int
-					if index = creationDateSorted.IndexOf(j); index == -1 {
-						return
-					}
+					index := creationDateSorted.IndexOf(j)
 					video.Part = index + 1
 					db.Model(&video).Where("ID = ?", video.ID).Update("part", video.Part)
 				}

@@ -10,6 +10,8 @@
 package api_test
 
 import (
+	"encoding/json"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -23,12 +25,16 @@ func TestUploadVideoMP4PourEnvoie(t *testing.T) {
 	request, err := http.NewRequest("POST", baseURL+"/api/parties", reader)
 	res, err := SecureRequest(request)
 
-	var m MessageSuccess
+	var m MessageGameID
 	responseMapping(&m, res)
 	gameID[0] = m.GameID
 
 	if gameID[0] == "" || gameID[0] == "0" {
 		t.Errorf("Game ID expected: %s", gameID[0])
+	}
+
+	if res.StatusCode != 201 {
+		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
 	}
 
 	path, err := filepath.Abs(testPath + "/small.mp4")
@@ -42,12 +48,43 @@ func TestUploadVideoMP4PourEnvoie(t *testing.T) {
 	}
 
 	if res.StatusCode != 201 {
-		t.Errorf("Response code expected: %d", res.StatusCode)
+		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
+	}
+}
+
+// TestGetVideoErrBD permet d'evoyer une vidéo au client
+// avec erreur de connexion à la base de données
+func TestGetVideoErrBD(t *testing.T) {
+	acqConf.ConnectionString = "host=localhost user=aaaaa dbname=tsap_acquisition sslmode=disable password="
+	reader = strings.NewReader("")
+	request, err := http.NewRequest("GET", baseURL+"/api/parties/"+gameID[0]+"/videos/1", reader)
+	res, err := SecureRequest(request)
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	bodyBuffer, _ := ioutil.ReadAll(res.Body)
+
+	var me MessageError
+	err = json.Unmarshal(bodyBuffer, &me)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	if res.StatusCode != 400 {
+		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
+	}
+
+	if !strings.Contains(me.Err, "pq: role \"aaaaa\" does not exist") {
+		t.Error("Error expected : ", me.Err)
 	}
 }
 
 // TestGetVideo permet d'evoyer une vidéo au client
 func TestGetVideo(t *testing.T) {
+	acqConf.ConnectionString = "host=localhost user=postgres dbname=tsap_acquisition sslmode=disable password="
 	reader = strings.NewReader("")
 	request, err := http.NewRequest("GET", baseURL+"/api/parties/"+gameID[0]+"/videos/1", reader)
 	res, err := SecureRequest(request)
@@ -57,7 +94,7 @@ func TestGetVideo(t *testing.T) {
 	}
 
 	if res.StatusCode != 200 {
-		t.Errorf("Response code expected: %d", res.StatusCode)
+		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
 	}
 
 }
@@ -96,7 +133,7 @@ func TestUploadDeleteVideoMP4Envoye(t *testing.T) {
 	}
 
 	if res.StatusCode != 204 {
-		t.Errorf("Response code expected: %d", res.StatusCode)
+		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
 		var m MessageError
 		responseMapping(&m, res)
 		t.Errorf("Error: %s", m.Err)

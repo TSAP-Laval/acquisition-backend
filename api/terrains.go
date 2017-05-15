@@ -158,18 +158,8 @@ func (a *AcquisitionService) CreerTerrainHandler(w http.ResponseWriter, r *http.
 				msg := map[string]string{"error": "Un terrain de même nom existe déjà. Veuillez choisir un autre nom."}
 				Message(w, msg, http.StatusUnauthorized)
 			} else {
-				if db.NewRecord(l) {
-					db.Create(&l)
-					if db.NewRecord(l) {
-						msg := map[string]string{"error": "Une erreur est survenue lors de la création du terrain. Veuillez réessayer!"}
-						Message(w, msg, http.StatusInternalServerError)
-					} else {
-						Message(w, l, http.StatusCreated)
-					}
-				} else {
-					msg := map[string]string{"error": "Le terrain existe déjà dans la base de donnée!"}
-					Message(w, msg, http.StatusUnauthorized)
-				}
+				db.Create(&l)
+				Message(w, l, http.StatusCreated)
 			}
 		}
 	} else {

@@ -2,7 +2,9 @@
 // Fichier     : actions.go
 // Développeur : Laurent Leclerc-Poulin
 //
-// Commentaire expliquant le code, les fonctions...
+// Permet de gérer toutes les interractions nécessaires à la création,
+// la modification, la seppression et la récupération des informations
+// d'un type d'action.
 //
 
 package api
@@ -35,7 +37,13 @@ func (a *AcquisitionService) GetActionsTypeHandler(w http.ResponseWriter, r *htt
 	if id != "" {
 		acType := ActionsType{}
 		db.Where("ID = ?", id).First(&acType)
-		Message(w, acType, http.StatusOK)
+
+		if acType.ID != 0 {
+			Message(w, acType, http.StatusOK)
+		} else {
+			msg := map[string]string{"error": "Aucun type d'action ne correspond à celui entré"}
+			Message(w, msg, http.StatusNotFound)
+		}
 	} else {
 		acType := []ActionsType{}
 		db.Find(&acType)
@@ -59,14 +67,15 @@ func (a *AcquisitionService) CreerActionsType(w http.ResponseWriter, r *http.Req
 	var acType ActionsType
 
 	if err = json.Unmarshal(body, &acType); err != nil {
-		a.ErrorHandler(w, err)
+		msg := map[string]string{"error": "Certaines informations entrées sont invalides!"}
+		Message(w, msg, http.StatusBadRequest)
 		return
 	}
 
 	var at ActionsType
 	db.Model(&at).Where("name = ?", acType.Name).Find(&at)
 
-	if at.ID != 0 {
+	if at.ID == 0 {
 		if db.NewRecord(acType) {
 			db.Create(&acType)
 			Message(w, acType, http.StatusCreated)

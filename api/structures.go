@@ -195,7 +195,6 @@ type Coaches struct {
 	TokenReset   string
 	TokenLogin   string
 	Teams        []Teams `gorm:"many2many:coach_team;"`
-	Actif        string
 }
 
 // CoachTeam table de relations entre entraineurs et équipes

@@ -25,7 +25,7 @@ import (
 // TODO : Ne test même pas les valeurs de retour ?
 func TestGetSaison(t *testing.T) {
 	reader = strings.NewReader("")
-	request, err := http.NewRequest("GET", baseURL+"/api/saison", reader)
+	request, err := http.NewRequest("GET", baseURL+"/api/saisons", reader)
 	res, err := http.DefaultClient.Do(request)
 
 	if err != nil {
@@ -44,7 +44,7 @@ func TestCreerSaison(t *testing.T) {
 			"Years": "2000"
 		}`)
 
-	request, err := http.NewRequest("POST", baseURL+"/api/saison", reader)
+	request, err := http.NewRequest("POST", baseURL+"/api/saisons", reader)
 	res, err := http.DefaultClient.Do(request)
 
 	if err != nil {
@@ -82,7 +82,7 @@ func TestGetSports(t *testing.T) {
 // TODO : Ne test même pas les valeurs de retour ?
 func TestGetNiveau(t *testing.T) {
 	reader = strings.NewReader("")
-	request, err := http.NewRequest("GET", baseURL+"/api/niveau", reader)
+	request, err := http.NewRequest("GET", baseURL+"/api/niveaux", reader)
 	res, err := http.DefaultClient.Do(request)
 
 	if err != nil {

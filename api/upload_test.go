@@ -22,6 +22,11 @@ import (
 	"testing"
 )
 
+// Constantes sur les tailles possibles
+const (
+	GB = 1 << (10 * 3)
+)
+
 type MessageError struct {
 	Err string `json:"error"`
 }
@@ -39,6 +44,49 @@ const videoPath = "../videos"
 const testPath = "../test"
 
 var gameID [6]string
+
+// TestUploadVideoMP4MauvaiseDate Simule l'envoie d'une video au format mp4
+// avec une mauvaise
+func TestUploadVideoMP4MauvaiseDate(t *testing.T) {
+	reader = strings.NewReader("")
+	request, err := http.NewRequest("POST", baseURL+"/api/parties", reader)
+	res, err := SecureRequest(request)
+
+	var m MessageSuccess
+	responseMapping(&m, res)
+	gameID[0] = m.GameID
+
+	if gameID[0] == "" || gameID[0] == "0" {
+		LogErrors(Messages{t, "Game ID expected: %s", gameID[0], false, nil, nil})
+	}
+
+	path, err := filepath.Abs(testPath + "/small.mp4")
+	if err != nil {
+		t.Error(err)
+	}
+
+	res, err = sendUploadRequest([]string{path}, t, gameID[0])
+	if err != nil {
+		t.Error(err)
+	}
+
+	bodyBuffer, _ := ioutil.ReadAll(res.Body)
+
+	var me MessageError
+	err = json.Unmarshal(bodyBuffer, &me)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	if res.StatusCode != 400 {
+		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
+	}
+
+	if !strings.Contains(me.Err, "Une erreur est survenue lors de l'envoie de la vidéo!") {
+		t.Error("Error expected : ", me.Err)
+	}
+}
 
 // Simule l'envoie d'aucune video
 func TestUploadNoVideo(t *testing.T) {
@@ -74,8 +122,65 @@ func TestUploadNoVideo(t *testing.T) {
 	}
 }
 
+// TestUploadVideoMP4MauvaisGameID Simule l'envoie d'une video au format mp4
+// avec un mauvais identifiant de partie
+func TestUploadVideoMP4MauvaisGameID(t *testing.T) {
+	reader = strings.NewReader("")
+	request, err := http.NewRequest("POST", baseURL+"/api/parties", reader)
+	res, err := SecureRequest(request)
+
+	var m MessageSuccess
+	responseMapping(&m, res)
+	gameID[0] = m.GameID
+
+	if gameID[0] == "" || gameID[0] == "0" {
+		LogErrors(Messages{t, "Game ID expected: %s", gameID[0], false, nil, nil})
+	}
+
+	path, err := filepath.Abs(testPath + "/small.mp4")
+	if err != nil {
+		t.Error(err)
+	}
+
+	res, err = sendUploadRequest([]string{path}, t, "aaa")
+	if err != nil {
+		t.Error(err)
+	}
+
+	if res.StatusCode != 400 {
+		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
+	}
+}
+
+// TestUploadVideoMP4ErrBD Simule l'envoie d'une video au format mp4
+// avec erreur de connexion à la base de données
+func TestUploadVideoMP4ErrBD(t *testing.T) {
+	acqConf.ConnectionString = "host=localhost user=aaaaa dbname=tsap_acquisition sslmode=disable password="
+	reader = strings.NewReader("")
+	request, err := http.NewRequest("POST", baseURL+"/api/upload/1", reader)
+	res, err := SecureRequest(request)
+
+	bodyBuffer, _ := ioutil.ReadAll(res.Body)
+
+	var me MessageError
+	err = json.Unmarshal(bodyBuffer, &me)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	if res.StatusCode != 400 {
+		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
+	}
+
+	if !strings.Contains(me.Err, "pq: role \"aaaaa\" does not exist") {
+		t.Error("Error expected : ", me.Err)
+	}
+}
+
 // Simule l'envoie d'une video au format mp4
 func TestUploadVideoMP4(t *testing.T) {
+	acqConf.ConnectionString = "host=localhost user=postgres dbname=tsap_acquisition sslmode=disable password="
 	reader = strings.NewReader("")
 	request, err := http.NewRequest("POST", baseURL+"/api/parties", reader)
 	res, err := SecureRequest(request)
@@ -434,8 +539,39 @@ func TestUploadDeleteFalseVideo(t *testing.T) {
 	}
 }
 
+// TestUploadDeleteVideoMP4ErrBD Simule la suppression de la première partie (avec la vidéo)
+// avec erreur de connexion à la base de données
+func TestUploadDeleteVideoMP4ErrBD(t *testing.T) {
+	acqConf.ConnectionString = "host=localhost user=aaaaa dbname=tsap_acquisition sslmode=disable password="
+	reader = strings.NewReader("")
+	request, err := http.NewRequest("DELETE", baseURL+"/api/upload/"+gameID[0], reader)
+	res, err := SecureRequest(request)
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	bodyBuffer, _ := ioutil.ReadAll(res.Body)
+
+	var me MessageError
+	err = json.Unmarshal(bodyBuffer, &me)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	if res.StatusCode != 400 {
+		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
+	}
+
+	if !strings.Contains(me.Err, "pq: role \"aaaaa\" does not exist") {
+		t.Error("Error expected : ", me.Err)
+	}
+}
+
 // Simule la suppression de la première partie (avec la vidéo)
 func TestUploadDeleteVideoMP4(t *testing.T) {
+	acqConf.ConnectionString = "host=localhost user=postgres dbname=tsap_acquisition sslmode=disable password="
 	reader = strings.NewReader("")
 	request, err := http.NewRequest("DELETE", baseURL+"/api/upload/"+gameID[0], reader)
 	res, err := SecureRequest(request)
@@ -567,9 +703,20 @@ func removeContents(dir string) error {
 	return nil
 }
 
-// Envoie la requestuête d'upload du fichier
+// Envoie la requête d'upload du fichier
 func sendUploadRequest(path []string, t *testing.T, gameID string) (*http.Response, error) {
 	request, err := newfileUploadRequest(path, gameID)
+	if err != nil {
+		t.Error(err)
+	}
+
+	return SecureRequest(request)
+}
+
+// Envoie la requête d'upload du fichier
+func sendUploadRequestWrondContentLength(path []string, t *testing.T, gameID string) (*http.Response, error) {
+	request, err := newfileUploadRequest(path, gameID)
+	request.ContentLength = 11 * GB
 	if err != nil {
 		t.Error(err)
 	}
@@ -606,7 +753,13 @@ func newfileUploadRequest(paths []string, gameID string) (*http.Request, error) 
 		}
 		file.Close()
 
-		part, err := writer.CreateFormFile(fi.ModTime().Format("Mon Jan 02 2006 15:04:05 GMT-0400 (EST)"), fi.Name())
+		var part io.Writer
+		if gameID == "4" {
+			part, err = writer.CreateFormFile("Mon Jan 02 2006 :04:05sdfsdf GMT-0400", fi.Name())
+		} else {
+			part, err = writer.CreateFormFile(fi.ModTime().Format("Mon Jan 02 2006 15:04:05 GMT-0400 (EDT)"), fi.Name())
+		}
+
 		if err != nil {
 			return nil, err
 		}

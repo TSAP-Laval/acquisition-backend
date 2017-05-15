@@ -22,46 +22,13 @@ import (
 	"github.com/TSAP-Laval/acquisition-backend/api"
 )
 
-// TestBD test la création de la base de donnée
-func TestBD(t *testing.T) {
+// TestGetEquipesErrBD test la récupération de toutes les équipes
+// avec erreur de connexion à la base de données
+func TestGetEquipesErrBD(t *testing.T) {
+	acqConf.ConnectionString = "host=localhost user=aaaaa dbname=tsap_acquisition sslmode=disable password="
 	reader = strings.NewReader("")
-	request, err := http.NewRequest("POST", baseURL+"/api/bd", reader)
+	request, err := http.NewRequest("GET", baseURL+"/api/equipes", reader)
 	res, err := SecureRequest(request)
-
-	if err != nil {
-		t.Error(err)
-	}
-
-	if res.StatusCode != 200 {
-		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
-	}
-}
-
-// TestSeed test le remplissage de la base de donnée avec des informations bidons
-func TestSeed(t *testing.T) {
-	reader = strings.NewReader("")
-	request, err := http.NewRequest("POST", baseURL+"/api/seed", reader)
-	res, err := SecureRequest(request)
-
-	if err != nil {
-		t.Error(err)
-	}
-
-	if res.StatusCode != 200 {
-		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
-	}
-}
-
-// TestGetTokenErr test la récupération d'un token avec des informations au mauvais format
-func TestGetTokenErr(t *testing.T) {
-	reader = strings.NewReader(
-		`{
-			"email "admin@admin.ca",
-			"pass_hash": "12345"
-		}`,
-	)
-	request, err := http.NewRequest("POST", baseURL+"/api/auth", reader)
-	res, err := http.DefaultClient.Do(request)
 
 	if err != nil {
 		t.Error(err)
@@ -69,148 +36,25 @@ func TestGetTokenErr(t *testing.T) {
 
 	bodyBuffer, _ := ioutil.ReadAll(res.Body)
 
-	err = json.Unmarshal(bodyBuffer, &token)
+	var me MessageError
+	err = json.Unmarshal(bodyBuffer, &me)
 	if err != nil {
 		t.Error(err)
 		return
 	}
 
 	if res.StatusCode != 400 {
-		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, nil, res})
-	}
-}
-
-// TestGetTokenInvalid test la récupération d'un token avec des informations invalides
-func TestGetTokenInvalid(t *testing.T) {
-	reader = strings.NewReader(
-		`{
-			"email": "admin@admin.ca",
-			"pass_hash": "1234534523"
-		}`,
-	)
-	request, err := http.NewRequest("POST", baseURL+"/api/auth", reader)
-	res, err := http.DefaultClient.Do(request)
-
-	if err != nil {
-		t.Error(err)
+		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
 	}
 
-	bodyBuffer, _ := ioutil.ReadAll(res.Body)
-
-	err = json.Unmarshal(bodyBuffer, &token)
-	if err != nil {
-		t.Error(err)
-	}
-
-	if res.StatusCode != 400 {
-		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, nil, res})
-	}
-
-	if token.Token != "" {
-		t.Error("Token :", token.Token)
-		t.Error("Token is not empty !")
-	}
-}
-
-// TestGetTokenInvalidEmail test la récupération d'un token avec des informations invalides
-func TestGetTokenInvalidEmail(t *testing.T) {
-	reader = strings.NewReader(
-		`{
-			"email": "admin@admin.com",
-			"pass_hash": "12345"
-		}`,
-	)
-	request, err := http.NewRequest("POST", baseURL+"/api/auth", reader)
-	res, err := http.DefaultClient.Do(request)
-
-	if err != nil {
-		t.Error(err)
-	}
-
-	bodyBuffer, _ := ioutil.ReadAll(res.Body)
-
-	err = json.Unmarshal(bodyBuffer, &token)
-	if err != nil {
-		t.Error(err)
-	}
-
-	if res.StatusCode != 400 {
-		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, nil, res})
-	}
-
-	if token.Token != "" {
-		t.Error("Token :", token.Token)
-		t.Error("Token is not empty !")
-	}
-}
-
-// TestGetToken test la récupération d'un token avec les informations d'authentification d'un administrateur
-func TestGetToken(t *testing.T) {
-	reader = strings.NewReader(
-		`{
-			"email": "admin@admin.ca",
-			"pass_hash": "12345"
-		}`,
-	)
-	request, err := http.NewRequest("POST", baseURL+"/api/auth", reader)
-	res, err := http.DefaultClient.Do(request)
-
-	if err != nil {
-		t.Error(err)
-	}
-
-	bodyBuffer, _ := ioutil.ReadAll(res.Body)
-
-	err = json.Unmarshal(bodyBuffer, &token)
-	if err != nil {
-		t.Error(err)
-	}
-
-	if res.StatusCode != 200 {
-		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, nil, res})
-	}
-
-	if token.Token == "" {
-		t.Error("Token is empty")
-	}
-}
-
-// TestGetTokenSecondTime test la récupération d'un token avec les informations d'authentification d'un administrateur
-func TestGetTokenSecondTime(t *testing.T) {
-	reader = strings.NewReader(
-		`{
-			"email": "admin@admin.ca",
-			"pass_hash": "12345"
-		}`,
-	)
-	request, err := http.NewRequest("POST", baseURL+"/api/auth", reader)
-	res, err := http.DefaultClient.Do(request)
-
-	if err != nil {
-		t.Error(err)
-	}
-
-	bodyBuffer, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		t.Error(err)
-	}
-
-	err = json.Unmarshal(bodyBuffer, &token)
-	if err != nil {
-		t.Error(err)
-	}
-
-	if res.StatusCode != 200 {
-		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, nil, res})
-	}
-
-	if token.Token == "" {
-		t.Error("Token is empty")
+	if !strings.Contains(me.Err, "pq: role \"aaaaa\" does not exist") {
+		t.Error("Error expected : ", me.Err)
 	}
 }
 
 // TestGetEquipes test la récupération de toutes les équipes
 func TestGetEquipes(t *testing.T) {
+	acqConf.ConnectionString = "host=localhost user=postgres dbname=tsap_acquisition sslmode=disable password="
 	reader = strings.NewReader("")
 	request, err := http.NewRequest("GET", baseURL+"/api/equipes", reader)
 	res, err := SecureRequest(request)
@@ -237,10 +81,48 @@ func TestGetEquipes(t *testing.T) {
 	}
 }
 
+// TestCreerEquipeErrBD test la création d'une équipe.
+// avec erreur de connexion à la base de données
+func TestCreerEquipeErrBD(t *testing.T) {
+	acqConf.ConnectionString = "host=localhost user=aaaaa dbname=tsap_acquisition sslmode=disable password="
+	reader = strings.NewReader(
+		`{
+			"Name": "Lequipe", 
+			"City": "Quebec", 
+			"CategoryID": 1, 
+			"SportID": 1
+		}`)
+
+	request, err := http.NewRequest("POST", baseURL+"/api/equipes", reader)
+	res, err := SecureRequest(request)
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	bodyBuffer, _ := ioutil.ReadAll(res.Body)
+
+	var me MessageError
+	err = json.Unmarshal(bodyBuffer, &me)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	if res.StatusCode != 400 {
+		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
+	}
+
+	if !strings.Contains(me.Err, "pq: role \"aaaaa\" does not exist") {
+		t.Error("Error expected : ", me.Err)
+	}
+}
+
 // TestCreerEquipe test la création d'une équipe.
 // Cette équipe sera utilisée pour le reste des opérations
 // (modification, suppression)
 func TestCreerEquipe(t *testing.T) {
+	acqConf.ConnectionString = "host=localhost user=postgres dbname=tsap_acquisition sslmode=disable password="
 	reader = strings.NewReader(
 		`{
 			"Name": "Lequipe", 
@@ -393,8 +275,39 @@ func TestCreerEquipeErrExiste(t *testing.T) {
 	}
 }
 
+// TestGetEquipeErrBD test la récupération de l'équipe créée
+// avec erreur de connexion à la base de données
+func TestGetEquipeErrBD(t *testing.T) {
+	acqConf.ConnectionString = "host=localhost user=aaaaa dbname=tsap_acquisition sslmode=disable password="
+	reader = strings.NewReader("")
+	request, err := http.NewRequest("GET", baseURL+"/api/equipes/LE", reader)
+	res, err := SecureRequest(request)
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	bodyBuffer, _ := ioutil.ReadAll(res.Body)
+
+	var me MessageError
+	err = json.Unmarshal(bodyBuffer, &me)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	if res.StatusCode != 400 {
+		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
+	}
+
+	if !strings.Contains(me.Err, "pq: role \"aaaaa\" does not exist") {
+		t.Error("Error expected : ", me.Err)
+	}
+}
+
 // TestGetEquipe test la récupération de l'équipe créée
 func TestGetEquipe(t *testing.T) {
+	acqConf.ConnectionString = "host=localhost user=postgres dbname=tsap_acquisition sslmode=disable password="
 	reader = strings.NewReader("")
 	request, err := http.NewRequest("GET", baseURL+"/api/equipes/LE", reader)
 	res, err := SecureRequest(request)
@@ -432,8 +345,47 @@ func TestGetEquipe(t *testing.T) {
 	}
 }
 
+// TestModifierEquipeErrBD test la modification de l'équipe créée plus haut
+// avec erreur de connexion à la base de données
+func TestModifierEquipeErrBD(t *testing.T) {
+	acqConf.ConnectionString = "host=localhost user=aaaaa dbname=tsap_acquisition sslmode=disable password="
+	reader = strings.NewReader(
+		`{
+			"Name": "LE equipe", 
+			"City": "Montreal", 
+			"CategoryID": 1, 
+			"SportID": 1
+		}`)
+
+	// rmID est utilisé ici pour permettre la modification de la partie créée plus haut
+	request, err := http.NewRequest("PUT", baseURL+"/api/equipes/"+rmID, reader)
+	res, err := SecureRequest(request)
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	bodyBuffer, _ := ioutil.ReadAll(res.Body)
+
+	var me MessageError
+	err = json.Unmarshal(bodyBuffer, &me)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	if res.StatusCode != 400 {
+		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
+	}
+
+	if !strings.Contains(me.Err, "pq: role \"aaaaa\" does not exist") {
+		t.Error("Error expected : ", me.Err)
+	}
+}
+
 // TestModifierEquipe test la modification de l'équipe créée plus haut
 func TestModifierEquipe(t *testing.T) {
+	acqConf.ConnectionString = "host=localhost user=postgres dbname=tsap_acquisition sslmode=disable password="
 	reader = strings.NewReader(
 		`{
 			"Name": "LE equipe", 

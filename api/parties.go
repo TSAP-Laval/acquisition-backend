@@ -41,7 +41,7 @@ func (a *AcquisitionService) PartiesHandler(w http.ResponseWriter, r *http.Reque
 		db.Find(&games)
 
 		for i := 0; i < len(games); i++ {
-			games[i] = AjoutInfosPartie(db, games[i])
+			games[i] = ajoutInfosPartie(db, games[i])
 		}
 
 		Message(w, games, http.StatusOK)
@@ -49,18 +49,18 @@ func (a *AcquisitionService) PartiesHandler(w http.ResponseWriter, r *http.Reque
 		db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
 		defer db.Close()
 
+		if err != nil {
+			a.ErrorHandler(w, err)
+			return
+		}
+
 		body, _ := ioutil.ReadAll(r.Body)
 		if len(body) > 0 {
-
-			if err != nil {
-				a.ErrorHandler(w, err)
-				return
-			}
-
 			var g Games
-			err = json.Unmarshal(body, &g)
-			if err != nil {
-				a.ErrorHandler(w, err)
+
+			if err = json.Unmarshal(body, &g); err != nil {
+				msg := map[string]string{"error": "Une erreur est survenue lors de la création de la partie. Les données entrées sont invalides"}
+				Message(w, msg, http.StatusBadRequest)
 				return
 			}
 
@@ -75,12 +75,13 @@ func (a *AcquisitionService) PartiesHandler(w http.ResponseWriter, r *http.Reque
 				msg := map[string]string{"error": "Une partie de même date avec les mêmes equipes existe déjà!"}
 				Message(w, msg, http.StatusBadRequest)
 			} else {
-				db.Create(&g)
-				if db.NewRecord(g) {
-					msg := map[string]string{"error": "Une erreur est survenue lors de la création de la partie. Veuillez réessayer!"}
-					Message(w, msg, http.StatusInternalServerError)
+				if g.Date == "" || g.TeamID < 1 || g.OpposingTeam == "" || g.FieldCondition == "" ||
+					g.Status == "" || g.LocationID < 1 || g.SeasonID < 1 {
+					msg := map[string]string{"error": "Veuillez remplir tous les champs!"}
+					Message(w, msg, http.StatusBadRequest)
 				} else {
-					g = AjoutInfosPartie(db, g)
+					db.Create(&g)
+					g = ajoutInfosPartie(db, g)
 					Message(w, g, http.StatusCreated)
 				}
 			}
@@ -114,7 +115,7 @@ func (a *AcquisitionService) PartieHandler(w http.ResponseWriter, r *http.Reques
 			Message(w, msg, http.StatusNotFound)
 			return
 		}
-		AjoutInfosPartie(db, game)
+		ajoutInfosPartie(db, game)
 		Message(w, game, http.StatusOK)
 	case "PUT":
 		id := mux.Vars(r)["id"]
@@ -142,19 +143,9 @@ func (a *AcquisitionService) PartieHandler(w http.ResponseWriter, r *http.Reques
 			db.First(&game, "ID = ?", id)
 
 			if game.ID == 0 {
-				if db.NewRecord(g) {
-					db.Create(&g)
-					if db.NewRecord(g) {
-						msg := map[string]string{"error": "Une erreur est survenue lors de la création de la partie. Veuillez réessayer!"}
-						Message(w, msg, http.StatusInternalServerError)
-					} else {
-						g = AjoutInfosPartie(db, g)
-						Message(w, g, http.StatusCreated)
-					}
-				} else {
-					msg := map[string]string{"error": "La partie existe déjà dans la base de donnée!"}
-					Message(w, msg, http.StatusBadRequest)
-				}
+				db.Create(&g)
+				g = ajoutInfosPartie(db, g)
+				Message(w, g, http.StatusCreated)
 			} else {
 				var l Locations
 				var temp string
@@ -179,7 +170,7 @@ func (a *AcquisitionService) PartieHandler(w http.ResponseWriter, r *http.Reques
 					time, err := time.Parse(layout, g.Date)
 					if err != nil {
 						msg := map[string]string{"error": err.Error()}
-						Message(w, msg, http.StatusBadGateway)
+						Message(w, msg, http.StatusBadRequest)
 						return
 					}
 					date := time.Unix()
@@ -244,14 +235,13 @@ func (a *AcquisitionService) SupprimerPartiesHandler(w http.ResponseWriter, r *h
 	} else {
 		// On supprime l'équipe
 		db.Where("ID = ?", id).Delete(&g)
-		msg := map[string]string{"succes": "La partie a été supprimée avec succès!"}
-		Message(w, msg, http.StatusNoContent)
+		Message(w, http.StatusText(http.StatusNoContent), http.StatusNoContent)
 	}
 }
 
-// AjoutInfosPartie ajout des informations sur une parties
+// ajoutInfosPartie ajout des informations sur une parties
 // à la structure de celle-ci
-func AjoutInfosPartie(db *gorm.DB, g Games) Games {
+func ajoutInfosPartie(db *gorm.DB, g Games) Games {
 	// Home team
 	var ht Teams
 	db.Where("ID = ?", g.TeamID).Find(&ht)

@@ -19,8 +19,39 @@ import (
 	"github.com/TSAP-Laval/acquisition-backend/api"
 )
 
+// TestGetPartiesErrBD test la récupération de toutes les parties
+// avec erreur de connexion à la base de données
+func TestGetPartiesErrBD(t *testing.T) {
+	acqConf.ConnectionString = "host=localhost user=aaaaa dbname=tsap_acquisition sslmode=disable password="
+	reader = strings.NewReader("")
+	request, err := http.NewRequest("GET", baseURL+"/api/parties", reader)
+	res, err := SecureRequest(request)
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	bodyBuffer, _ := ioutil.ReadAll(res.Body)
+
+	var me MessageError
+	err = json.Unmarshal(bodyBuffer, &me)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	if res.StatusCode != 400 {
+		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
+	}
+
+	if !strings.Contains(me.Err, "pq: role \"aaaaa\" does not exist") {
+		t.Error("Error expected : ", me.Err)
+	}
+}
+
 // TestGetParties test la récupération de toutes les parties
 func TestGetParties(t *testing.T) {
+	acqConf.ConnectionString = "host=localhost user=postgres dbname=tsap_acquisition sslmode=disable password="
 	reader = strings.NewReader("")
 	request, err := http.NewRequest("GET", baseURL+"/api/parties", reader)
 	res, err := SecureRequest(request)
@@ -47,10 +78,51 @@ func TestGetParties(t *testing.T) {
 	}
 }
 
+// TestCreerPartieErrBD test la création d'une partie.
+// avec erreur de connexion à la base de données
+func TestCreerPartieErrBD(t *testing.T) {
+	acqConf.ConnectionString = "host=localhost user=aaaaa dbname=tsap_acquisition sslmode=disable password="
+	reader = strings.NewReader(
+		`{
+			"Date": "2016-06-21 06:02",
+            "FieldCondition": "Correcte",
+            "LocationID": 1,
+            "OpposingTeam": "Rien",
+            "SeasonID": 1,
+            "Status": "Local",
+            "TeamID": 1
+		}`)
+
+	request, err := http.NewRequest("POST", baseURL+"/api/parties", reader)
+	res, err := SecureRequest(request)
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	bodyBuffer, _ := ioutil.ReadAll(res.Body)
+
+	var me MessageError
+	err = json.Unmarshal(bodyBuffer, &me)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	if res.StatusCode != 400 {
+		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
+	}
+
+	if !strings.Contains(me.Err, "pq: role \"aaaaa\" does not exist") {
+		t.Error("Error expected : ", me.Err)
+	}
+}
+
 // TestCreerPartie test la création d'une partie.
 // Cette partie sera utilisée pour le reste des opérations
 // (modification, suppression)
 func TestCreerPartie(t *testing.T) {
+	acqConf.ConnectionString = "host=localhost user=postgres dbname=tsap_acquisition sslmode=disable password="
 	reader = strings.NewReader(
 		`{
 			"Date": "2016-06-21 06:02",
@@ -118,7 +190,7 @@ func TestCreerPartie(t *testing.T) {
 func TestCreerPartieErrEmpty(t *testing.T) {
 	reader = strings.NewReader(
 		`{
-			"Date": "2016-06-21 06:02",
+			"Date": "2016-06-22 06:02",
             "": "Correcte",
             "LocationID": 1,
             "OpposingTeam": "Rien",
@@ -134,14 +206,14 @@ func TestCreerPartieErrEmpty(t *testing.T) {
 		t.Error(err)
 	}
 
-	if res.StatusCode != 401 {
+	if res.StatusCode != 400 {
 		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
 	}
 
 	var me MessageError
 	responseMapping(&me, res)
 
-	if !strings.Contains(me.Err, "Une partie de même date avec les mêmes equipes existe déjà!") {
+	if !strings.Contains(me.Err, "Veuillez remplir tous les champs!") {
 		t.Errorf("Error expected: %s", me.Err)
 	}
 }
@@ -189,6 +261,25 @@ func TestCreerPartieVide(t *testing.T) {
 	}
 }
 
+// TestCreerPartieErr test que créer une partie avec
+// une erreur dans le JSON. Doit retourner une erreur.
+func TestCreerPartieErr(t *testing.T) {
+	reader = strings.NewReader(`{
+		"ERREUR" "
+	}`)
+
+	request, err := http.NewRequest("POST", baseURL+"/api/parties", reader)
+	res, err := SecureRequest(request)
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	if res.StatusCode != 400 {
+		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
+	}
+}
+
 // TestCreerPartieErrExiste test que de créer une partie qui
 // existe déjà retourne une erreur
 func TestCreerPartieErrExiste(t *testing.T) {
@@ -210,7 +301,7 @@ func TestCreerPartieErrExiste(t *testing.T) {
 		t.Error(err)
 	}
 
-	if res.StatusCode != 401 {
+	if res.StatusCode != 400 {
 		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
 	}
 
@@ -222,8 +313,39 @@ func TestCreerPartieErrExiste(t *testing.T) {
 	}
 }
 
+// TestGetPartieErrBD test la récupération de la partie créée
+// avec erreur de connexion à la base de données
+func TestGetPartieErrBD(t *testing.T) {
+	acqConf.ConnectionString = "host=localhost user=aaaaa dbname=tsap_acquisition sslmode=disable password="
+	reader = strings.NewReader("")
+	request, err := http.NewRequest("GET", baseURL+"/api/parties/"+rmID, reader)
+	res, err := SecureRequest(request)
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	bodyBuffer, _ := ioutil.ReadAll(res.Body)
+
+	var me MessageError
+	err = json.Unmarshal(bodyBuffer, &me)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	if res.StatusCode != 400 {
+		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
+	}
+
+	if !strings.Contains(me.Err, "pq: role \"aaaaa\" does not exist") {
+		t.Error("Error expected : ", me.Err)
+	}
+}
+
 // TestGetPartie test la récupération de la partie créée
 func TestGetPartie(t *testing.T) {
+	acqConf.ConnectionString = "host=localhost user=postgres dbname=tsap_acquisition sslmode=disable password="
 	reader = strings.NewReader("")
 	request, err := http.NewRequest("GET", baseURL+"/api/parties/"+rmID, reader)
 	res, err := SecureRequest(request)
@@ -241,6 +363,133 @@ func TestGetPartie(t *testing.T) {
 	}
 
 	if res.StatusCode != 200 {
+		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
+	}
+}
+
+// TestModifierPartieErrBD test la modification de la partie créée plus haut
+// avec erreur de connexion à la base de données
+func TestModifierPartieErrBD(t *testing.T) {
+	acqConf.ConnectionString = "host=localhost user=aaaaa dbname=tsap_acquisition sslmode=disable password="
+	reader = strings.NewReader(
+		`{
+			"Date": "2016-06-22 06:02",
+            "FieldCondition": "Correcte",
+            "LocationID": 1,
+            "OpposingTeam": "Ok",
+            "SeasonID": 1,
+            "Status": "Local",
+            "TeamID": 1
+		}`)
+
+	// rmID est utilisé ici pour permettre la modification de la partie créée plus haut
+	request, err := http.NewRequest("PUT", baseURL+"/api/parties/"+rmID, reader)
+	res, err := SecureRequest(request)
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	bodyBuffer, _ := ioutil.ReadAll(res.Body)
+
+	var me MessageError
+	err = json.Unmarshal(bodyBuffer, &me)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	if res.StatusCode != 400 {
+		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
+	}
+
+	if !strings.Contains(me.Err, "pq: role \"aaaaa\" does not exist") {
+		t.Error("Error expected : ", me.Err)
+	}
+}
+
+// TestModifierPartie test la modification de la partie créée plus haut
+// avec une erreur dans la clé du géodécodeur
+func TestModifierPartieErrKeyGeodecoder(t *testing.T) {
+	acqConf.ConnectionString = "host=localhost user=postgres dbname=tsap_acquisition sslmode=disable password="
+	keys.Geodecoder = ""
+	reader = strings.NewReader(
+		`{
+			"Date": "2016-06-22 06:02",
+            "FieldCondition": "Correcte",
+            "LocationID": 1,
+            "OpposingTeam": "Ok",
+            "SeasonID": 1,
+            "Status": "Local",
+            "TeamID": 1
+		}`)
+
+	// rmID est utilisé ici pour permettre la modification de la partie créée plus haut
+	request, err := http.NewRequest("PUT", baseURL+"/api/parties/"+rmID, reader)
+	res, err := SecureRequest(request)
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	if res.StatusCode != 400 {
+		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
+	}
+}
+
+// TestModifierPartieErrKeyWeather test la modification de la partie créée plus haut
+// avec un erreur dans la clé de l'API de récupération de la température
+func TestModifierPartieErrKeyWeather(t *testing.T) {
+	keys.Geodecoder = "gCVEOBYTObcAaHsG5MXE3Uy0PF1kgkg0"
+	keys.Weather = ""
+	reader = strings.NewReader(
+		`{
+			"Date": "2016-06-22 06:02",
+            "FieldCondition": "Correcte",
+            "LocationID": 1,
+            "OpposingTeam": "Ok",
+            "SeasonID": 1,
+            "Status": "Local",
+            "TeamID": 1
+		}`)
+
+	// rmID est utilisé ici pour permettre la modification de la partie créée plus haut
+	request, err := http.NewRequest("PUT", baseURL+"/api/parties/"+rmID, reader)
+	res, err := SecureRequest(request)
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	if res.StatusCode != 400 {
+		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
+	}
+}
+
+// TestModifierPartieErrDate test la modification de la partie créée plus haut
+// avec une erreur dans le format de la date
+func TestModifierPartieErrDate(t *testing.T) {
+	keys.Weather = "1e471424e05991d2f9ed9e39b9749ae0"
+	reader = strings.NewReader(
+		`{
+			"Date": "2016-06-22 06:02 EDT",
+            "FieldCondition": "Correcte",
+            "LocationID": 1,
+            "OpposingTeam": "Ok",
+            "SeasonID": 1,
+            "Status": "Local",
+            "TeamID": 1
+		}`)
+
+	// rmID est utilisé ici pour permettre la modification de la partie créée plus haut
+	request, err := http.NewRequest("PUT", baseURL+"/api/parties/"+rmID, reader)
+	res, err := SecureRequest(request)
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	if res.StatusCode != 400 {
 		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
 	}
 }
@@ -344,10 +593,30 @@ func TestModifierPartieVide(t *testing.T) {
 }
 
 // TestModifierPartieMauvaiseInfo test que la modification avec une
-// erreur dans le JSON retourne une erreur
+// erreur dans les les informations entrées et retourne une erreur
 func TestModifierPartieMauvaiseInfo(t *testing.T) {
 	reader = strings.NewReader(`{
 		"ERREUR : ""
+	}`)
+
+	// rmID est utilisé ici pour permettre la modification de la partie créée plus haut
+	request, err := http.NewRequest("PUT", baseURL+"/api/parties/"+rmID, reader)
+	res, err := SecureRequest(request)
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	if res.StatusCode != 400 {
+		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
+	}
+}
+
+// TestModifierPartieErr test que la modification avec une
+// erreur dans le JSON et retourne une erreur
+func TestModifierPartieErr(t *testing.T) {
+	reader = strings.NewReader(`{
+		"ERREUR ""
 	}`)
 
 	// rmID est utilisé ici pour permettre la modification de la partie créée plus haut
@@ -382,8 +651,39 @@ func TestModifierPartieCreer(t *testing.T) {
 	}
 }
 
+// TestSupprimerPartieErrBD test la suppression de la partie préalablement créée
+// avec erreur de connexion à la base de données
+func TestSupprimerPartieErrBD(t *testing.T) {
+	acqConf.ConnectionString = "host=localhost user=aaaaa dbname=tsap_acquisition sslmode=disable password="
+	reader = strings.NewReader("")
+	request, err := http.NewRequest("DELETE", baseURL+"/api/parties/"+rmID, reader)
+	res, err := SecureRequest(request)
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	bodyBuffer, _ := ioutil.ReadAll(res.Body)
+
+	var me MessageError
+	err = json.Unmarshal(bodyBuffer, &me)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	if res.StatusCode != 400 {
+		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
+	}
+
+	if !strings.Contains(me.Err, "pq: role \"aaaaa\" does not exist") {
+		t.Error("Error expected : ", me.Err)
+	}
+}
+
 // TestSupprimerPartie test la suppression de la partie préalablement créée
 func TestSupprimerPartie(t *testing.T) {
+	acqConf.ConnectionString = "host=localhost user=postgres dbname=tsap_acquisition sslmode=disable password="
 	reader = strings.NewReader("")
 	request, err := http.NewRequest("DELETE", baseURL+"/api/parties/"+rmID, reader)
 	res, err := SecureRequest(request)

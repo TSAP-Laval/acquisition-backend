@@ -28,6 +28,8 @@ var (
 	baseURL string
 	rmID    string
 	token   Token
+	acqConf api.AcquisitionConfiguration
+	keys    api.Keys
 )
 
 // Token est utilisé pour les communication sécurisées
@@ -47,17 +49,15 @@ type Messages struct {
 
 // Permet de simuler le démarrage du serveur le temps des tests
 func init() {
-	var a api.AcquisitionConfiguration
-	var k api.Keys
 
-	err := envconfig.Process("TSAP", &a)
-	err = envconfig.Process("KEYS", &k)
+	err := envconfig.Process("TSAP", &acqConf)
+	err = envconfig.Process("KEYS", &keys)
 
 	if err != nil {
 		panic(err)
 	}
 
-	service := api.New(os.Stdout, &a, &k)
+	service := api.New(os.Stdout, &acqConf, &keys)
 	service.Start()
 
 	// ** IMPORTANT **
@@ -66,7 +66,7 @@ func init() {
 	// une fois sur deux...
 	time.Sleep(5 * time.Second)
 
-	baseURL = "http://localhost" + a.Port
+	baseURL = "http://localhost" + acqConf.Port
 }
 
 // SecureRequest permet de faire des requêtes au serveur avec le token en en-tête
