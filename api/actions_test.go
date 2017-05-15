@@ -27,8 +27,8 @@ import (
 func TestGetTokenErr(t *testing.T) {
 	reader = strings.NewReader(
 		`{
-			"email "admin@admin.ca",
-			"pass_hash": "12345"
+			"Email "admin@admin.ca",
+			"PassHash": "aaaaa"
 		}`,
 	)
 	request, err := http.NewRequest("POST", baseURL+"/api/auth", reader)
@@ -59,8 +59,8 @@ func TestGetTokenErr(t *testing.T) {
 func TestGetTokenInvalid(t *testing.T) {
 	reader = strings.NewReader(
 		`{
-			"email": "admin@admin.ca",
-			"pass_hash": "1234534523"
+			"Email": "admin@admin.ca",
+			"PassHash": "1234534523"
 		}`,
 	)
 	request, err := http.NewRequest("POST", baseURL+"/api/auth", reader)
@@ -91,8 +91,8 @@ func TestGetTokenInvalid(t *testing.T) {
 func TestGetTokenInvalidEmail(t *testing.T) {
 	reader = strings.NewReader(
 		`{
-			"email": "admin@admin.com",
-			"pass_hash": "12345"
+			"Email": "admin@admin.com",
+			"PassHash": "aaaaa"
 		}`,
 	)
 	request, err := http.NewRequest("POST", baseURL+"/api/auth", reader)
@@ -125,8 +125,8 @@ func TestGetTokenErrBD(t *testing.T) {
 	acqConf.ConnectionString = "host=localhost user=aaaaa dbname=tsap_acquisition sslmode=disable password="
 	reader = strings.NewReader(
 		`{
-			"email": "admin@admin.ca",
-			"pass_hash": "12345"
+			"Email": "admin@admin.ca",
+			"PassHash": "aaaaa"
 		}`,
 	)
 	request, err := http.NewRequest("POST", baseURL+"/api/auth", reader)
@@ -160,8 +160,8 @@ func TestGetTokenExpire(t *testing.T) {
 	acqConf.ConnectionString = "host=localhost user=postgres dbname=tsap_acquisition sslmode=disable password="
 	reader = strings.NewReader(
 		`{
-			"email": "mauvais@mauvais.ca",
-			"pass_hash": "12345"
+			"Email": "mauvais@mauvais.ca",
+			"PassHash": "aaaaa"
 		}`,
 	)
 	request, err := http.NewRequest("POST", baseURL+"/api/auth", reader)
@@ -198,8 +198,8 @@ func TestGetTokenExpire(t *testing.T) {
 func TestGetToken(t *testing.T) {
 	reader = strings.NewReader(
 		`{
-			"email": "admin@admin.ca",
-			"pass_hash": "12345"
+			"Email": "admin@admin.ca",
+			"PassHash": "aaaaa"
 		}`,
 	)
 	request, err := http.NewRequest("POST", baseURL+"/api/auth", reader)
@@ -229,8 +229,8 @@ func TestGetToken(t *testing.T) {
 func TestGetTokenSecondTime(t *testing.T) {
 	reader = strings.NewReader(
 		`{
-			"email": "admin@admin.ca",
-			"pass_hash": "12345"
+			"Email": "admin@admin.ca",
+			"PassHash": "aaaaa"
 		}`,
 	)
 	request, err := http.NewRequest("POST", baseURL+"/api/auth", reader)
@@ -263,8 +263,8 @@ func TestGetTokenSecondTime(t *testing.T) {
 func TestGetTokenOptions(t *testing.T) {
 	reader = strings.NewReader(
 		`{
-			"email": "admin@admin.ca",
-			"pass_hash": "12345"
+			"Email": "admin@admin.ca",
+			"PassHash": "aaaaa"
 		}`,
 	)
 	request, err := http.NewRequest("OPTIONS", baseURL+"/api/auth", reader)

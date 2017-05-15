@@ -96,15 +96,13 @@ func (a *AcquisitionService) Login(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		pass := []byte(ad.PassHash)
-
 		var dbAd Admins
 		db.Where("email = ?", ad.Email).First(&dbAd)
 
 		if dbAd.Email != "" {
 			// Vérification que le mot de passe envoyé est bel et bien celui contenu dans la base de données et
 			// faisant référence à celui correspondant au email entré
-			if err = bcrypt.CompareHashAndPassword([]byte(dbAd.PassHash), pass); err == nil && string(pass) != "" {
+			if err = bcrypt.CompareHashAndPassword([]byte(dbAd.PassHash), []byte(ad.PassHash)); err == nil && ad.PassHash != "" {
 				if dbAd.TokenLogin != "" {
 					token, _ := jwt.ParseWithClaims(dbAd.TokenLogin, &Claims{}, func(token *jwt.Token) (interface{}, error) {
 						return []byte(a.keys.JWT), nil
@@ -129,7 +127,7 @@ func (a *AcquisitionService) Login(w http.ResponseWriter, r *http.Request) {
 		}
 		// Dans le cas où le mot de passe où l'adresse courriel est invalide,
 		// on envoie un message d'erreur au client.
-		msg := map[string]string{"error": "Le mot de passe ou l'adresse email entrées est invalide."}
+		msg := map[string]string{"error": "Le mot de passe ou l'adresse email entrés est invalide."}
 		Message(w, msg, http.StatusBadRequest)
 	case "OPTIONS":
 		w.Header().Set("Access-Control-Allow-Origin", "*")
