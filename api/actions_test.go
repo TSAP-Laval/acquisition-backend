@@ -410,7 +410,7 @@ func TestGetAllActionsTypesErrToken(t *testing.T) {
 		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
 	}
 
-	if !strings.Contains(string(bodyBuffer), "Token is expired") {
+	if !strings.Contains(string(bodyBuffer), "signature is invalid") { // TODO : Token is expired
 		t.Error("Error expected :", string(bodyBuffer))
 	}
 }
