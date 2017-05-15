@@ -14,6 +14,7 @@ import (
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 
 	"github.com/jinzhu/gorm"
+	"golang.org/x/crypto/bcrypt"
 )
 
 // FaireBD crée la base de données à partie du modèle de données (structures.go)
@@ -200,13 +201,15 @@ func (a *AcquisitionService) RemplirBD(w http.ResponseWriter, r *http.Request) {
 		db.Create(&equipe5)
 	}
 
-	admin := Admins{Email: "admin@admin.ca", PassHash: "$2a$10$nrfobAUs0x1dAQe9jubLhO/YWe4w2kViPNFAmZfWEah28vkWMa9q6"}
+	pass, _ := bcrypt.GenerateFromPassword([]byte("12345"), bcrypt.DefaultCost)
+	admin := Admins{Email: "admin@admin.ca", PassHash: string(pass)}
 	if db.NewRecord(admin) {
 		db.Create(&admin)
 	}
 
 	// Admin avec un token expiré (pour les tests seulement)
-	badAdmin := Admins{Email: "mauvais@mauvais.ca", PassHash: "$2a$10$txBDGNabCC0j.n8wFURChO9KazKeQFOyPtUliyH.V5b7DbTkwsJxe",
+	pass, _ = bcrypt.GenerateFromPassword([]byte("12345"), bcrypt.DefaultCost)
+	badAdmin := Admins{Email: "mauvais@mauvais.ca", PassHash: string(pass),
 		TokenLogin: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbiI6dHJ1ZSwiZXhwIjoxNDk0Njk0OTU0fQ.TBukRueijLUla7hejpR064CERMXJy3CRbWWhPQPQ5fY"}
 	if db.NewRecord(badAdmin) {
 		db.Create(&badAdmin)
