@@ -371,11 +371,33 @@ func TestGetTokenOptions(t *testing.T) {
 	}
 }
 
+// TestGetAllActionsTypesErrTokenSignature test la récupération de tous les type d'action avec un token mal signé
+func TestGetAllActionsTypesErrTokenSignature(t *testing.T) {
+	reader = strings.NewReader("")
+	request, err := http.NewRequest("GET", baseURL+"/api/actions/types", reader)
+	request.Header.Add("Authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbiI6dHJ1ZSwiZXhwIjoxNDk0NzgyNjg5fQ.5yuANzVeFq7HPMAmNQIk_QqWZxh2ZfgiWqvDoMtUTGs")
+	res, err := http.DefaultClient.Do(request)
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	bodyBuffer, _ := ioutil.ReadAll(res.Body)
+
+	if res.StatusCode != 401 {
+		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
+	}
+
+	if !strings.Contains(string(bodyBuffer), "signature is invalid") {
+		t.Error("Error expected :", string(bodyBuffer))
+	}
+}
+
 // TestGetAllActionsTypesErrToken test la récupération de tous les type d'action avec un token expiré
 func TestGetAllActionsTypesErrToken(t *testing.T) {
 	reader = strings.NewReader("")
 	request, err := http.NewRequest("GET", baseURL+"/api/actions/types", reader)
-	request.Header.Add("Authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbiI6dHJ1ZSwiZXhwIjoxNDk0NzgyNjg5fQ.5yuANzVeFq7HPMAmNQIk_QqWZxh2ZfgiWqvDoMtUTGs")
+	request.Header.Add("Authorization", "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiIiLCJpYXQiOjE0OTQ4MTE4MjMsImV4cCI6MTQ5NDgxMTgyNCwiYXVkIjoiIiwic3ViIjoiIiwiYWRtaW4iOiJ0cnVlIn0.n-eE_AJErTBpbuR78Cb4wCEEeleBEmG_6j0N_DDlVYs")
 	res, err := http.DefaultClient.Do(request)
 
 	if err != nil {
