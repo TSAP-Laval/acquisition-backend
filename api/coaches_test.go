@@ -285,6 +285,14 @@ func TestUpdateCoach(t *testing.T) {
 	}
 
 	if res.StatusCode != 200 {
+		bodyBuffer, _ := ioutil.ReadAll(res.Body)
+		var me MessageError
+		err = json.Unmarshal(bodyBuffer, &me)
+		if err != nil {
+			t.Error(err)
+			return
+		}
+		t.Error("Error expected : ", me.Err)
 		t.Errorf("Success expected: %d", res.StatusCode)
 	}
 }
