@@ -110,7 +110,7 @@ func (a *AcquisitionService) RemplirBD(w http.ResponseWriter, r *http.Request) {
 	if db.NewRecord(reception7) {
 		db.Create(&reception7)
 	}
-	reception8 := ReceptionType{Name: "Passe reçue aérien"}
+	reception8 := ReceptionType{Name: "Passe aérienne reçue "}
 	if db.NewRecord(reception8) {
 		db.Create(&reception8)
 	}
