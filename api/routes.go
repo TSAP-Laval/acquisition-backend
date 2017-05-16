@@ -112,6 +112,11 @@ func AddMiddleware(h http.Handler, middleware ...func(http.Handler) http.Handler
 	return h
 }
 
+func (a *AcquisitionService) handleOptions(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.WriteHeader(http.StatusOK)
+}
+
 func (a *AcquisitionService) getRouter() http.Handler {
 	r := mux.NewRouter()
 
@@ -178,10 +183,9 @@ func (a *AcquisitionService) getRouter() http.Handler {
 		)).Methods("DELETE", "POST", "OPTIONS")
 
 	// Videos
-	api.Handle("/parties/{id}/videos/{part}",
+	api.Handle("/parties/{id}/videos/{part}", // a.JWTMiddleware,
 		AddMiddleware(
 			a.SecureHeaders(http.HandlerFunc(a.VideoHandler)),
-			a.JWTMiddleware,
 			a.RateLimiter,
 		)).Methods("GET")
 
@@ -198,6 +202,12 @@ func (a *AcquisitionService) getRouter() http.Handler {
 			a.JWTMiddleware,
 			a.RateLimiter,
 		)).Methods("GET")
+	api.Handle("/terrains/{nom}",
+		AddMiddleware(
+			a.SecureHeaders(http.HandlerFunc(a.handleOptions)),
+			a.JWTMiddleware,
+			a.RateLimiter,
+		)).Methods("OPTIONS")
 	api.Handle("/terrains/{id}",
 		AddMiddleware(
 			a.SecureHeaders(http.HandlerFunc(a.TerrainsHandler)),
@@ -224,6 +234,12 @@ func (a *AcquisitionService) getRouter() http.Handler {
 			a.JWTMiddleware,
 			a.RateLimiter,
 		)).Methods("GET")
+	api.Handle("/equipes/{nom}",
+		AddMiddleware(
+			a.SecureHeaders(http.HandlerFunc(a.handleOptions)),
+			a.JWTMiddleware,
+			a.RateLimiter,
+		)).Methods("OPTIONS")
 	api.Handle("/equipes/{id}",
 		AddMiddleware(
 			a.SecureHeaders(http.HandlerFunc(a.EquipesHandler)),
@@ -243,13 +259,19 @@ func (a *AcquisitionService) getRouter() http.Handler {
 			a.SecureHeaders(http.HandlerFunc(a.PartiesHandler)),
 			a.JWTMiddleware,
 			a.RateLimiter,
-		)).Methods("GET", "POST")
+		)).Methods("GET", "POST", "OPTIONS")
 	api.Handle("/parties/{id}",
 		AddMiddleware(
 			a.SecureHeaders(http.HandlerFunc(a.PartieHandler)),
 			a.JWTMiddleware,
 			a.RateLimiter,
 		)).Methods("GET", "PUT", "OPTIONS")
+	api.Handle("/parties/{id}",
+		AddMiddleware(
+			a.SecureHeaders(http.HandlerFunc(a.handleOptions)),
+			a.JWTMiddleware,
+			a.RateLimiter,
+		)).Methods("OPTIONS")
 	api.Handle("/parties/{id}",
 		AddMiddleware(
 			a.SecureHeaders(http.HandlerFunc(a.SupprimerPartiesHandler)),
