@@ -20,8 +20,6 @@ test:
 database:
   override:
     - createdb tsap_acquisition
-    - psql -U postgres 'tsap_acquisition' < postgres.pgsql
-    - psql -c "\dt" tsap_acquisition
 
 machine:
   python:
@@ -39,6 +37,7 @@ machine:
     COVERALLS_TOKEN: "N7eNnjlrcfuhXXFORqzga8SDgV3qbMKYA"
     KEYS_WEATHER: "1e471424e05991d2f9ed9e39b9749ae0"
     KEYS_GEODECODER: "gCVEOBYTObcAaHsG5MXE3Uy0PF1kgkg0"
+    KEYS_JWT: "aind9wd98h#$*@*!29dh29h"
 
 general:
   artifacts:

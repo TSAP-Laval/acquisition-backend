@@ -136,7 +136,7 @@ CREATE TABLE "games" (
   "id_location" INT NOT NULL,
   "field_condition" VARCHAR(45) NULL,
   "temperature" VARCHAR(45) NULL,
-  "degree" VARCHAR(10) NULL
+  "degree" VARCHAR(10) NULL,
   "date" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT "fk_game_team"
     FOREIGN KEY ("id_team")

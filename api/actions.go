@@ -1,8 +1,10 @@
 //
 // Fichier     : actions.go
-// Développeur : ?
+// Développeur : Laurent Leclerc-Poulin
 //
-// Commentaire expliquant le code, les fonctions...
+// Permet de gérer toutes les interractions nécessaires à la création,
+// la modification, la seppression et la récupération des informations
+// d'un type d'action.
 //
 
 package api
@@ -10,7 +12,6 @@ package api
 import (
 	"encoding/json"
 	"net/http"
-	"strings"
 
 	"github.com/gorilla/mux"
 	"github.com/jinzhu/gorm"
@@ -21,32 +22,8 @@ import (
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 )
 
-// TODO: Linter le code...
-// TODO: Gérer les erreurs comme du monde
-// TODO: Enlever tous ce qui est log, print...
-
-// GetMovementTypeHandler Gestion du select des types de mouvements
-func (a *AcquisitionService) GetMovementTypeHandler(w http.ResponseWriter, r *http.Request) {
-	db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
-
-	defer db.Close()
-	if err != nil {
-		a.ErrorHandler(w, err)
-		return
-	}
-
-	mvmType := []MovementsType{}
-	db.Find(&mvmType)
-
-	mvmTypeJSON, _ := json.Marshal(mvmType)
-
-	w.Header().Set("Content-Type", "Application/json")
-	w.Write(mvmTypeJSON)
-}
-
-//GetAllActionsTypes gestion du select des types d'actions
-func (a *AcquisitionService) GetAllActionsTypes(w http.ResponseWriter, r *http.Request) {
-
+//GetActionsTypeHandler Gère la récupération de tous les types d'actions
+func (a *AcquisitionService) GetActionsTypeHandler(w http.ResponseWriter, r *http.Request) {
 	db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
 	defer db.Close()
 
@@ -55,15 +32,24 @@ func (a *AcquisitionService) GetAllActionsTypes(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	actionTypes := []ActionsType{}
-	db.Find(&actionTypes)
+	id := mux.Vars(r)["id"]
 
-	actionTypesJSON, _ := json.Marshal(actionTypes)
+	if id != "" {
+		acType := ActionsType{}
+		db.Where("ID = ?", id).First(&acType)
 
-	w.Header().Set("Content-Type", "Application/json")
-	w.Write(actionTypesJSON)
+		if acType.ID != 0 {
+			Message(w, acType, http.StatusOK)
+		} else {
+			msg := map[string]string{"error": "Aucun type d'action ne correspond à celui entré"}
+			Message(w, msg, http.StatusNotFound)
+		}
+	} else {
+		acType := []ActionsType{}
+		db.Find(&acType)
 
-	defer db.Close()
+		Message(w, acType, http.StatusOK)
+	}
 }
 
 // GetAllReceptionTypes gestion du select pour les types de reception
@@ -82,63 +68,35 @@ func (a *AcquisitionService) GetAllReceptionTypes(w http.ResponseWriter, r *http
 	defer db.Close()
 }
 
-//PostActionType : Create new action type
-func (a *AcquisitionService) PostActionType(w http.ResponseWriter, r *http.Request) {
+//CreerActionsType Gère la création d'un type d'action
+func (a *AcquisitionService) CreerActionsType(w http.ResponseWriter, r *http.Request) {
 	db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
-	if err != nil {
-		a.ErrorHandler(w, err)
-		return
-	}
-
-	body, err := ioutil.ReadAll(r.Body)
+	defer db.Close()
 
 	if err != nil {
 		a.ErrorHandler(w, err)
 		return
 	}
 
-	var newActionType ActionsType
+	body, _ := ioutil.ReadAll(r.Body)
 
-	err = json.Unmarshal(body, &newActionType)
+	var acType ActionsType
 
-	if err != nil {
-		a.ErrorHandler(w, err)
+	if err = json.Unmarshal(body, &acType); err != nil {
+		msg := map[string]string{"error": "Certaines informations entrées sont invalides!"}
+		Message(w, msg, http.StatusBadRequest)
 		return
 	}
+	var at ActionsType
+	db.Model(&at).Where("name = ?", acType.Name).Find(&at)
 
-	if db.NewRecord(newActionType) {
-		db.Create(&newActionType)
-		db.NewRecord(newActionType) // => return `false` after `user` created
-	} else {
-		// TODO: Gérer l'erreur
-		return
-	}
-
-	defer r.Body.Close()
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(body)
-}
-
-//GetActionsTypeHandler : Get actionstype
-func (a *AcquisitionService) GetActionsTypeHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	vars := mux.Vars(r)
-
-	if vars != nil {
-		db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
-		defer db.Close()
-
-		if err != nil {
-			a.ErrorHandler(w, err)
-			return
+	if at.ID == 0 {
+		if db.NewRecord(acType) {
+			db.Create(&acType)
+			Message(w, acType, http.StatusCreated)
 		}
-
-		action := []ActionsType{}
-		id := strings.ToLower(strings.TrimSpace(vars["id"]))
-		db.Where("ID = ?", id).Find(&action)
-		Message(w, action, http.StatusOK)
 	} else {
-		msg := map[string]string{"error": "non trouvé"}
-		Message(w, msg, http.StatusNotFound)
+		msg := map[string]string{"error": "Un type d'action avec le même nom existe déjà"}
+		Message(w, msg, http.StatusBadRequest)
 	}
 }

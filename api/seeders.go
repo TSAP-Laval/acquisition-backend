@@ -8,13 +8,13 @@
 package api
 
 import (
-	"fmt"
 	"net/http"
 
 	//Import DB driver
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 
 	"github.com/jinzhu/gorm"
+	"golang.org/x/crypto/bcrypt"
 )
 
 // FaireBD crée la base de données à partie du modèle de données (structures.go)
@@ -24,8 +24,8 @@ func (a *AcquisitionService) FaireBD(w http.ResponseWriter, r *http.Request) {
 	defer db.Close()
 
 	if err != nil {
-		fmt.Println("ERROR : ")
-		fmt.Println(err)
+		a.ErrorHandler(w, err)
+		return
 	}
 
 	db.DropTableIfExists("admins")
@@ -36,7 +36,7 @@ func (a *AcquisitionService) FaireBD(w http.ResponseWriter, r *http.Request) {
 	db.DropTableIfExists("games")
 	db.DropTableIfExists("player_team")
 	db.DropTableIfExists("players")
-	db.DropTableIfExists("coach_team")
+	db.DropTableIfExists("coach_teams")
 	db.DropTableIfExists("metrics")
 	db.DropTableIfExists("teams")
 	db.DropTableIfExists("sports")
@@ -79,8 +79,8 @@ func (a *AcquisitionService) RemplirBD(w http.ResponseWriter, r *http.Request) {
 	defer db.Close()
 
 	if err != nil {
-		fmt.Println("ERROR : ")
-		fmt.Println(err)
+		a.ErrorHandler(w, err)
+		return
 	}
 	reception := ReceptionType{Name: "Ballon conquis aérien"}
 	if db.NewRecord(reception) {
@@ -220,7 +220,7 @@ func (a *AcquisitionService) RemplirBD(w http.ResponseWriter, r *http.Request) {
 		db.Create(&location6)
 	}
 
-	equipe1 := Teams{Name: "Lions", City: "Quebec", SportID: 1, CategoryID: 1}
+	equipe1 := Teams{Name: "Lions", City: "Quebec", SportID: 1, CategoryID: 1, SeasonID: 1, Sexe: "M"}
 	if db.NewRecord(equipe1) {
 		db.Create(&equipe1)
 	}
@@ -245,7 +245,27 @@ func (a *AcquisitionService) RemplirBD(w http.ResponseWriter, r *http.Request) {
 		db.Create(&equipe5)
 	}
 
-	Uneaction := Actions{ActionTypeID: 1, ReceptionTypeID: 1, ZoneID: 1, GameID: 1, X1: 0, Y1: 0, X2: 0, Y2: 0, X3: 0, Y3: 0, Time: 10, HomeScore: 0, GuestScore: 0, PlayerID: 1}
+	pass, _ := bcrypt.GenerateFromPassword([]byte("aaaaa"), bcrypt.DefaultCost)
+	if err := bcrypt.CompareHashAndPassword(pass, []byte("aaaaa")); err != nil {
+		panic(err)
+	}
+	admin := Admins{Email: "admin@admin.ca", PassHash: string(pass)}
+	if db.NewRecord(admin) {
+		db.Create(&admin)
+	}
+
+	// Admin avec un token expiré (pour les tests seulement)
+	pass, _ = bcrypt.GenerateFromPassword([]byte("aaaaa"), bcrypt.DefaultCost)
+	if err := bcrypt.CompareHashAndPassword(pass, []byte("aaaaa")); err != nil {
+		panic(err)
+	}
+	badAdmin := Admins{Email: "mauvais@mauvais.ca", PassHash: string(pass),
+		TokenLogin: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbiI6dHJ1ZSwiZXhwIjoxNDk0Njk0OTU0fQ.TBukRueijLUla7hejpR064CERMXJy3CRbWWhPQPQ5fY"}
+	if db.NewRecord(badAdmin) {
+		db.Create(&badAdmin)
+	}
+
+	Uneaction := Actions{ActionTypeID: 1, ZoneID: 1, GameID: 1, X1: 0, Y1: 0, X2: 0, Y2: 0, X3: 0, Y3: 0, Time: 10, HomeScore: 0, GuestScore: 0, PlayerID: 1}
 	if db.NewRecord(Uneaction) {
 		db.Create(&Uneaction)
 	}

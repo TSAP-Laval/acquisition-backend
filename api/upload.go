@@ -11,6 +11,7 @@ package api
 
 import (
 	"io"
+	"mime"
 	"mime/multipart"
 	"net/http"
 	"os"
@@ -18,13 +19,13 @@ import (
 	"regexp"
 	"sort"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/gorilla/mux"
 	"github.com/jinzhu/gorm"
 )
 
+// Type dates permettant d'obtenir l'ordre des vidéos selon leur date de création
 type dates struct {
 	index int
 	date  time.Time
@@ -37,8 +38,10 @@ const (
 	KO = 1 << (10 * 1)
 )
 
+// Le dossier de destination des vidéos uploadées
 const videoPath = "../videos/"
 
+// Type de données permettant d'obtenir l'ordre des vidéos selon leur date de création
 type creationDates []dates
 
 // UploadHandler Gère l'upload de videos sur le serveur
@@ -46,13 +49,16 @@ func (a *AcquisitionService) UploadHandler(w http.ResponseWriter, r *http.Reques
 	switch r.Method {
 	case "POST":
 		gameID := mux.Vars(r)["game-id"]
-		if _, err := strconv.Atoi(gameID); err == nil {
+		if id, err := strconv.Atoi(gameID); id > 0 || err == nil {
 			db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
 			defer db.Close()
 			if err != nil {
 				a.ErrorHandler(w, err)
 				return
 			}
+
+			// Taille limite d'envoie de fichiers
+			r.Body = http.MaxBytesReader(w, r.Body, 10*GB) // 10 Gb
 
 			// 10 Gb
 			if r.ContentLength > 10*GB {
@@ -61,33 +67,48 @@ func (a *AcquisitionService) UploadHandler(w http.ResponseWriter, r *http.Reques
 				return
 			}
 
-			// Taille limite d'envoie de fichiers
-			r.Body = http.MaxBytesReader(w, r.Body, 10*GB) // 10 Gb
-
+			// Dans le cas où le dossier de destination des vidéos est inexistant, on le crée
 			if _, err := os.Stat(videoPath); os.IsNotExist(err) {
 				os.MkdirAll(videoPath, 0777)
 			}
 
 			var form *multipart.Reader
 			if form, err = r.MultipartReader(); err != nil {
-				msg := map[string]string{"error": "Aucun fichier envoyé ! Veuillez réessayer !"}
+				msg := map[string]string{"error": "Aucun fichier n'a été envoyé ! Veuillez réessayer !"}
 				Message(w, msg, http.StatusBadRequest)
 				return
 			}
 
+			// Tableau des vidéos uploadées servant à l'insertion des informations dans la base de données
 			var videos = make([]*Videos, 0)
+
+			// variable servant à la récupération de l'itération actuelle de la
+			// vidéo uploadée et de se date de création
 			var partsDate = make(map[string]dates)
 
-			// Boucle infinie, mais termine une fois que la dernière partie est lue
+			// Boucle sur les "parties" du formulaire envoyée
+			//  ** Boucle infinie, mais termine une fois que la dernière partie est lue
 			for i := 0; i >= 0; i++ {
 				part, err := form.NextPart()
 				if err == io.EOF {
 					break
 				}
 
-				layout := "Mon Jan 02 2006 15:04:05 GMT-0400 (EDT)"
-				str := part.FormName()
-				t, _ := time.Parse(layout, str)
+				// Convertion de la date de création de la vidéo selon le format donné
+				layout := "Mon Jan 02 2006 15:04:05 GMT-0400 (EST)"
+				date := part.FormName()
+
+				t, err := time.Parse(layout, date)
+				if err != nil {
+					layout := "Mon Jan 02 2006 15:04:05 GMT-0400 (EDT)"
+					t, err = time.Parse(layout, date)
+
+					if err != nil {
+						msg := map[string]string{"error": "Une erreur est survenue lors de l'envoie de la vidéo!"}
+						Message(w, msg, http.StatusBadRequest)
+						return
+					}
+				}
 
 				// Forn name is use as file last modified date
 				partsDate[strconv.Itoa(i)] = dates{index: i, date: t}
@@ -105,48 +126,50 @@ func (a *AcquisitionService) UploadHandler(w http.ResponseWriter, r *http.Reques
 					return
 				}
 
+				var contentType string
+				var ext []string
+
 				// On valide préalablement que le fichier est une vidéo au format
-				// Quicktime (.mov). Dans le cas où ell ne l'est pas, on valide
-				// alors son format avec la fonction native `DetectContentType`.
+				// Quicktime (.mov) ni MPEG (.mpg/mpeg). Dans le cas où ell ne l'est
+				// pas, on valide alors son format avec la fonction native `DetectContentType`.
 				//
 				// ** Cette fonction ne continent pas la définition pour les
-				//    fichier .mov, c'est pourquoi j'ai ajouté la fonction
+				//    fichier .mov et .mpg/mpeg, c'est pourquoi j'ai ajouté la fonction
 				//    qui permet de valider ce type de fichier.
-				if !isMov(buffer) {
-					contentType := http.DetectContentType(buffer)
-					var validation *regexp.Regexp
-					if validation, err = regexp.Compile("video/.*"); err != nil {
-						a.ErrorHandler(w, err)
-						return
-					}
+				if !isMov(buffer, &contentType, &ext) && !isMpg(buffer, &contentType, &ext) {
+					// Utilisation de la fonction native permettant de déterminer le format du fichier
+					contentType = http.DetectContentType(buffer)
+
+					// Seule une erreur dans la REGEX peut causer le retour d'une erreur par la fonction
+					// c'est pourquoi, en m'assurant qu'elle est conforme, j'ai pris la décision de retirer
+					// la gestion de celle-ci.
+					validation, _ := regexp.Compile("video/.*")
 
 					if !validation.Match([]byte(contentType)) {
 						msg := map[string]string{"error": "Le fichier \"" + part.FileName() + "\" n'est pas une vidéo de format valide ! Les format supportés sont : mp4, avi, mov, mpeg."}
 						Message(w, msg, http.StatusBadRequest)
 						return
 					}
-				}
 
-				fileSplit := strings.Split(part.FileName(), ".")
-				ext := fileSplit[len(fileSplit)-1]
+					// Récupération de l'extention du format de fichier
+					ext, _ = mime.ExtensionsByType(contentType)
+				}
 
 				// Le timestamp sera le nom du fichier
 				timestamp := strconv.FormatInt(time.Now().UTC().UnixNano(), 10)
 
-				filename := timestamp + "." + ext
+				filename := timestamp + ext[0]
 
-				var dst *os.File
-				if dst, err = os.OpenFile(videoPath+filename, os.O_WRONLY|os.O_CREATE, 0777); err != nil {
-					msg := map[string]string{"error": "Une erreur inconnue est survenue lors de l'écriture du fichier \"" + part.FileName() + "\". Veuillez réessayer !"}
-					Message(w, msg, http.StatusBadRequest)
-					return
-				}
-				defer dst.Close()
+				dest, _ := os.OpenFile(videoPath+filename, os.O_WRONLY|os.O_CREATE, 0777)
+				defer dest.Close()
 
 				// Écriture de l'en-tête venant d'être lue
-				dst.Write(buffer)
+				dest.Write(buffer)
 
 				var v Videos
+				// Par défaut, la vidéo est la première partie.
+				// De cette façon, dans le cas où il n'y a qu'une vidéo
+				// uploadé, elle est la seule partie
 				v.Part = 1
 
 				v.Completed = 0
@@ -154,12 +177,9 @@ func (a *AcquisitionService) UploadHandler(w http.ResponseWriter, r *http.Reques
 
 				v.GameID, _ = strconv.Atoi(gameID)
 
+				// Création de la vidéo dans la base de données
 				if db.NewRecord(v) {
 					db.Create(&v)
-					if db.NewRecord(v) {
-						msg := map[string]string{"error": "Une erreur est survenue lors de la création de la video dans la base de données. Veuillez réessayer!"}
-						Message(w, msg, http.StatusInternalServerError)
-					}
 					videos = append(videos, &v)
 				}
 
@@ -167,16 +187,14 @@ func (a *AcquisitionService) UploadHandler(w http.ResponseWriter, r *http.Reques
 				//
 				// ** La boucle termine une fois que
 				//    cette partie du formulaire a été
-				//    envoyé entièrement
+				//    envoyé entièrement au serveur
 				for {
 					buffer = make([]byte, 4*KO)
 
 					cBytes, err = part.Read(buffer)
 
 					if cBytes != 0 {
-						dst.Write(buffer[0:cBytes])
-					} else {
-						break
+						dest.Write(buffer[0:cBytes])
 					}
 
 					if err == io.EOF {
@@ -185,28 +203,28 @@ func (a *AcquisitionService) UploadHandler(w http.ResponseWriter, r *http.Reques
 				}
 			}
 
-			// Trie les dates en ordre croissant pour permettre de récupérer
-			// l'ordre des vidéos en plusieurs parties
-			creationDateSorted := make(creationDates, 0, len(partsDate))
-			for _, d := range partsDate {
-				creationDateSorted = append(creationDateSorted, d)
-			}
-			sort.Sort(creationDateSorted)
-
-			for j, video := range videos {
-				var index int
-				if index = creationDateSorted.IndexOf(j); index == -1 {
-					return
+			// Seulement dans le cas où il y a plus d'une partie uploadée
+			if len(videos) > 1 {
+				// Tri les dates en ordre croissant pour permettre de récupérer
+				// l'ordre des vidéos en plusieurs parties
+				creationDateSorted := make(creationDates, 0, len(partsDate))
+				for _, d := range partsDate {
+					creationDateSorted = append(creationDateSorted, d)
 				}
-				video.Part = index + 1
-				db.Model(&video).Where("ID = ?", video.ID).Update("part", video.Part)
+				sort.Sort(creationDateSorted)
+
+				// Ajout du noméro de la partie de la vidéo dans la base de données
+				for j, video := range videos {
+					index := creationDateSorted.IndexOf(j)
+					video.Part = index + 1
+					db.Model(&video).Where("ID = ?", video.ID).Update("part", video.Part)
+				}
 			}
 
 			msg := map[string]string{"succes": "Video(s) envoyé(s) avec succès!"}
 			Message(w, msg, http.StatusCreated)
 		} else {
-			msg := map[string]string{"error": "Une erreur est survenue lors de la création de la video dans la base de données. Veuillez réessayer!"}
-			Message(w, msg, http.StatusInternalServerError)
+			Message(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 		}
 	case "DELETE":
 		var g Games
@@ -251,6 +269,7 @@ func (a *AcquisitionService) UploadHandler(w http.ResponseWriter, r *http.Reques
 	}
 }
 
+// Retourne le nombre de dates contenus dans le tableau
 func (d creationDates) Len() int {
 	return len(d)
 }
@@ -260,11 +279,12 @@ func (d creationDates) Less(i int, j int) bool {
 	return d[i].date.Before(d[j].date)
 }
 
-// Less fonction utilisée pour trier les dates
+// Swap fonction utilisée pour trier les dates
 func (d creationDates) Swap(i, j int) {
 	d[i], d[j] = d[j], d[i]
 }
 
+// IndexOf fonction utilisée pour trier les dates
 func (d creationDates) IndexOf(value int) int {
 	for i, date := range d {
 		if date.index == value {
@@ -281,10 +301,37 @@ func (d creationDates) IndexOf(value int) int {
 // ** Dans ce cas ci, on n'utilise pas la
 //    fonction DetectContentType, car elle
 //    ne valide pas les vidéos au format mov
-func isMov(buf []byte) bool {
-	return len(buf) > 7 &&
+func isMov(buf []byte, contentType *string, ext *[]string) bool {
+	isMov := len(buf) > 7 &&
+		(buf[0] == 0x0 && buf[1] == 0x0 &&
+			buf[2] == 0x0 && buf[3] == 0x14 &&
+			buf[4] == 0x66 && buf[5] == 0x74 &&
+			buf[6] == 0x79 && buf[7] == 0x70) ||
+		(buf[0] == 0x6D && buf[1] == 0x6F &&
+			buf[2] == 0x6F && buf[3] == 0x76)
+
+	if isMov {
+		*contentType = "video/quicktime"
+		*ext = []string{".mov"}
+	}
+	return isMov
+}
+
+// isMpg permet de déterminer si le fichier
+// envoyé vers le serveur est bel est bien
+// dans un format pris en charge.
+//
+// ** Dans ce cas ci, on n'utilise pas la
+//    fonction DetectContentType, car elle
+//    ne valide pas les vidéos au format mpg
+func isMpg(buf []byte, contentType *string, ext *[]string) bool {
+	isMpg := len(buf) > 4 &&
 		buf[0] == 0x0 && buf[1] == 0x0 &&
-		buf[2] == 0x0 && buf[3] == 0x14 &&
-		buf[4] == 0x66 && buf[5] == 0x74 &&
-		buf[6] == 0x79 && buf[7] == 0x70
+		buf[2] == 0x1 && buf[3] == 0xBA
+
+	if isMpg {
+		*contentType = "video/mpeg"
+		*ext = []string{".mpg"}
+	}
+	return isMpg
 }

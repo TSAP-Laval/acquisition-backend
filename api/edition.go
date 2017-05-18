@@ -36,14 +36,20 @@ func (a *AcquisitionService) GetJoueurs(w http.ResponseWriter, r *http.Request) 
 		a.ErrorHandler(w, err)
 		return
 	}
+	switch r.Method {
+	case "GET":
+		user := []Players{}
+		db.Find(&user)
 
-	user := []Players{}
-	db.Find(&user)
+		userJSON, _ := json.Marshal(user)
 
-	userJSON, _ := json.Marshal(user)
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(userJSON)
+	case "OPTIONS":
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.WriteHeader(http.StatusOK)
+	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(userJSON)
 }
 func (a *AcquisitionService) GetActions(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
