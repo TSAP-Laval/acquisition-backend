@@ -136,7 +136,7 @@ CREATE TABLE "games" (
   "id_location" INT NOT NULL,
   "field_condition" VARCHAR(45) NULL,
   "temperature" VARCHAR(45) NULL,
-  "degree" VARCHAR(10) NULL
+  "degree" VARCHAR(10) NULL,
   "date" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT "fk_game_team"
     FOREIGN KEY ("id_team")
@@ -261,6 +261,7 @@ CREATE TABLE "actions_type" (
 CREATE TABLE "actions" (
   "id" SERIAL PRIMARY KEY ,
   "id_action_type" VARCHAR(5) NOT NULL,
+  "id_reception_type" VARCHAR(5) NOT NULL
   "id_player" INT  NOT NULL,
   "id_zone" VARCHAR(3) NOT NULL,
   "id_game" INT NOT NULL,
@@ -269,6 +270,8 @@ CREATE TABLE "actions" (
   "y1" FLOAT NOT NULL,
   "x2" FLOAT NOT NULL,
   "y2" FLOAT NOT NULL,
+  "x3" FLOAT NOT NULL,
+  "y3" FLOAT NOT NULL,
   "time" TIMESTAMP NOT NULL,
   "home_score" INT NOT NULL DEFAULT 0,
   "guest_score" INT NOT NULL DEFAULT 0,
@@ -285,6 +288,11 @@ CREATE TABLE "actions" (
   CONSTRAINT "fk_action_game"
     FOREIGN KEY ("id_game")
     REFERENCES "games" ("id")
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
+  CONSTRAINT "fk_reception_type"
+    FOREIGN KEY ("id_reception_type")
+    REFERENCES "reception_type" ("id")
     ON DELETE CASCADE
     ON UPDATE CASCADE,
   CONSTRAINT "fk_action_player"
@@ -314,7 +322,13 @@ CREATE TABLE "player_team" (
     ON DELETE CASCADE
     ON UPDATE CASCADE);
 
+-- -----------------------------------------------------
+-- Table "reception_type"
+-- -----------------------------------------------------
 
+CREATE TABLE "reception_type" (
+  "id" VARCHAR(5) PRIMARY KEY,
+  "name" VARCHAR(256) NOT NULL);
 
 -- -----------------------------------------------------
 -- Table "coaches"
