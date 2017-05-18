@@ -25,7 +25,7 @@ import (
 // TODO : Ne test même pas les valeurs de retour ?
 func TestGetSaison(t *testing.T) {
 	reader = strings.NewReader("")
-	request, err := http.NewRequest("GET", baseURL+"/api/saisons", reader)
+	request, err := http.NewRequest("GET", baseURL+"/api/saison", reader)
 	res, err := http.DefaultClient.Do(request)
 
 	if err != nil {
@@ -44,7 +44,7 @@ func TestCreerSaison(t *testing.T) {
 			"Years": "2000"
 		}`)
 
-	request, err := http.NewRequest("POST", baseURL+"/api/saisons", reader)
+	request, err := http.NewRequest("POST", baseURL+"/api/saison", reader)
 	res, err := http.DefaultClient.Do(request)
 
 	if err != nil {
