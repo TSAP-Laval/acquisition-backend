@@ -8,13 +8,13 @@
 package api
 
 import (
-	"fmt"
 	"net/http"
 
 	//Import DB driver
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 
 	"github.com/jinzhu/gorm"
+	"golang.org/x/crypto/bcrypt"
 )
 
 // FaireBD crée la base de données à partie du modèle de données (structures.go)
@@ -24,18 +24,19 @@ func (a *AcquisitionService) FaireBD(w http.ResponseWriter, r *http.Request) {
 	defer db.Close()
 
 	if err != nil {
-		fmt.Println("ERROR : ")
-		fmt.Println(err)
+		a.ErrorHandler(w, err)
+		return
 	}
 
 	db.DropTableIfExists("admins")
+	db.DropTableIfExists("reception_types")
 	db.DropTableIfExists("actions")
 	db.DropTableIfExists("videos")
 	db.DropTableIfExists("player_position_game_team")
 	db.DropTableIfExists("games")
 	db.DropTableIfExists("player_team")
 	db.DropTableIfExists("players")
-	db.DropTableIfExists("coach_team")
+	db.DropTableIfExists("coach_teams")
 	db.DropTableIfExists("metrics")
 	db.DropTableIfExists("teams")
 	db.DropTableIfExists("sports")
@@ -49,6 +50,7 @@ func (a *AcquisitionService) FaireBD(w http.ResponseWriter, r *http.Request) {
 	db.DropTableIfExists("positions")
 	db.DropTableIfExists("movements_type")
 
+	db.AutoMigrate(&ReceptionType{})
 	db.AutoMigrate(&Admins{})
 	db.AutoMigrate(&Seasons{})
 	db.AutoMigrate(&Sports{})
@@ -77,36 +79,78 @@ func (a *AcquisitionService) RemplirBD(w http.ResponseWriter, r *http.Request) {
 	defer db.Close()
 
 	if err != nil {
-		fmt.Println("ERROR : ")
-		fmt.Println(err)
+		a.ErrorHandler(w, err)
+		return
+	}
+	reception := ReceptionType{Name: "Ballon conquis aérien"}
+	if db.NewRecord(reception) {
+		db.Create(&reception)
+	}
+	reception2 := ReceptionType{Name: "Ballon conquis sol"}
+	if db.NewRecord(reception2) {
+		db.Create(&reception2)
+	}
+	reception3 := ReceptionType{Name: "Ballon reçu sol"}
+	if db.NewRecord(reception3) {
+		db.Create(&reception3)
+	}
+	reception4 := ReceptionType{Name: "Ballon reçu aérien"}
+	if db.NewRecord(reception4) {
+		db.Create(&reception4)
+	}
+	reception5 := ReceptionType{Name: "Ballon reçu sur faute de l’adversaire"}
+	if db.NewRecord(reception5) {
+		db.Create(&reception5)
+	}
+	reception6 := ReceptionType{Name: "Ballon reçu sur remise en jeu"}
+	if db.NewRecord(reception6) {
+		db.Create(&reception6)
+	}
+	reception7 := ReceptionType{Name: "Passe reçue au sol"}
+	if db.NewRecord(reception7) {
+		db.Create(&reception7)
+	}
+	reception8 := ReceptionType{Name: "Passe aérienne reçue "}
+	if db.NewRecord(reception8) {
+		db.Create(&reception8)
 	}
 
-	user := ActionsType{Description: "Passe offensive", TypeAction: "reception et action", Name: "Passe offensive"}
+	user := ActionsType{Description: "Tir au but cadré", TypeAction: "reception et action", Name: "Tir au but cadré"}
 	if db.NewRecord(user) {
 		db.Create(&user)
 	}
-
-	action := ActionsType{Description: "Reception suivi d'une perte de ballon", TypeAction: "balle perdu", Name: "Balle perdu"}
+	userTirAuBut := ActionsType{Description: "Tir au but non-cadré", TypeAction: "reception et action", Name: "Tir au but non-cadré"}
+	if db.NewRecord(userTirAuBut) {
+		db.Create(&userTirAuBut)
+	}
+	action := ActionsType{Description: "Perte directe sur contrôle", TypeAction: "balle perdu", Name: "Perte directe sur contrôle"}
 	if db.NewRecord(action) {
 		db.Create(&action)
 	}
-	action3 := ActionsType{Description: "passe defensif", TypeAction: "reception et action", Name: "passe defensif"}
+	action3 := ActionsType{Description: "Perte directe sur passe tentée", TypeAction: "passe incomplete", Name: "Perte directe sur passe tentée"}
 	if db.NewRecord(action3) {
 		db.Create(&action3)
 	}
-	action4 := ActionsType{Description: "Dégagement gardien", TypeAction: "reception et action", Name: "Dégagement gardien"}
+	action4 := ActionsType{Description: "Perte directe autres(faute, etc)", TypeAction: "balle perdu", Name: "Perte directe autres(faute, etc)"}
 	if db.NewRecord(action4) {
 		db.Create(&action4)
 	}
-	action5 := ActionsType{Description: "faute", TypeAction: "balle perdu", Name: "faute"}
+	action5 := ActionsType{Description: "Passe offensive positive (dans la course du joueur)", TypeAction: "reception et action", Name: "Passe offensive positive (dans la course du joueur)"}
 	if db.NewRecord(action5) {
 		db.Create(&action5)
 	}
-	action6 := ActionsType{Description: "tir arreter", TypeAction: "reception et action", Name: "tir arreter"}
+	action6 := ActionsType{Description: "Passe offensive négative (joueur doit modifier sa course)", TypeAction: "reception et action", Name: "Passe offensive négative (joueur doit modifier sa course)"}
 	if db.NewRecord(action6) {
 		db.Create(&action6)
 	}
-
+	action7 := ActionsType{Description: "Dégagement réussi", TypeAction: "passe incomplete", Name: "Dégagement réussi"}
+	if db.NewRecord(action7) {
+		db.Create(&action7)
+	}
+	action8 := ActionsType{Description: "Passe neutre", TypeAction: "reception et action", Name: "Passe neutre"}
+	if db.NewRecord(action8) {
+		db.Create(&action8)
+	}
 	coach := Coaches{Fname: "alex", Lname: "Des", Email: "alex@hotmail.com", PassHash: "test"}
 	if db.NewRecord(coach) {
 		db.Create(&coach)
@@ -176,7 +220,7 @@ func (a *AcquisitionService) RemplirBD(w http.ResponseWriter, r *http.Request) {
 		db.Create(&location6)
 	}
 
-	equipe1 := Teams{Name: "Lions", City: "Quebec", SportID: 1, CategoryID: 1}
+	equipe1 := Teams{Name: "Lions", City: "Quebec", SportID: 1, CategoryID: 1, SeasonID: 1, Sexe: "M"}
 	if db.NewRecord(equipe1) {
 		db.Create(&equipe1)
 	}
@@ -199,6 +243,26 @@ func (a *AcquisitionService) RemplirBD(w http.ResponseWriter, r *http.Request) {
 	equipe5 := Teams{Name: "Tatoo", City: "Rivière-du-loup", SportID: 1, CategoryID: 1, SeasonID: 1, Sexe: "F"}
 	if db.NewRecord(equipe5) {
 		db.Create(&equipe5)
+	}
+
+	pass, _ := bcrypt.GenerateFromPassword([]byte("aaaaa"), bcrypt.DefaultCost)
+	if err := bcrypt.CompareHashAndPassword(pass, []byte("aaaaa")); err != nil {
+		panic(err)
+	}
+	admin := Admins{Email: "admin@admin.ca", PassHash: string(pass)}
+	if db.NewRecord(admin) {
+		db.Create(&admin)
+	}
+
+	// Admin avec un token expiré (pour les tests seulement)
+	pass, _ = bcrypt.GenerateFromPassword([]byte("aaaaa"), bcrypt.DefaultCost)
+	if err := bcrypt.CompareHashAndPassword(pass, []byte("aaaaa")); err != nil {
+		panic(err)
+	}
+	badAdmin := Admins{Email: "mauvais@mauvais.ca", PassHash: string(pass),
+		TokenLogin: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbiI6dHJ1ZSwiZXhwIjoxNDk0Njk0OTU0fQ.TBukRueijLUla7hejpR064CERMXJy3CRbWWhPQPQ5fY"}
+	if db.NewRecord(badAdmin) {
+		db.Create(&badAdmin)
 	}
 
 	Uneaction := Actions{ActionTypeID: 1, ZoneID: 1, GameID: 1, X1: 0, Y1: 0, X2: 0, Y2: 0, X3: 0, Y3: 0, Time: 10, HomeScore: 0, GuestScore: 0, PlayerID: 1}

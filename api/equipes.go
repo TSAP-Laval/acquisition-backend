@@ -32,16 +32,24 @@ func (a *AcquisitionService) GetEquipeHandler(w http.ResponseWriter, r *http.Req
 		a.ErrorHandler(w, err)
 		return
 	}
+	switch r.Method {
+	case "GET":
+		teams := []Teams{}
+		name := strings.ToLower(strings.TrimSpace(vars["nom"]))
+		db.Model(&teams).Preload("Coaches").Preload("Players").Where("LOWER(Name) LIKE LOWER(?)", name+"%").Find(&teams)
 
-	team := []Teams{}
-	name := strings.ToLower(strings.TrimSpace(vars["nom"]))
-	db.Where("LOWER(Name) LIKE LOWER(?)", name+"%").Find(&team)
+		for i := range teams {
+			db.Model(&teams[i]).Related(&teams[i].Season, "SeasonID")
+			db.Model(&teams[i]).Related(&teams[i].Category, "CategoryID")
+			db.Model(&teams[i]).Related(&teams[i].Sport, "SportID")
+		}
 
-	for i := 0; i < len(team); i++ {
-		team[i] = AjoutNiveauSport(db, team[i])
+		Message(w, teams, http.StatusOK)
+	case "OPTIONS":
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.WriteHeader(http.StatusOK)
 	}
 
-	Message(w, team, http.StatusOK)
 }
 
 // EquipesHandler gère la modification et la suppression des équipes
@@ -90,6 +98,9 @@ func (a *AcquisitionService) EquipesHandler(w http.ResponseWriter, r *http.Reque
 			db.Where("ID = ?", id).Find(&nt)
 
 			nt = AjoutNiveauSport(db, nt)
+			db.Model(&nt).Related(&nt.Season, "SeasonID")
+			db.Model(&nt).Related(&nt.Category, "CategoryID")
+			db.Model(&nt).Related(&nt.Sport, "SportID")
 
 			Message(w, nt, http.StatusCreated)
 
@@ -122,14 +133,16 @@ func (a *AcquisitionService) GetEquipesHandler(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	team := []Teams{}
-	db.Find(&team)
+	teams := []Teams{}
+	db.Model(&teams).Preload("Coaches").Preload("Players").Find(&teams)
 
-	for i := 0; i < len(team); i++ {
-		team[i] = AjoutNiveauSport(db, team[i])
+	for i := range teams {
+		db.Model(&teams[i]).Related(&teams[i].Season, "SeasonID")
+		db.Model(&teams[i]).Related(&teams[i].Category, "CategoryID")
+		db.Model(&teams[i]).Related(&teams[i].Sport, "SportID")
 	}
 
-	Message(w, team, http.StatusOK)
+	Message(w, teams, http.StatusOK)
 }
 
 // CreerEquipeHandler gère la création d'une équipe dans la base de donnée
@@ -170,19 +183,11 @@ func (a *AcquisitionService) CreerEquipeHandler(w http.ResponseWriter, r *http.R
 				msg := map[string]string{"error": "Une équipe de même nom existe déjà. Veuillez choisir une autre nom."}
 				Message(w, msg, http.StatusUnauthorized)
 			} else {
-				if db.NewRecord(t) {
-					db.Create(&t)
-					if db.NewRecord(t) {
-						msg := map[string]string{"error": "Une erreur est survenue lors de la création de l'équipe. Veuillez réessayer!"}
-						Message(w, msg, http.StatusInternalServerError)
-					} else {
-						t = AjoutNiveauSport(db, t)
-						Message(w, t, http.StatusCreated)
-					}
-				} else {
-					msg := map[string]string{"error": "L'équipe existe déjà dans la base de donnée!"}
-					Message(w, msg, http.StatusBadRequest)
-				}
+				db.Create(&t)
+				db.Model(&t).Related(&t.Season, "SeasonID")
+				db.Model(&t).Related(&t.Category, "CategoryID")
+				db.Model(&t).Related(&t.Sport, "SportID")
+				Message(w, t, http.StatusCreated)
 			}
 		}
 	} else {
@@ -225,7 +230,7 @@ func (a *AcquisitionService) ErrorHandler(w http.ResponseWriter, err error) {
 	if err != nil {
 		a.Error(fmt.Sprintf("ERROR : %s", err))
 		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusNotFound)
+		w.WriteHeader(http.StatusBadRequest)
 		a.ErrorWrite(err.Error(), w)
 	}
 	return

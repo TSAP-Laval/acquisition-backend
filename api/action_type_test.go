@@ -24,12 +24,12 @@ import (
 // TODO: Mettre des commentaire au dessus des fonctions
 
 func PostActionType(t *testing.T) {
+
 	reader = strings.NewReader(
 		`{
-			"Name": "Passe", 
-			"Description": "Interceptée", 
-			"ControlType": "Neutre", 
-			"MovementType": "Postif"
+			"Description": "Passe offensive positive (dans la course du joueur)",
+			"TypeAction": "reception et action",
+			"Name": "Passe offensive positive (dans la course du joueur)"
 		}`)
 
 	request, err := http.NewRequest("POST", baseURL+"//addactiontype", reader)

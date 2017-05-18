@@ -37,19 +37,24 @@ func (a *AcquisitionService) PostSaison(w http.ResponseWriter, r *http.Request) 
 		a.ErrorHandler(w, err)
 		return
 	}
-
-	if db.NewRecord(t) {
-		db.Create(&t)
+	switch r.Method {
+	case "POST":
 		if db.NewRecord(t) {
+			db.Create(&t)
+			if db.NewRecord(t) {
+				msg := map[string]string{"error": "Une erreur est survenue lors de la création de la saison. Veuillez réessayer!"}
+				Message(w, msg, http.StatusInternalServerError)
+			} else {
+				Message(w, t, http.StatusCreated)
+			}
+
+		} else {
 			msg := map[string]string{"error": "Une erreur est survenue lors de la création de la saison. Veuillez réessayer!"}
 			Message(w, msg, http.StatusInternalServerError)
-		} else {
-			Message(w, t, http.StatusCreated)
 		}
-
-	} else {
-		msg := map[string]string{"error": "Une erreur est survenue lors de la création de la saison. Veuillez réessayer!"}
-		Message(w, msg, http.StatusInternalServerError)
+	case "OPTIONS":
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.WriteHeader(http.StatusOK)
 	}
 
 }

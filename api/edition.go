@@ -36,14 +36,20 @@ func (a *AcquisitionService) GetJoueurs(w http.ResponseWriter, r *http.Request) 
 		a.ErrorHandler(w, err)
 		return
 	}
+	switch r.Method {
+	case "GET":
+		user := []Players{}
+		db.Find(&user)
 
-	user := []Players{}
-	db.Find(&user)
+		userJSON, _ := json.Marshal(user)
 
-	userJSON, _ := json.Marshal(user)
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(userJSON)
+	case "OPTIONS":
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.WriteHeader(http.StatusOK)
+	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(userJSON)
 }
 func (a *AcquisitionService) GetActions(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
@@ -82,16 +88,15 @@ func (a *AcquisitionService) PostAction(w http.ResponseWriter, r *http.Request) 
 		a.ErrorHandler(w, err)
 		return
 	}
-
-	if db.NewRecord(t) {
-		db.Create(&t)
-		db.NewRecord(t)
-		w.Header().Set("Content-Type", "application/text")
-
-	} else {
-
-		w.Header().Set("Content-Type", "application/text")
-		w.Write([]byte("erreur"))
+	switch r.Method {
+	case "POST":
+		if db.NewRecord(t) {
+			db.Create(&t)
+			Message(w, t, http.StatusCreated)
+		}
+	case "OPTIONS":
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.WriteHeader(http.StatusOK)
 	}
 
 }
