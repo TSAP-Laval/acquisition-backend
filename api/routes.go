@@ -290,19 +290,59 @@ func (a *AcquisitionService) getRouter() http.Handler {
 		)).Methods("POST")
 
 	// Actions
-	api.HandleFunc("/actions", a.GetActions).Methods("GET")
-	api.HandleFunc("/reception", a.GetAllReceptionTypes).Methods("GET")
-	api.HandleFunc("/actions", a.PostAction).Methods("POST", "OPTIONS")
+	api.Handle("/actions",
+		AddMiddleware(
+			a.SecureHeaders(http.HandlerFunc(a.GetActions)),
+			a.RateLimiter,
+		)).Methods("GET")
+	api.Handle("/reception",
+		AddMiddleware(
+			a.SecureHeaders(http.HandlerFunc(a.GetAllReceptionTypes)),
+			a.RateLimiter,
+		)).Methods("GET")
+	api.Handle("/actions",
+		AddMiddleware(
+			a.SecureHeaders(http.HandlerFunc(a.PostAction)),
+			a.RateLimiter,
+		)).Methods("POST", "OPTIONS")
 	// Joueurs
-	api.HandleFunc("/joueurs", a.HandleJoueur).Methods("POST", "OPTIONS")
-	api.HandleFunc("/joueurs/{id}", a.HandleJoueur).Methods("PUT", "OPTIONS", "DELETE")
-	api.HandleFunc("/joueurs", a.GetJoueurs).Methods("GET")
+	api.Handle("/joueurs",
+		AddMiddleware(
+			a.SecureHeaders(http.HandlerFunc(a.HandleJoueur)),
+			a.RateLimiter,
+		)).Methods("POST", "OPTIONS")
+	api.Handle("/joueurs/{id}",
+		AddMiddleware(
+			a.SecureHeaders(http.HandlerFunc(a.HandleJoueur)),
+			a.RateLimiter,
+		)).Methods("PUT", "OPTIONS", "DELETE")
+	api.Handle("/joueurs",
+		AddMiddleware(
+			a.SecureHeaders(http.HandlerFunc(a.GetJoueurs)),
+			a.RateLimiter,
+		)).Methods("GET")
 	// Saisons
-	api.HandleFunc("/saison", a.GetSeasons).Methods("GET")
-	api.HandleFunc("/saison", a.PostSaison).Methods("POST", "OPTIONS")
+	api.Handle("/saison",
+		AddMiddleware(
+			a.SecureHeaders(http.HandlerFunc(a.GetSeasons)),
+			a.RateLimiter,
+		)).Methods("GET")
+	api.Handle("/saison",
+		AddMiddleware(
+			a.SecureHeaders(http.HandlerFunc(a.PostSaison)),
+			a.RateLimiter,
+		)).Methods("POST", "OPTIONS")
 	// Autres
-	api.HandleFunc("/sports", a.GetSports).Methods("GET")
-	api.HandleFunc("/niveaux", a.GetNiveau).Methods("GET")
+	api.Handle("/sports",
+		AddMiddleware(
+			a.SecureHeaders(http.HandlerFunc(a.GetSports)),
+			a.RateLimiter,
+		)).Methods("GET")
+	api.Handle("/niveaux",
+		AddMiddleware(
+			a.SecureHeaders(http.HandlerFunc(a.GetNiveau)),
+			a.RateLimiter,
+		)).Methods("GET")
 	return a.Middleware(api)
 }
 
