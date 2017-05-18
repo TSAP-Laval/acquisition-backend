@@ -295,7 +295,7 @@ func (a *AcquisitionService) getRouter() http.Handler {
 			a.SecureHeaders(http.HandlerFunc(a.GetActions)),
 			a.RateLimiter,
 		)).Methods("GET")
-	api.Handle("/reception",
+	api.Handle("/receptions",
 		AddMiddleware(
 			a.SecureHeaders(http.HandlerFunc(a.GetAllReceptionTypes)),
 			a.RateLimiter,
@@ -322,12 +322,12 @@ func (a *AcquisitionService) getRouter() http.Handler {
 			a.RateLimiter,
 		)).Methods("GET")
 	// Saisons
-	api.Handle("/saison",
+	api.Handle("/saisons",
 		AddMiddleware(
 			a.SecureHeaders(http.HandlerFunc(a.GetSeasons)),
 			a.RateLimiter,
 		)).Methods("GET")
-	api.Handle("/saison",
+	api.Handle("/saisons",
 		AddMiddleware(
 			a.SecureHeaders(http.HandlerFunc(a.PostSaison)),
 			a.RateLimiter,
