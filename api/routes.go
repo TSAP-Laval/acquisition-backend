@@ -293,11 +293,6 @@ func (a *AcquisitionService) getRouter() http.Handler {
 		)).Methods("POST")
 
 	// Actions
-<<<<<<< HEAD
-	api.HandleFunc("/actions", a.GetActions).Methods("GET")
-	api.HandleFunc("/actions", a.PostAction).Methods("POST")
-
-=======
 	api.Handle("/actions",
 		AddMiddleware(
 			a.SecureHeaders(http.HandlerFunc(a.GetActions)),
@@ -313,7 +308,6 @@ func (a *AcquisitionService) getRouter() http.Handler {
 			a.SecureHeaders(http.HandlerFunc(a.PostAction)),
 			a.RateLimiter,
 		)).Methods("POST", "OPTIONS")
->>>>>>> 366b2ada222daaa89dfcd876c93d57b0655e8f26
 	// Joueurs
 	api.Handle("/joueurs",
 		AddMiddleware(
