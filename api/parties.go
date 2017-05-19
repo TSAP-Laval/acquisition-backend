@@ -234,7 +234,7 @@ func (a *AcquisitionService) ActionsPartieHandler(w http.ResponseWriter, r *http
 	} else {
 		// On supprime l'équipe
 		var acts []Actions
-		db.Model(&acts).Preload("Players").Where("game_id = ?", gameID).Find(&acts)
+		db.Model(&acts).Where("game_id = ?", gameID).Find(&acts)
 		Message(w, acts, http.StatusOK)
 	}
 }
