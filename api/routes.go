@@ -348,19 +348,16 @@ func (a *AcquisitionService) getRouter() http.Handler {
 	api.Handle("/saisons",
 		AddMiddleware(
 			a.SecureHeaders(http.HandlerFunc(a.GetSeasons)),
-			a.JWTMiddleware,
 			a.RateLimiter,
 		)).Methods("GET")
 	api.Handle("/saisons",
 		AddMiddleware(
 			a.SecureHeaders(http.HandlerFunc(a.handleOptions)),
-			a.JWTMiddleware,
 			a.RateLimiter,
 		)).Methods("OPTIONS")
 	api.Handle("/saisons",
 		AddMiddleware(
 			a.SecureHeaders(http.HandlerFunc(a.PostSaison)),
-			a.JWTMiddleware,
 			a.RateLimiter,
 		)).Methods("POST", "OPTIONS")
 
@@ -369,24 +366,20 @@ func (a *AcquisitionService) getRouter() http.Handler {
 		AddMiddleware(
 			a.SecureHeaders(http.HandlerFunc(a.GetSports)),
 			a.RateLimiter,
-			a.JWTMiddleware,
 		)).Methods("GET")
 	api.Handle("/sports",
 		AddMiddleware(
 			a.SecureHeaders(http.HandlerFunc(a.handleOptions)),
-			a.JWTMiddleware,
 			a.RateLimiter,
 		)).Methods("OPTIONS")
 	api.Handle("/niveaux",
 		AddMiddleware(
 			a.SecureHeaders(http.HandlerFunc(a.GetNiveau)),
 			a.RateLimiter,
-			a.JWTMiddleware,
 		)).Methods("GET")
 	api.Handle("/niveaux",
 		AddMiddleware(
 			a.SecureHeaders(http.HandlerFunc(a.handleOptions)),
-			a.JWTMiddleware,
 			a.RateLimiter,
 		)).Methods("OPTIONS")
 
