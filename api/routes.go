@@ -128,13 +128,14 @@ func (a *AcquisitionService) getRouter() http.Handler {
 			http.HandlerFunc(a.Login),
 			a.RateLimiter,
 		)).Methods("POST", "OPTIONS")
+
 	// Actions
 	api.Handle("/actions/types/{id}",
 		AddMiddleware(
 			a.SecureHeaders(http.HandlerFunc(a.GetActionsTypeHandler)),
 			a.JWTMiddleware,
 			a.RateLimiter,
-		)).Methods("GET")
+		)).Methods("GET", "OPTIONS")
 	api.Handle("/actions/types",
 		AddMiddleware(
 			a.SecureHeaders(http.HandlerFunc(a.GetActionsTypeHandler)),
@@ -227,7 +228,7 @@ func (a *AcquisitionService) getRouter() http.Handler {
 			a.SecureHeaders(http.HandlerFunc(a.GetEquipesHandler)),
 			a.JWTMiddleware,
 			a.RateLimiter,
-		)).Methods("GET")
+		)).Methods("GET", "OPTIONS")
 	api.Handle("/equipes/{nom}",
 		AddMiddleware(
 			a.SecureHeaders(http.HandlerFunc(a.GetEquipeHandler)),
@@ -292,19 +293,73 @@ func (a *AcquisitionService) getRouter() http.Handler {
 		)).Methods("POST")
 
 	// Actions
+<<<<<<< HEAD
 	api.HandleFunc("/actions", a.GetActions).Methods("GET")
 	api.HandleFunc("/actions", a.PostAction).Methods("POST")
 
+=======
+	api.Handle("/actions",
+		AddMiddleware(
+			a.SecureHeaders(http.HandlerFunc(a.GetActions)),
+			a.RateLimiter,
+		)).Methods("GET")
+	api.Handle("/receptions",
+		AddMiddleware(
+			a.SecureHeaders(http.HandlerFunc(a.GetAllReceptionTypes)),
+			a.RateLimiter,
+		)).Methods("GET")
+	api.Handle("/actions",
+		AddMiddleware(
+			a.SecureHeaders(http.HandlerFunc(a.PostAction)),
+			a.RateLimiter,
+		)).Methods("POST", "OPTIONS")
+>>>>>>> 366b2ada222daaa89dfcd876c93d57b0655e8f26
 	// Joueurs
-	api.HandleFunc("/joueurs", a.HandleJoueur).Methods("POST")
-	api.HandleFunc("/joueurs/{id}", a.HandleJoueur).Methods("PUT", "OPTIONS", "DELETE")
-	api.HandleFunc("/joueurs", a.GetJoueurs).Methods("GET")
+	api.Handle("/joueurs",
+		AddMiddleware(
+			a.SecureHeaders(http.HandlerFunc(a.HandleJoueur)),
+			a.RateLimiter,
+		)).Methods("POST", "OPTIONS")
+	api.Handle("/joueurs/{id}",
+		AddMiddleware(
+			a.SecureHeaders(http.HandlerFunc(a.HandleJoueur)),
+			a.RateLimiter,
+		)).Methods("PUT", "OPTIONS", "DELETE")
+	api.Handle("/joueurs",
+		AddMiddleware(
+			a.SecureHeaders(http.HandlerFunc(a.GetJoueurs)),
+			a.RateLimiter,
+		)).Methods("GET")
 	// Saisons
+<<<<<<< HEAD
 	api.HandleFunc("/saisons", a.GetSeasons).Methods("GET")
 	api.HandleFunc("/saisons", a.PostSaison).Methods("POST")
 	// Autres
 	api.HandleFunc("/sports", a.GetSports).Methods("GET")
 	api.HandleFunc("/niveaux", a.GetNiveau).Methods("GET")
+=======
+	api.Handle("/saisons",
+		AddMiddleware(
+			a.SecureHeaders(http.HandlerFunc(a.GetSeasons)),
+			a.RateLimiter,
+		)).Methods("GET")
+	api.Handle("/saisons",
+		AddMiddleware(
+			a.SecureHeaders(http.HandlerFunc(a.PostSaison)),
+			a.RateLimiter,
+		)).Methods("POST", "OPTIONS")
+	// Autres
+	api.Handle("/sports",
+		AddMiddleware(
+			a.SecureHeaders(http.HandlerFunc(a.GetSports)),
+			a.RateLimiter,
+		)).Methods("GET")
+	api.Handle("/niveaux",
+		AddMiddleware(
+			a.SecureHeaders(http.HandlerFunc(a.GetNiveau)),
+			a.RateLimiter,
+		)).Methods("GET")
+>>>>>>> 366b2ada222daaa89dfcd876c93d57b0655e8f26
 	return a.Middleware(api)
 }
 

@@ -156,23 +156,25 @@ type ActionsType struct {
 // action exécutée par un joueur
 type Actions struct {
 	gorm.Model
-	ActionType   ActionsType
-	ActionTypeID int
-	Zone         Zones
-	ZoneID       int
-	Game         Games
-	GameID       int
-	X1           float64
-	Y1           float64
-	X2           float64
-	Y2           float64
-	X3           float64
-	Y3           float64
-	Time         time.Duration
-	HomeScore    int
-	GuestScore   int
-	PLayer       Players
-	PlayerID     int
+	ActionType      ActionsType
+	ActionTypeID    int
+	ReceptionType   ReceptionType
+	ReceptionTypeID int
+	Zone            Zones
+	ZoneID          int
+	Game            Games
+	GameID          int
+	X1              float64
+	Y1              float64
+	X2              float64
+	Y2              float64
+	X3              float64
+	Y3              float64
+	Time            time.Duration
+	HomeScore       int
+	GuestScore      int
+	PLayer          Players
+	PlayerID        int
 }
 
 // PlayersTeam table de relations joueurs et équipe
@@ -204,6 +206,12 @@ type CoachTeam struct {
 	CoachID int
 	Team    Teams
 	TeamID  int
+}
+
+// Reception du ballon
+type ReceptionType struct {
+	gorm.Model
+	Name string
 }
 
 // Metrics les métriques

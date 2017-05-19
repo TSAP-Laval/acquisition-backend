@@ -29,6 +29,7 @@ func (a *AcquisitionService) FaireBD(w http.ResponseWriter, r *http.Request) {
 	}
 
 	db.DropTableIfExists("admins")
+	db.DropTableIfExists("reception_types")
 	db.DropTableIfExists("actions")
 	db.DropTableIfExists("videos")
 	db.DropTableIfExists("player_position_game_team")
@@ -49,6 +50,7 @@ func (a *AcquisitionService) FaireBD(w http.ResponseWriter, r *http.Request) {
 	db.DropTableIfExists("positions")
 	db.DropTableIfExists("movements_type")
 
+	db.AutoMigrate(&ReceptionType{})
 	db.AutoMigrate(&Admins{})
 	db.AutoMigrate(&Seasons{})
 	db.AutoMigrate(&Sports{})
@@ -81,32 +83,82 @@ func (a *AcquisitionService) RemplirBD(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user := ActionsType{Description: "Passe offensive", TypeAction: "reception et action", Name: "Passe offensive"}
+	reception := ReceptionType{Name: "Ballon conquis aérien"}
+	if db.NewRecord(reception) {
+		db.Create(&reception)
+	}
+
+	reception2 := ReceptionType{Name: "Ballon conquis sol"}
+	if db.NewRecord(reception2) {
+		db.Create(&reception2)
+	}
+
+	reception3 := ReceptionType{Name: "Ballon reçu sol"}
+	if db.NewRecord(reception3) {
+		db.Create(&reception3)
+	}
+
+	reception4 := ReceptionType{Name: "Ballon reçu aérien"}
+	if db.NewRecord(reception4) {
+		db.Create(&reception4)
+	}
+
+	reception5 := ReceptionType{Name: "Ballon reçu sur faute de l’adversaire"}
+	if db.NewRecord(reception5) {
+		db.Create(&reception5)
+	}
+
+	reception6 := ReceptionType{Name: "Ballon reçu sur remise en jeu"}
+	if db.NewRecord(reception6) {
+		db.Create(&reception6)
+	}
+
+	reception7 := ReceptionType{Name: "Passe reçue au sol"}
+	if db.NewRecord(reception7) {
+		db.Create(&reception7)
+	}
+
+	reception8 := ReceptionType{Name: "Passe aérienne reçue "}
+	if db.NewRecord(reception8) {
+		db.Create(&reception8)
+	}
+
+	user := ActionsType{Description: "Tir au but cadré", TypeAction: "reception et action", Name: "Tir au but cadré"}
 	if db.NewRecord(user) {
 		db.Create(&user)
 	}
-
-	action := ActionsType{Description: "Reception suivi d'une perte de ballon", TypeAction: "balle perdu", Name: "Balle perdu"}
+	userTirAuBut := ActionsType{Description: "Tir au but non-cadré", TypeAction: "reception et action", Name: "Tir au but non-cadré"}
+	if db.NewRecord(userTirAuBut) {
+		db.Create(&userTirAuBut)
+	}
+	action := ActionsType{Description: "Perte directe sur contrôle", TypeAction: "balle perdu", Name: "Perte directe sur contrôle"}
 	if db.NewRecord(action) {
 		db.Create(&action)
 	}
-	action3 := ActionsType{Description: "passe defensif", TypeAction: "reception et action", Name: "passe defensif"}
+	action3 := ActionsType{Description: "Perte directe sur passe tentée", TypeAction: "passe incomplete", Name: "Perte directe sur passe tentée"}
 	if db.NewRecord(action3) {
 		db.Create(&action3)
 	}
-	action4 := ActionsType{Description: "Dégagement gardien", TypeAction: "reception et action", Name: "Dégagement gardien"}
+	action4 := ActionsType{Description: "Perte directe autres(faute, etc)", TypeAction: "balle perdu", Name: "Perte directe autres(faute, etc)"}
 	if db.NewRecord(action4) {
 		db.Create(&action4)
 	}
-	action5 := ActionsType{Description: "faute", TypeAction: "balle perdu", Name: "faute"}
+	action5 := ActionsType{Description: "Passe offensive positive (dans la course du joueur)", TypeAction: "reception et action", Name: "Passe offensive positive (dans la course du joueur)"}
 	if db.NewRecord(action5) {
 		db.Create(&action5)
 	}
-	action6 := ActionsType{Description: "tir arreter", TypeAction: "reception et action", Name: "tir arreter"}
+	action6 := ActionsType{Description: "Passe offensive négative (joueur doit modifier sa course)", TypeAction: "reception et action", Name: "Passe offensive négative (joueur doit modifier sa course)"}
 	if db.NewRecord(action6) {
 		db.Create(&action6)
 	}
-
+	action7 := ActionsType{Description: "Dégagement réussi", TypeAction: "passe incomplete", Name: "Dégagement réussi"}
+	if db.NewRecord(action7) {
+		db.Create(&action7)
+	}
+	action8 := ActionsType{Description: "Passe neutre", TypeAction: "reception et action", Name: "Passe neutre"}
+	if db.NewRecord(action8) {
+		db.Create(&action8)
+	}
 	coach := Coaches{Fname: "alex", Lname: "Des", Email: "alex@hotmail.com", PassHash: "test"}
 	if db.NewRecord(coach) {
 		db.Create(&coach)

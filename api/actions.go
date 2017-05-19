@@ -64,8 +64,6 @@ func (a *AcquisitionService) CreerActionsType(w http.ResponseWriter, r *http.Req
 
 	body, _ := ioutil.ReadAll(r.Body)
 
-	var acType ActionsType
-
 	if err = json.Unmarshal(body, &acType); err != nil {
 		msg := map[string]string{"error": "Certaines informations entrées sont invalides!"}
 		Message(w, msg, http.StatusBadRequest)

@@ -32,18 +32,20 @@ func (a *AcquisitionService) GetEquipeHandler(w http.ResponseWriter, r *http.Req
 		a.ErrorHandler(w, err)
 		return
 	}
+	switch r.Method {
+	case "GET":
+		teams := []Teams{}
+		name := strings.ToLower(strings.TrimSpace(vars["nom"]))
+		db.Model(&teams).Preload("Coaches").Preload("Players").Where("LOWER(Name) LIKE LOWER(?)", name+"%").Find(&teams)
 
-	teams := []Teams{}
-	name := strings.ToLower(strings.TrimSpace(vars["nom"]))
-	db.Model(&teams).Preload("Coaches").Preload("Players").Where("LOWER(Name) LIKE LOWER(?)", name+"%").Find(&teams)
+		for i := range teams {
+			db.Model(&teams[i]).Related(&teams[i].Season, "SeasonID")
+			db.Model(&teams[i]).Related(&teams[i].Category, "CategoryID")
+			db.Model(&teams[i]).Related(&teams[i].Sport, "SportID")
+		}
 
-	for i := range teams {
-		db.Model(&teams[i]).Related(&teams[i].Season, "SeasonID")
-		db.Model(&teams[i]).Related(&teams[i].Category, "CategoryID")
-		db.Model(&teams[i]).Related(&teams[i].Sport, "SportID")
+		Message(w, teams, http.StatusOK)
 	}
-
-	Message(w, teams, http.StatusOK)
 }
 
 // EquipesHandler gère la modification et la suppression des équipes
