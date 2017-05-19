@@ -214,28 +214,34 @@ func (a *AcquisitionService) PartieHandler(w http.ResponseWriter, r *http.Reques
 
 // ActionsPartieHandler Gère la récupération des actions d'une partie
 func (a *AcquisitionService) ActionsPartieHandler(w http.ResponseWriter, r *http.Request) {
-	gameID := mux.Vars(r)["id"]
+	switch r.Method {
+	case "GET":
+		gameID := mux.Vars(r)["id"]
 
-	db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
-	defer db.Close()
+		db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
+		defer db.Close()
 
-	if err != nil {
-		a.ErrorHandler(w, err)
-		return
-	}
+		if err != nil {
+			a.ErrorHandler(w, err)
+			return
+		}
 
-	g := Games{}
-	db.First(&g, "ID = ?", gameID)
+		g := Games{}
+		db.First(&g, "ID = ?", gameID)
 
-	// Erreur
-	if g.ID == 0 {
-		msg := map[string]string{"error": "Aucune partie ne correspond."}
-		Message(w, msg, http.StatusBadRequest)
-	} else {
-		// On supprime l'équipe
-		var acts []Actions
-		db.Model(&acts).Where("game_id = ?", gameID).Find(&acts)
-		Message(w, acts, http.StatusOK)
+		// Erreur
+		if g.ID == 0 {
+			msg := map[string]string{"error": "Aucune partie ne correspond."}
+			Message(w, msg, http.StatusBadRequest)
+		} else {
+			// On supprime l'équipe
+			var acts []Actions
+			db.Model(&acts).Where("game_id = ?", gameID).Find(&acts)
+			Message(w, acts, http.StatusOK)
+		}
+	case "OPTIONS":
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.WriteHeader(http.StatusOK)
 	}
 }
 
