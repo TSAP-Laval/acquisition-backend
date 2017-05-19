@@ -189,7 +189,7 @@ func (a *AcquisitionService) UploadHandler(w http.ResponseWriter, r *http.Reques
 				//    cette partie du formulaire a été
 				//    envoyé entièrement au serveur
 				for {
-					buffer = make([]byte, 4*KO)
+					buffer = make([]byte, 80*KO)
 
 					cBytes, err = part.Read(buffer)
 

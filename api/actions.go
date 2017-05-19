@@ -52,6 +52,20 @@ func (a *AcquisitionService) GetActionsTypeHandler(w http.ResponseWriter, r *htt
 	}
 }
 
+// GetAllReceptionTypes gestion du select pour les types de reception
+func (a *AcquisitionService) GetAllReceptionTypes(w http.ResponseWriter, r *http.Request) {
+	db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
+	defer db.Close()
+	if err != nil {
+		a.ErrorHandler(w, err)
+		return
+	}
+
+	receptionType := []ReceptionType{}
+	db.Find(&receptionType)
+	Message(w, receptionType, http.StatusOK)
+}
+
 //CreerActionsType Gère la création d'un type d'action
 func (a *AcquisitionService) CreerActionsType(w http.ResponseWriter, r *http.Request) {
 	db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
@@ -64,6 +78,7 @@ func (a *AcquisitionService) CreerActionsType(w http.ResponseWriter, r *http.Req
 
 	body, _ := ioutil.ReadAll(r.Body)
 
+	var acType ActionsType
 	if err = json.Unmarshal(body, &acType); err != nil {
 		msg := map[string]string{"error": "Certaines informations entrées sont invalides!"}
 		Message(w, msg, http.StatusBadRequest)

@@ -208,7 +208,7 @@ type CoachTeam struct {
 	TeamID  int
 }
 
-// Reception du ballon
+// ReceptionType Reception du ballon
 type ReceptionType struct {
 	gorm.Model
 	Name string

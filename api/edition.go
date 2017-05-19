@@ -26,31 +26,6 @@ import (
 // TODO: Pourquoi tous les endpoints pour la gestion d'un joueur sont dans joueurs.go,
 //       mais celui-ci (GET) dans edition.go ?
 
-func (a *AcquisitionService) GetJoueurs(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-
-	db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
-
-	defer db.Close()
-	if err != nil {
-		a.ErrorHandler(w, err)
-		return
-	}
-	switch r.Method {
-	case "GET":
-		user := []Players{}
-		db.Find(&user)
-
-		userJSON, _ := json.Marshal(user)
-
-		w.Header().Set("Content-Type", "application/json")
-		w.Write(userJSON)
-	case "OPTIONS":
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.WriteHeader(http.StatusOK)
-	}
-
-}
 func (a *AcquisitionService) GetActions(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 

@@ -636,3 +636,50 @@ func TestGetActionsTypesExistePas(t *testing.T) {
 		t.Errorf("Error expected: %s", me.Err)
 	}
 }
+
+// TestGetAllReceptionTypeErrBD test la création d'un type d'action
+// avec erreur de connexion à la base de données
+func TestGetAllReceptionTypeErrBD(t *testing.T) {
+	acqConf.ConnectionString = "host=localhost user=aaaaa dbname=tsap_acquisition sslmode=disable password="
+	reader = strings.NewReader(``)
+	request, err := http.NewRequest("GET", baseURL+"/api/receptions", reader)
+	res, err := SecureRequest(request)
+
+	bodyBuffer, _ := ioutil.ReadAll(res.Body)
+
+	var me MessageError
+	err = json.Unmarshal(bodyBuffer, &me)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	if res.StatusCode != 400 {
+		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
+	}
+}
+
+// TestGetAllReceptionType test la récupération du tous les types de réceptions
+func TestGetAllReceptionType(t *testing.T) {
+	acqConf.ConnectionString = "host=localhost user=postgres dbname=tsap_acquisition sslmode=disable password="
+	reader = strings.NewReader(``)
+	request, err := http.NewRequest("GET", baseURL+"/api/receptions", reader)
+	res, err := SecureRequest(request)
+
+	bodyBuffer, _ := ioutil.ReadAll(res.Body)
+
+	var rt []api.ReceptionType
+	err = json.Unmarshal(bodyBuffer, &rt)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	if res.StatusCode != 200 {
+		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
+	}
+
+	if len(rt) < 1 {
+		LogErrors(Messages{t, "Number of reception types expected: %d", len(rt), true, request, res})
+	}
+}

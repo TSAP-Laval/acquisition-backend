@@ -212,6 +212,33 @@ func (a *AcquisitionService) PartieHandler(w http.ResponseWriter, r *http.Reques
 	}
 }
 
+// ActionsPartieHandler Gère la récupération des actions d'une partie
+func (a *AcquisitionService) ActionsPartieHandler(w http.ResponseWriter, r *http.Request) {
+	gameID := mux.Vars(r)["id"]
+
+	db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
+	defer db.Close()
+
+	if err != nil {
+		a.ErrorHandler(w, err)
+		return
+	}
+
+	g := Games{}
+	db.First(&g, "ID = ?", gameID)
+
+	// Erreur
+	if g.ID == 0 {
+		msg := map[string]string{"error": "Aucune partie ne correspond."}
+		Message(w, msg, http.StatusBadRequest)
+	} else {
+		// On supprime l'équipe
+		var acts []Actions
+		db.Model(&acts).Preload("Players").Where("game_id = ?", gameID).Find(&acts)
+		Message(w, acts, http.StatusOK)
+	}
+}
+
 // SupprimerPartiesHandler Gère la suppression des parties
 func (a *AcquisitionService) SupprimerPartiesHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
