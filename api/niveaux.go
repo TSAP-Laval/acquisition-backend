@@ -11,17 +11,17 @@ package api
 import (
 	"net/http"
 
+	"github.com/jinzhu/gorm"
+
 	//Import DB driver
 	_ "github.com/jinzhu/gorm/dialects/postgres"
-
-	"github.com/jinzhu/gorm"
 )
 
 // GetNiveauHandler Gère la récupération des niveaux
 func (a *AcquisitionService) GetNiveauHandler(w http.ResponseWriter, r *http.Request) {
 	db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
 	defer db.Close()
-	
+
 	if err != nil {
 		a.ErrorHandler(w, err)
 		return
