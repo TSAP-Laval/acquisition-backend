@@ -2,7 +2,8 @@
 // Fichier     : niveaux.go
 // Développeur : ?
 //
-// Commentaire expliquant le code, les fonction...
+// Permet de gérer toutes les interractions nécessaires à la
+// récupération des informations d'un niveau.
 //
 
 package api
@@ -16,16 +17,11 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
-// TODO: Changer le nom du fichier et ses références pour catégorie...
-// TODO: Linter le code... Aucun commentaire pour les fonctions
-// TODO: Enlever tous ce qui est log, print...
-
-func (a *AcquisitionService) GetNiveau(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-
+// GetNiveauHandler Gère la récupération des niveaux
+func (a *AcquisitionService) GetNiveauHandler(w http.ResponseWriter, r *http.Request) {
 	db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
-
 	defer db.Close()
+	
 	if err != nil {
 		a.ErrorHandler(w, err)
 		return

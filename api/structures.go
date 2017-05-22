@@ -173,7 +173,7 @@ type Actions struct {
 	Time            time.Duration
 	HomeScore       int
 	GuestScore      int
-	PLayer          Players
+	Player          Players
 	PlayerID        int
 }
 
@@ -224,7 +224,7 @@ type Metrics struct {
 
 // Expand effectue un fetch de tous les children de l'action
 // (has-many, has-one, pas belongs-to)
-func (a *Actions) Expand(db *gorm.DB) {
+/*func (a *Actions) Expand(db *gorm.DB) {
 	db.Model(a).Related(&(a.ActionType))
 	db.Model(a).Related(&(a.Zone))
 }
@@ -235,4 +235,4 @@ func (g *Games) Expand(db *gorm.DB) {
 	db.Model(g).Related(&(g.Action))
 	db.Model(g).Related(&(g.Team), "TeamID")
 	db.Model(g).Related(&(g.OpposingTeam), "OpposingTeamID")
-}
+}*/

@@ -65,6 +65,7 @@ func TestGetVideoErrBD(t *testing.T) {
 	}
 
 	bodyBuffer, _ := ioutil.ReadAll(res.Body)
+	defer res.Body.Close()
 
 	var me MessageError
 	err = json.Unmarshal(bodyBuffer, &me)
@@ -156,4 +157,9 @@ func TestFolderEmptyEnvoie(t *testing.T) {
 			t.Error(err)
 		}
 	}
+}
+
+// TestFermetureServeur ferme le l'api
+func TestFermetureServeur(t *testing.T) {
+	service.Stop()
 }

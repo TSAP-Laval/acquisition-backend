@@ -1,29 +1,31 @@
 //
-// Fichier     : actions.go
-// Développeur : Laurent Leclerc-Poulin
+// Fichier     : edition.go
+// Développeur : Laurent Leclerc Poulin
 //
 // Permet de gérer toutes les interractions nécessaires à la création,
 // la modification, la seppression et la récupération des informations
-// d'un type d'action.
+// d'une action.
 //
 
 package api
 
 import (
 	"encoding/json"
+	"io/ioutil"
 	"net/http"
 
 	"github.com/gorilla/mux"
-	"github.com/jinzhu/gorm"
-
-	"io/ioutil"
 
 	//Import DB driver
 	_ "github.com/jinzhu/gorm/dialects/postgres"
+
+	"github.com/jinzhu/gorm"
 )
 
-//GetActionsTypeHandler Gère la récupération de tous les types d'actions
-func (a *AcquisitionService) GetActionsTypeHandler(w http.ResponseWriter, r *http.Request) {
+// ActionsPartieHandler Gère la récupération des actions d'une partie
+func (a *AcquisitionService) ActionsPartieHandler(w http.ResponseWriter, r *http.Request) {
+	gameID := mux.Vars(r)["id"]
+
 	db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
 	defer db.Close()
 
@@ -32,69 +34,47 @@ func (a *AcquisitionService) GetActionsTypeHandler(w http.ResponseWriter, r *htt
 		return
 	}
 
-	id := mux.Vars(r)["id"]
+	g := Games{}
+	db.First(&g, "ID = ?", gameID)
 
-	if id != "" {
-		acType := ActionsType{}
-		db.Where("ID = ?", id).First(&acType)
-
-		if acType.ID != 0 {
-			Message(w, acType, http.StatusOK)
-		} else {
-			msg := map[string]string{"error": "Aucun type d'action ne correspond à celui entré"}
-			Message(w, msg, http.StatusNotFound)
-		}
+	if g.ID == 0 {
+		msg := map[string]string{"error": "Aucune partie ne correspond."}
+		Message(w, msg, http.StatusBadRequest)
 	} else {
-		acType := []ActionsType{}
-		db.Find(&acType)
-
-		Message(w, acType, http.StatusOK)
+		var acts []Actions
+		db.Model(&acts).Where("game_id = ?", gameID).Find(&acts)
+		Message(w, acts, http.StatusOK)
 	}
 }
 
-// GetAllReceptionTypes gestion du select pour les types de reception
-func (a *AcquisitionService) GetAllReceptionTypes(w http.ResponseWriter, r *http.Request) {
+// CreerActionHandler Gère la création d'une nouvelle action
+func (a *AcquisitionService) CreerActionHandler(w http.ResponseWriter, r *http.Request) {
 	db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
 	defer db.Close()
-	if err != nil {
-		a.ErrorHandler(w, err)
-		return
-	}
-
-	receptionType := []ReceptionType{}
-	db.Find(&receptionType)
-	Message(w, receptionType, http.StatusOK)
-}
-
-//CreerActionsType Gère la création d'un type d'action
-func (a *AcquisitionService) CreerActionsType(w http.ResponseWriter, r *http.Request) {
-	db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
-	defer db.Close()
-
 	if err != nil {
 		a.ErrorHandler(w, err)
 		return
 	}
 
 	body, _ := ioutil.ReadAll(r.Body)
+	defer r.Body.Close()
 
-	var acType ActionsType
-	if err = json.Unmarshal(body, &acType); err != nil {
-		msg := map[string]string{"error": "Certaines informations entrées sont invalides!"}
-		Message(w, msg, http.StatusBadRequest)
+	var ac Actions
+	err = json.Unmarshal(body, &ac)
+	if err != nil {
+		a.ErrorHandler(w, err)
 		return
 	}
 
-	var at ActionsType
-	db.Model(&at).Where("name = ?", acType.Name).Find(&at)
+	var dbAction Actions
+	db.Model(&dbAction).Where("time = ? AND game_id = ? ", ac.Time, ac.GameID).First(&dbAction)
 
-	if at.ID == 0 {
-		if db.NewRecord(acType) {
-			db.Create(&acType)
-			Message(w, acType, http.StatusCreated)
-		}
+	if dbAction.ID == 0 {
+		db.Create(&ac)
+		Message(w, ac, http.StatusCreated)
 	} else {
-		msg := map[string]string{"error": "Un type d'action avec le même nom existe déjà"}
+		msg := map[string]string{"error": "Une action existe déjà à ce moment précis de la partie !"}
 		Message(w, msg, http.StatusBadRequest)
 	}
+
 }

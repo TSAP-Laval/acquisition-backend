@@ -27,6 +27,7 @@ var (
 	reader  io.Reader
 	baseURL string
 	rmID    string
+	service *api.AcquisitionService
 	token   Token
 	acqConf api.AcquisitionConfiguration
 	keys    api.Keys
@@ -57,7 +58,7 @@ func init() {
 		panic(err)
 	}
 
-	service := api.New(os.Stdout, &acqConf, &keys)
+	service = api.New(os.Stdout, &acqConf, &keys)
 	service.Start()
 
 	// ** IMPORTANT **

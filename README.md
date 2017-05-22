@@ -87,6 +87,7 @@
   ```$ vi /usr/local/etc/nginx/nginx.conf```
 
 ### Procédure pour tester l'API
+
   ```bash
   $ go test -v -race ./...
   ```

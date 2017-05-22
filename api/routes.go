@@ -71,13 +71,9 @@ func (a *AcquisitionService) Error(message string) {
 // ErrorWrite écrit un message d'erreur en format JSON vers le writer
 // passé en paramètre
 func (a *AcquisitionService) ErrorWrite(message string, w io.Writer) error {
-	bytes, err := json.Marshal(errorMessage{Error: message})
+	bytes, _ := json.Marshal(errorMessage{Error: message})
 
-	if err != nil {
-		return err
-	}
-
-	_, err = w.Write(bytes)
+	_, err := w.Write(bytes)
 
 	return err
 }
@@ -299,20 +295,15 @@ func (a *AcquisitionService) getRouter() http.Handler {
 	// Actions
 	api.Handle("/actions",
 		AddMiddleware(
-			a.SecureHeaders(http.HandlerFunc(a.GetActions)),
+			a.SecureHeaders(http.HandlerFunc(a.CreerActionHandler)),
 			a.RateLimiter,
-		)).Methods("GET")
+		)).Methods("POST")
 	api.Handle("/actions",
 		AddMiddleware(
 			a.SecureHeaders(http.HandlerFunc(a.handleOptions)),
 			a.JWTMiddleware,
 			a.RateLimiter,
 		)).Methods("OPTIONS")
-	api.Handle("/actions",
-		AddMiddleware(
-			a.SecureHeaders(http.HandlerFunc(a.PostAction)),
-			a.RateLimiter,
-		)).Methods("POST", "OPTIONS")
 
 	// Receptions
 	api.Handle("/receptions",
@@ -332,54 +323,70 @@ func (a *AcquisitionService) getRouter() http.Handler {
 		AddMiddleware(
 			a.SecureHeaders(http.HandlerFunc(a.HandleJoueur)),
 			a.RateLimiter,
-		)).Methods("POST", "OPTIONS")
+		)).Methods("POST")
 	api.Handle("/joueurs/{id}",
 		AddMiddleware(
 			a.SecureHeaders(http.HandlerFunc(a.HandleJoueur)),
 			a.RateLimiter,
-		)).Methods("PUT", "OPTIONS", "DELETE")
+		)).Methods("PUT")
 	api.Handle("/joueurs",
 		AddMiddleware(
 			a.SecureHeaders(http.HandlerFunc(a.GetJoueursHandler)),
 			a.RateLimiter,
 		)).Methods("GET")
+	api.Handle("/joueurs/{id}",
+		AddMiddleware(
+			a.SecureHeaders(http.HandlerFunc(a.handleOptions)),
+			a.RateLimiter,
+		)).Methods("OPTIONS")
+	api.Handle("/joueurs",
+		AddMiddleware(
+			a.SecureHeaders(http.HandlerFunc(a.handleOptions)),
+			a.RateLimiter,
+		)).Methods("OPTIONS")
 
 	// Saisons
 	api.Handle("/saisons",
 		AddMiddleware(
-			a.SecureHeaders(http.HandlerFunc(a.GetSeasons)),
+			a.SecureHeaders(http.HandlerFunc(a.GetSeasonsHandler)),
 			a.RateLimiter,
 		)).Methods("GET")
+	api.Handle("/saisons",
+		AddMiddleware(
+			a.SecureHeaders(http.HandlerFunc(a.CreerSaisonHandler)),
+			a.RateLimiter,
+		)).Methods("POST")
 	api.Handle("/saisons",
 		AddMiddleware(
 			a.SecureHeaders(http.HandlerFunc(a.handleOptions)),
 			a.RateLimiter,
 		)).Methods("OPTIONS")
-	api.Handle("/saisons",
-		AddMiddleware(
-			a.SecureHeaders(http.HandlerFunc(a.PostSaison)),
-			a.RateLimiter,
-		)).Methods("POST", "OPTIONS")
 
-	// Autres
+	// Sports
 	api.Handle("/sports",
 		AddMiddleware(
 			a.SecureHeaders(http.HandlerFunc(a.GetSports)),
+			a.JWTMiddleware,
 			a.RateLimiter,
 		)).Methods("GET")
 	api.Handle("/sports",
 		AddMiddleware(
 			a.SecureHeaders(http.HandlerFunc(a.handleOptions)),
+			a.JWTMiddleware,
 			a.RateLimiter,
 		)).Methods("OPTIONS")
+
+	// Niveaux
 	api.Handle("/niveaux",
 		AddMiddleware(
-			a.SecureHeaders(http.HandlerFunc(a.GetNiveau)),
+			a.SecureHeaders(http.HandlerFunc(a.GetNiveauHandler)),
+			a.JWTMiddleware,
 			a.RateLimiter,
 		)).Methods("GET")
 	api.Handle("/niveaux",
 		AddMiddleware(
 			a.SecureHeaders(http.HandlerFunc(a.handleOptions)),
+			a.JWTMiddleware,
 			a.RateLimiter,
 		)).Methods("OPTIONS")
 
@@ -395,7 +402,8 @@ func (a *AcquisitionService) Start() {
 		a.Error("Acquisition shutting down...")
 
 		if err != nil {
-			panic(err)
+			// panic(err)
+			a.Info(err.Error())
 		}
 
 	}()

@@ -254,9 +254,7 @@ func (a *AcquisitionService) RemplirBD(w http.ResponseWriter, r *http.Request) {
 	}
 
 	pass, _ := bcrypt.GenerateFromPassword([]byte("aaaaa"), bcrypt.DefaultCost)
-	if err := bcrypt.CompareHashAndPassword(pass, []byte("aaaaa")); err != nil {
-		panic(err)
-	}
+
 	admin := Admins{Email: "admin@admin.ca", PassHash: string(pass)}
 	if db.NewRecord(admin) {
 		db.Create(&admin)
@@ -264,9 +262,7 @@ func (a *AcquisitionService) RemplirBD(w http.ResponseWriter, r *http.Request) {
 
 	// Admin avec un token expiré (pour les tests seulement)
 	pass, _ = bcrypt.GenerateFromPassword([]byte("aaaaa"), bcrypt.DefaultCost)
-	if err := bcrypt.CompareHashAndPassword(pass, []byte("aaaaa")); err != nil {
-		panic(err)
-	}
+
 	badAdmin := Admins{Email: "mauvais@mauvais.ca", PassHash: string(pass),
 		TokenLogin: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbiI6dHJ1ZSwiZXhwIjoxNDk0Njk0OTU0fQ.TBukRueijLUla7hejpR064CERMXJy3CRbWWhPQPQ5fY"}
 	if db.NewRecord(badAdmin) {

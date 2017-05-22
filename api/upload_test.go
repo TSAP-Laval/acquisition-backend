@@ -46,7 +46,7 @@ const testPath = "../test"
 var gameID [6]string
 
 // TestUploadVideoMP4MauvaiseDate Simule l'envoie d'une video au format mp4
-// avec une mauvaise
+// avec une mauvaise date
 func TestUploadVideoMP4MauvaiseDate(t *testing.T) {
 	reader = strings.NewReader("")
 	request, err := http.NewRequest("POST", baseURL+"/api/parties", reader)
@@ -71,6 +71,7 @@ func TestUploadVideoMP4MauvaiseDate(t *testing.T) {
 	}
 
 	bodyBuffer, _ := ioutil.ReadAll(res.Body)
+	defer res.Body.Close()
 
 	var me MessageError
 	err = json.Unmarshal(bodyBuffer, &me)
@@ -122,6 +123,46 @@ func TestUploadNoVideo(t *testing.T) {
 	}
 }
 
+// Simule l'envoie d'une vidéo vide de contenu
+func TestUploadEmptyVideo(t *testing.T) {
+	reader = strings.NewReader("")
+	request, err := http.NewRequest("POST", baseURL+"/api/parties", reader)
+	res, err := SecureRequest(request)
+
+	var m MessageSuccess
+	responseMapping(&m, res)
+	var gameID = m.GameID
+
+	if gameID == "" || gameID == "0" {
+		t.Errorf("Game ID expected: %s", gameID)
+	}
+
+	reader = strings.NewReader("")
+	request, err = http.NewRequest("POST", baseURL+"/api/upload/"+gameID, reader)
+	res, err = SecureRequest(request)
+
+	path, err := filepath.Abs(testPath + "/empty.mp4")
+	if err != nil {
+		t.Error(err)
+	}
+
+	res, err = sendUploadRequest([]string{path}, t, gameID)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if res.StatusCode != 400 {
+		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
+	}
+
+	var me MessageError
+	responseMapping(&me, res)
+
+	if !strings.Contains(me.Err, "Le fichier envoyé ne possède aucun contenu!") {
+		LogErrors(Messages{t, "Error expected: %s", me.Err, true, request, res})
+	}
+}
+
 // TestUploadVideoMP4MauvaisGameID Simule l'envoie d'une video au format mp4
 // avec un mauvais identifiant de partie
 func TestUploadVideoMP4MauvaisGameID(t *testing.T) {
@@ -160,7 +201,12 @@ func TestUploadVideoMP4ErrBD(t *testing.T) {
 	request, err := http.NewRequest("POST", baseURL+"/api/upload/1", reader)
 	res, err := SecureRequest(request)
 
+	if err != nil {
+		t.Error(err)
+	}
+
 	bodyBuffer, _ := ioutil.ReadAll(res.Body)
+	defer res.Body.Close()
 
 	var me MessageError
 	err = json.Unmarshal(bodyBuffer, &me)
@@ -178,9 +224,53 @@ func TestUploadVideoMP4ErrBD(t *testing.T) {
 	}
 }
 
+// Simule l'envoie de toutes les vidéos
+func TestUploadAllVideos(t *testing.T) {
+	acqConf.ConnectionString = "host=localhost user=postgres dbname=tsap_acquisition sslmode=disable password="
+	reader = strings.NewReader("")
+	request, err := http.NewRequest("POST", baseURL+"/api/parties", reader)
+	res, err := SecureRequest(request)
+
+	var m MessageSuccess
+	responseMapping(&m, res)
+	gameID[0] = m.GameID
+
+	if gameID[0] == "" || gameID[0] == "0" {
+		LogErrors(Messages{t, "Game ID expected: %s", gameID[0], false, nil, nil})
+	}
+
+	pathMp4, err := filepath.Abs(testPath + "/small.mp4")
+	if err != nil {
+		t.Error(err)
+	}
+
+	pathWebm, err := filepath.Abs(testPath + "/small.webm")
+	if err != nil {
+		t.Error(err)
+	}
+
+	pathMov, err := filepath.Abs(testPath + "/small.mov")
+	if err != nil {
+		t.Error(err)
+	}
+
+	pathMpg, err := filepath.Abs(testPath + "/small.mpg")
+	if err != nil {
+		t.Error(err)
+	}
+
+	res, err = sendUploadRequest([]string{pathMp4, pathWebm, pathMov, pathMpg, pathMp4, pathMp4, pathMp4}, t, gameID[0])
+	if err != nil {
+		t.Error(err)
+	}
+
+	if res.StatusCode != 201 {
+		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
+	}
+}
+
 // Simule l'envoie d'une video au format mp4
 func TestUploadVideoMP4(t *testing.T) {
-	acqConf.ConnectionString = "host=localhost user=postgres dbname=tsap_acquisition sslmode=disable password="
 	reader = strings.NewReader("")
 	request, err := http.NewRequest("POST", baseURL+"/api/parties", reader)
 	res, err := SecureRequest(request)
@@ -280,6 +370,35 @@ func TestUploadVideoFLV(t *testing.T) {
 	}
 }
 
+// Simule l'envoie d'une video au format webm
+func TestUploadVideoWEBM(t *testing.T) {
+	reader = strings.NewReader("")
+	request, err := http.NewRequest("POST", baseURL+"/api/parties", reader)
+	res, err := SecureRequest(request)
+
+	var m MessageSuccess
+	responseMapping(&m, res)
+	gameID[1] = m.GameID
+
+	if gameID[1] == "" || gameID[1] == "0" {
+		t.Errorf("Game ID expected: %s", gameID[1])
+	}
+
+	path, err := filepath.Abs(testPath + "/small.webm")
+	if err != nil {
+		t.Error(err)
+	}
+
+	res, err = sendUploadRequest([]string{path}, t, gameID[1])
+	if err != nil {
+		t.Error(err)
+	}
+
+	if res.StatusCode != 201 {
+		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
+	}
+}
+
 // Simule l'envoie d'une video au format ogv
 func TestUploadVideoOGV(t *testing.T) {
 	reader = strings.NewReader("")
@@ -313,35 +432,6 @@ func TestUploadVideoOGV(t *testing.T) {
 
 	if !strings.Contains(me.Err, "n'est pas une vidéo de format valide") {
 		t.Errorf("Error expected: %s", me.Err)
-	}
-}
-
-// Simule l'envoie d'une video au format webm
-func TestUploadVideoWEBM(t *testing.T) {
-	reader = strings.NewReader("")
-	request, err := http.NewRequest("POST", baseURL+"/api/parties", reader)
-	res, err := SecureRequest(request)
-
-	var m MessageSuccess
-	responseMapping(&m, res)
-	gameID[1] = m.GameID
-
-	if gameID[1] == "" || gameID[1] == "0" {
-		t.Errorf("Game ID expected: %s", gameID[1])
-	}
-
-	path, err := filepath.Abs(testPath + "/small.webm")
-	if err != nil {
-		t.Error(err)
-	}
-
-	res, err = sendUploadRequest([]string{path}, t, gameID[1])
-	if err != nil {
-		t.Error(err)
-	}
-
-	if res.StatusCode != 201 {
-		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
 	}
 }
 
@@ -552,6 +642,7 @@ func TestUploadDeleteVideoMP4ErrBD(t *testing.T) {
 	}
 
 	bodyBuffer, _ := ioutil.ReadAll(res.Body)
+	defer res.Body.Close()
 
 	var me MessageError
 	err = json.Unmarshal(bodyBuffer, &me)
@@ -713,25 +804,14 @@ func sendUploadRequest(path []string, t *testing.T, gameID string) (*http.Respon
 	return SecureRequest(request)
 }
 
-// Envoie la requête d'upload du fichier
-func sendUploadRequestWrondContentLength(path []string, t *testing.T, gameID string) (*http.Response, error) {
-	request, err := newfileUploadRequest(path, gameID)
-	request.ContentLength = 11 * GB
-	if err != nil {
-		t.Error(err)
-	}
-
-	return SecureRequest(request)
-}
-
 func responseMapping(m interface{}, res *http.Response) {
 	body, _ := ioutil.ReadAll(res.Body)
+	defer res.Body.Close()
 	json.Unmarshal(body, m)
 }
 
 // Créé une requestuête pour l'envoie de fichier
 func newfileUploadRequest(paths []string, gameID string) (*http.Request, error) {
-
 	body := new(bytes.Buffer)
 	writer := multipart.NewWriter(body)
 
@@ -754,7 +834,7 @@ func newfileUploadRequest(paths []string, gameID string) (*http.Request, error) 
 		file.Close()
 
 		var part io.Writer
-		if gameID == "4" {
+		if gameID == "5" {
 			part, err = writer.CreateFormFile("Mon Jan 02 2006 :04:05sdfsdf GMT-0400", fi.Name())
 		} else {
 			part, err = writer.CreateFormFile(fi.ModTime().Format("Mon Jan 02 2006 15:04:05 GMT-0400 (EDT)"), fi.Name())

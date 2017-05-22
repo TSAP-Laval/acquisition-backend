@@ -33,6 +33,7 @@ func TestGetTerrainsErrBD(t *testing.T) {
 	}
 
 	bodyBuffer, _ := ioutil.ReadAll(res.Body)
+	defer res.Body.Close()
 
 	var me MessageError
 	err = json.Unmarshal(bodyBuffer, &me)
@@ -62,6 +63,7 @@ func TestGetTerrains(t *testing.T) {
 	}
 
 	bodyBuffer, _ := ioutil.ReadAll(res.Body)
+	defer res.Body.Close()
 
 	var lo []api.Locations
 	err = json.Unmarshal(bodyBuffer, &lo)
@@ -98,6 +100,7 @@ func TestCreerTerrainErrBD(t *testing.T) {
 	}
 
 	bodyBuffer, _ := ioutil.ReadAll(res.Body)
+	defer res.Body.Close()
 
 	var me MessageError
 	err = json.Unmarshal(bodyBuffer, &me)
@@ -133,6 +136,7 @@ func TestCreerTerrain(t *testing.T) {
 	}
 
 	bodyBuffer, _ := ioutil.ReadAll(res.Body)
+	defer res.Body.Close()
 
 	var l api.Locations
 	err = json.Unmarshal(bodyBuffer, &l)
@@ -303,6 +307,7 @@ func TestGetTerrainErrBD(t *testing.T) {
 	}
 
 	bodyBuffer, _ := ioutil.ReadAll(res.Body)
+	defer res.Body.Close()
 
 	var me MessageError
 	err = json.Unmarshal(bodyBuffer, &me)
@@ -332,6 +337,7 @@ func TestGetTerrain(t *testing.T) {
 	}
 
 	bodyBuffer, _ := ioutil.ReadAll(res.Body)
+	defer res.Body.Close()
 
 	var l []api.Locations
 	err = json.Unmarshal(bodyBuffer, &l)
@@ -380,6 +386,7 @@ func TestModifierTerrainErrBD(t *testing.T) {
 	}
 
 	bodyBuffer, _ := ioutil.ReadAll(res.Body)
+	defer res.Body.Close()
 
 	var me MessageError
 	err = json.Unmarshal(bodyBuffer, &me)
@@ -416,6 +423,7 @@ func TestModifierTerrain(t *testing.T) {
 	}
 
 	bodyBuffer, _ := ioutil.ReadAll(res.Body)
+	defer res.Body.Close()
 
 	var l api.Locations
 	err = json.Unmarshal(bodyBuffer, &l)
@@ -459,6 +467,7 @@ func TestModifierTerrainAutresInfos(t *testing.T) {
 	}
 
 	bodyBuffer, _ := ioutil.ReadAll(res.Body)
+	defer res.Body.Close()
 
 	var l api.Locations
 	err = json.Unmarshal(bodyBuffer, &l)
@@ -537,6 +546,7 @@ func TestSupprimerTerrainErrBD(t *testing.T) {
 	}
 
 	bodyBuffer, _ := ioutil.ReadAll(res.Body)
+	defer res.Body.Close()
 
 	var me MessageError
 	err = json.Unmarshal(bodyBuffer, &me)
@@ -588,6 +598,7 @@ func TestGetTerrainErr(t *testing.T) {
 	}
 
 	bodyBuffer, _ := ioutil.ReadAll(res.Body)
+	defer res.Body.Close()
 
 	var lo []api.Locations
 	err = json.Unmarshal(bodyBuffer, &lo)

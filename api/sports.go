@@ -2,7 +2,8 @@
 // Fichier     : sports.go
 // Développeur : ?
 //
-// Commentaire expliquant le code, les fonctions...
+// Permet de gérer toutes les interractions nécessaires à la
+// récupération des informations d'un sport.
 //
 
 package api
@@ -16,15 +17,11 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
-// TODO: Linter le code... Aucun commentaire pour les fonctions
-// TODO: Enlever tous ce qui est log, print...
-
+// GetSports Gère la récupération de tous les sports
 func (a *AcquisitionService) GetSports(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-
 	db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
-
 	defer db.Close()
+
 	if err != nil {
 		a.ErrorHandler(w, err)
 		return

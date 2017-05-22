@@ -1,6 +1,6 @@
 //
 // Fichier     : joueurs.go
-// Développeur : Laurent Leclerc Poulin
+// Développeur : ?
 //
 // Permet de gérer toutes les interractions nécessaires à la création,
 // la modification, la seppression et la récupération des informations
@@ -24,20 +24,15 @@ import (
 func (a *AcquisitionService) GetJoueursHandler(w http.ResponseWriter, r *http.Request) {
 	db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
 	defer db.Close()
+
 	if err != nil {
 		a.ErrorHandler(w, err)
 		return
 	}
 
-	switch r.Method {
-	case "GET":
-		users := []Players{}
-		db.Find(&users)
-		Message(w, users, http.StatusOK)
-	case "OPTIONS":
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.WriteHeader(http.StatusOK)
-	}
+	users := []Players{}
+	db.Find(&users)
+	Message(w, users, http.StatusOK)
 }
 
 // HandleJoueur Gère la modification et l'ajout d'un joueur
@@ -52,10 +47,16 @@ func (a *AcquisitionService) HandleJoueur(w http.ResponseWriter, r *http.Request
 	id := mux.Vars(r)["id"]
 
 	body, err := ioutil.ReadAll(r.Body)
+	defer r.Body.Close()
 
 	var p Players
 	var dat map[string]interface{}
 	err = json.Unmarshal(body, &p)
+	if err != nil {
+		a.ErrorHandler(w, err)
+		return
+	}
+
 	switch r.Method {
 	case "POST":
 		db.Create(&p)
@@ -63,10 +64,6 @@ func (a *AcquisitionService) HandleJoueur(w http.ResponseWriter, r *http.Request
 		if num != "" {
 			Team := Teams{}
 			db.First(&Team, num)
-			if err != nil {
-				a.ErrorHandler(w, err)
-				return
-			}
 			p.Teams = append(p.Teams, Team)
 			db.Model(&Team).Association("Players").Append(p)
 		}
@@ -74,13 +71,5 @@ func (a *AcquisitionService) HandleJoueur(w http.ResponseWriter, r *http.Request
 	case "PUT":
 		db.Model(&p).Where("ID = ?", id).Updates(p)
 		Message(w, p, http.StatusOK)
-	case "DELETE":
-		// On supprime l'équipe
-		db.Model(&p).Where("ID = ?", id).Delete(p)
-		msg := map[string]string{"succes": "Le joueur a été supprimée avec succès!"}
-		Message(w, msg, http.StatusNoContent)
-	case "OPTIONS":
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.WriteHeader(http.StatusOK)
 	}
 }

@@ -1,9 +1,9 @@
 //
 // Fichier     : coachs_test.go
-// Développeur : ?
+// Développeur : Laurent Leclerc Poulin
 //
 // Permet de gérer toutes les interractions nécessaires à la création,
-// la modification, la seppression et la récupération des informations
+// la modification, la suppression et la récupération des informations
 // d'un entraineur.
 //
 
