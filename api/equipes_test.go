@@ -25,36 +25,18 @@ import (
 // TestGetEquipesErrBD test la récupération de toutes les équipes
 // avec erreur de connexion à la base de données
 func TestGetEquipesErrBD(t *testing.T) {
-	acqConf.ConnectionString = "host=localhost user=aaaaa dbname=tsap_acquisition sslmode=disable password="
 	reader = strings.NewReader("")
 	request, err := http.NewRequest("GET", baseURL+"/api/equipes", reader)
-	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	bodyBuffer, _ := ioutil.ReadAll(res.Body)
-
-	var me MessageError
-	err = json.Unmarshal(bodyBuffer, &me)
-	if err != nil {
-		t.Error(err)
-		return
-	}
-
-	if res.StatusCode != 400 {
-		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
-	}
-
-	if !strings.Contains(me.Err, "pq: role \"aaaaa\" does not exist") {
-		t.Error("Error expected : ", me.Err)
-	}
+	BDErrorHandler(request, t)
 }
 
 // TestGetEquipes test la récupération de toutes les équipes
 func TestGetEquipes(t *testing.T) {
-	acqConf.ConnectionString = "host=localhost user=postgres dbname=tsap_acquisition sslmode=disable password="
 	reader = strings.NewReader("")
 	request, err := http.NewRequest("GET", baseURL+"/api/equipes", reader)
 	res, err := SecureRequest(request)
@@ -84,7 +66,6 @@ func TestGetEquipes(t *testing.T) {
 // TestCreerEquipeErrBD test la création d'une équipe.
 // avec erreur de connexion à la base de données
 func TestCreerEquipeErrBD(t *testing.T) {
-	acqConf.ConnectionString = "host=localhost user=aaaaa dbname=tsap_acquisition sslmode=disable password="
 	reader = strings.NewReader(
 		`{
 			"Name": "Lequipe", 
@@ -92,37 +73,19 @@ func TestCreerEquipeErrBD(t *testing.T) {
 			"CategoryID": 1, 
 			"SportID": 1
 		}`)
-
 	request, err := http.NewRequest("POST", baseURL+"/api/equipes", reader)
-	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	bodyBuffer, _ := ioutil.ReadAll(res.Body)
-
-	var me MessageError
-	err = json.Unmarshal(bodyBuffer, &me)
-	if err != nil {
-		t.Error(err)
-		return
-	}
-
-	if res.StatusCode != 400 {
-		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
-	}
-
-	if !strings.Contains(me.Err, "pq: role \"aaaaa\" does not exist") {
-		t.Error("Error expected : ", me.Err)
-	}
+	BDErrorHandler(request, t)
 }
 
 // TestCreerEquipe test la création d'une équipe.
 // Cette équipe sera utilisée pour le reste des opérations
 // (modification, suppression)
 func TestCreerEquipe(t *testing.T) {
-	acqConf.ConnectionString = "host=localhost user=postgres dbname=tsap_acquisition sslmode=disable password="
 	reader = strings.NewReader(
 		`{
 			"Name": "Lequipe", 
@@ -183,18 +146,12 @@ func TestCreerEquipeErrEmpty(t *testing.T) {
 		}`)
 
 	request, err := http.NewRequest("POST", baseURL+"/api/equipes", reader)
-	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	if res.StatusCode != 400 {
-		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
-	}
-
-	var me MessageError
-	responseMapping(&me, res)
+	me := BadRequestHandler(request, t)
 
 	if !strings.Contains(me.Err, "Veuillez remplir tous les champs.") {
 		t.Errorf("Error expected: %s", me.Err)
@@ -227,18 +184,12 @@ func TestCreerEquipeVide(t *testing.T) {
 	reader = strings.NewReader(``)
 
 	request, err := http.NewRequest("POST", baseURL+"/api/equipes", reader)
-	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	if res.StatusCode != 400 {
-		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
-	}
-
-	var me MessageError
-	responseMapping(&me, res)
+	me := BadRequestHandler(request, t)
 
 	if !strings.Contains(me.Err, "Veuillez remplir tous les champs.") {
 		t.Errorf("Error expected: %s", me.Err)
@@ -278,36 +229,18 @@ func TestCreerEquipeErrExiste(t *testing.T) {
 // TestGetEquipeErrBD test la récupération de l'équipe créée
 // avec erreur de connexion à la base de données
 func TestGetEquipeErrBD(t *testing.T) {
-	acqConf.ConnectionString = "host=localhost user=aaaaa dbname=tsap_acquisition sslmode=disable password="
 	reader = strings.NewReader("")
 	request, err := http.NewRequest("GET", baseURL+"/api/equipes/LE", reader)
-	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	bodyBuffer, _ := ioutil.ReadAll(res.Body)
-
-	var me MessageError
-	err = json.Unmarshal(bodyBuffer, &me)
-	if err != nil {
-		t.Error(err)
-		return
-	}
-
-	if res.StatusCode != 400 {
-		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
-	}
-
-	if !strings.Contains(me.Err, "pq: role \"aaaaa\" does not exist") {
-		t.Error("Error expected : ", me.Err)
-	}
+	BDErrorHandler(request, t)
 }
 
 // TestGetEquipe test la récupération de l'équipe créée
 func TestGetEquipe(t *testing.T) {
-	acqConf.ConnectionString = "host=localhost user=postgres dbname=tsap_acquisition sslmode=disable password="
 	reader = strings.NewReader("")
 	request, err := http.NewRequest("GET", baseURL+"/api/equipes/LE", reader)
 	res, err := SecureRequest(request)
@@ -348,7 +281,6 @@ func TestGetEquipe(t *testing.T) {
 // TestModifierEquipeErrBD test la modification de l'équipe créée plus haut
 // avec erreur de connexion à la base de données
 func TestModifierEquipeErrBD(t *testing.T) {
-	acqConf.ConnectionString = "host=localhost user=aaaaa dbname=tsap_acquisition sslmode=disable password="
 	reader = strings.NewReader(
 		`{
 			"Name": "LE equipe", 
@@ -356,36 +288,18 @@ func TestModifierEquipeErrBD(t *testing.T) {
 			"CategoryID": 1, 
 			"SportID": 1
 		}`)
-
 	// rmID est utilisé ici pour permettre la modification de la partie créée plus haut
 	request, err := http.NewRequest("PUT", baseURL+"/api/equipes/"+rmID, reader)
-	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	bodyBuffer, _ := ioutil.ReadAll(res.Body)
-
-	var me MessageError
-	err = json.Unmarshal(bodyBuffer, &me)
-	if err != nil {
-		t.Error(err)
-		return
-	}
-
-	if res.StatusCode != 400 {
-		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
-	}
-
-	if !strings.Contains(me.Err, "pq: role \"aaaaa\" does not exist") {
-		t.Error("Error expected : ", me.Err)
-	}
+	BDErrorHandler(request, t)
 }
 
 // TestModifierEquipe test la modification de l'équipe créée plus haut
 func TestModifierEquipe(t *testing.T) {
-	acqConf.ConnectionString = "host=localhost user=postgres dbname=tsap_acquisition sslmode=disable password="
 	reader = strings.NewReader(
 		`{
 			"Name": "LE equipe", 
@@ -507,18 +421,13 @@ func TestModifierEquipeVide(t *testing.T) {
 
 	// rmID est utilisé ici pour permettre la modification de la partie créée plus haut
 	request, err := http.NewRequest("PUT", baseURL+"/api/equipes/"+rmID, reader)
-	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	if res.StatusCode != 400 {
-		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
-	}
+	me := BadRequestHandler(request, t)
 
-	var me MessageError
-	responseMapping(&me, res)
 	if !strings.Contains(me.Err, "Veuillez choisir au moins un champs à modifier.") {
 		t.Error("Error expected: ", me.Err)
 	}
@@ -548,15 +457,13 @@ func TestModifierEquipeMauvaiseInfo(t *testing.T) {
 func TestSupprimerEquipe(t *testing.T) {
 	reader = strings.NewReader("")
 	request, err := http.NewRequest("DELETE", baseURL+"/api/equipes/"+rmID, reader)
-	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
+		return
 	}
 
-	if res.StatusCode != 204 {
-		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
-	}
+	DeleteHandler(request, t)
 }
 
 // TestGetEquipeErr test la récupération de l'équipe supprimée
@@ -591,18 +498,13 @@ func TestGetEquipeErr(t *testing.T) {
 func TestSupprimerEquipeSupprime(t *testing.T) {
 	reader = strings.NewReader("")
 	request, err := http.NewRequest("DELETE", baseURL+"/api/equipes/"+rmID, reader)
-	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	if res.StatusCode != 400 {
-		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
-	}
+	me := BadRequestHandler(request, t)
 
-	var me MessageError
-	responseMapping(&me, res)
 	if !strings.Contains(me.Err, "Aucune equipe ne correspond. Elle doit déjà avoir été supprimée!") {
 		t.Error("Error expected: ", me.Err)
 	}

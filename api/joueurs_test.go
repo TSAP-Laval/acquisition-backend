@@ -23,37 +23,18 @@ import (
 // TestGetJoueursErrBD test la récupération de tous les joueurs
 // avec erreur de connexion à la base de données
 func TestGetJoueursErrBD(t *testing.T) {
-	acqConf.ConnectionString = "host=localhost user=aaaaa dbname=tsap_acquisition sslmode=disable password="
 	reader = strings.NewReader("")
 	request, err := http.NewRequest("GET", baseURL+"/api/joueurs", reader)
-	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	bodyBuffer, _ := ioutil.ReadAll(res.Body)
-	defer res.Body.Close()
-
-	var me MessageError
-	err = json.Unmarshal(bodyBuffer, &me)
-	if err != nil {
-		t.Error(err)
-		return
-	}
-
-	if res.StatusCode != 400 {
-		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
-	}
-
-	if !strings.Contains(me.Err, "pq: role \"aaaaa\" does not exist") {
-		t.Error("Error expected : ", me.Err)
-	}
+	BDErrorHandler(request, t)
 }
 
 // TestGetJoueurs test la récupération de tous les joueurs
 func TestGetJoueurs(t *testing.T) {
-	acqConf.ConnectionString = "host=localhost user=postgres dbname=tsap_acquisition sslmode=disable password="
 	reader = strings.NewReader("")
 	request, err := http.NewRequest("GET", baseURL+"/api/joueurs", reader)
 	res, err := SecureRequest(request)
@@ -105,7 +86,6 @@ func TestCreerJoueur(t *testing.T) {
 // TestModifJoueurErrBD test la modification d'un joueur avec erreur
 // de connexion à la base de données
 func TestModifJoueurErrBD(t *testing.T) {
-	acqConf.ConnectionString = "host=localhost user=aaaaa dbname=tsap_acquisition sslmode=disable password="
 	reader = strings.NewReader(
 		`{
 			"Lname": "Test",
@@ -118,34 +98,16 @@ func TestModifJoueurErrBD(t *testing.T) {
 
 	// rmID est utilisé, ici pour permettre la modification du joueur tout juste créé
 	request, err := http.NewRequest("PUT", baseURL+"/api/joueurs/"+rmID, reader)
-	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	bodyBuffer, _ := ioutil.ReadAll(res.Body)
-	defer res.Body.Close()
-
-	var me MessageError
-	err = json.Unmarshal(bodyBuffer, &me)
-	if err != nil {
-		t.Error(err)
-		return
-	}
-
-	if res.StatusCode != 400 {
-		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
-	}
-
-	if !strings.Contains(me.Err, "pq: role \"aaaaa\" does not exist") {
-		t.Error("Error expected : ", me.Err)
-	}
+	BDErrorHandler(request, t)
 }
 
 // TestModifJoueurErr test la modification d'un joueur avec une erreur dans le JSON
 func TestModifJoueurErr(t *testing.T) {
-	acqConf.ConnectionString = "host=localhost user=postgres dbname=tsap_acquisition sslmode=disable password="
 	reader = strings.NewReader(
 		`{
 			"Lname" Test",

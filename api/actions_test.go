@@ -28,36 +28,18 @@ func TestStartServerStarted(t *testing.T) {
 // TestBD test la création de la base de donnée avec erreur de connexion à la base de données
 // avec erreur de connexion à la base de données
 func TestBDErr(t *testing.T) {
-	acqConf.ConnectionString = "host=localhost user=aaaaa dbname=tsap_acquisition sslmode=disable password="
 	reader = strings.NewReader("")
 	request, err := http.NewRequest("POST", baseURL+"/api/bd", reader)
-	res, err := http.DefaultClient.Do(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	bodyBuffer, _ := ioutil.ReadAll(res.Body)
-
-	var me MessageError
-	err = json.Unmarshal(bodyBuffer, &me)
-	if err != nil {
-		t.Error(err)
-		return
-	}
-
-	if res.StatusCode != 400 {
-		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
-	}
-
-	if !strings.Contains(me.Err, "pq: role \"aaaaa\" does not exist") {
-		t.Error("Error expected : ", me.Err)
-	}
+	BDErrorHandler(request, t)
 }
 
 // TestBD test la création de la base de donnée
 func TestBD(t *testing.T) {
-	acqConf.ConnectionString = "host=localhost user=postgres dbname=tsap_acquisition sslmode=disable password="
 	reader = strings.NewReader("")
 	request, err := http.NewRequest("POST", baseURL+"/api/bd", reader)
 	res, err := http.DefaultClient.Do(request)
@@ -77,24 +59,12 @@ func TestSeedErr(t *testing.T) {
 	acqConf.ConnectionString = "host=localhost user=aaaaa dbname=tsap_acquisition sslmode=disable password="
 	reader = strings.NewReader("")
 	request, err := http.NewRequest("POST", baseURL+"/api/seed", reader)
-	res, err := http.DefaultClient.Do(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	bodyBuffer, _ := ioutil.ReadAll(res.Body)
-
-	var me MessageError
-	err = json.Unmarshal(bodyBuffer, &me)
-	if err != nil {
-		t.Error(err)
-		return
-	}
-
-	if res.StatusCode != 400 {
-		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
-	}
+	me := BadRequestHandler(request, t)
 
 	if !strings.Contains(me.Err, "pq: role \"aaaaa\" does not exist") {
 		t.Error("Error expected : ", me.Err)
@@ -217,7 +187,6 @@ func TestGetTokenInvalidEmail(t *testing.T) {
 // TestGetTokenErrBD test la récupération d'un token avec les informations d'authentification d'un administrateur
 // avec erreur de connexion à la base de données
 func TestGetTokenErrBD(t *testing.T) {
-	acqConf.ConnectionString = "host=localhost user=aaaaa dbname=tsap_acquisition sslmode=disable password="
 	reader = strings.NewReader(
 		`{
 			"Email": "admin@admin.ca",
@@ -225,34 +194,17 @@ func TestGetTokenErrBD(t *testing.T) {
 		}`,
 	)
 	request, err := http.NewRequest("POST", baseURL+"/api/auth", reader)
-	res, err := http.DefaultClient.Do(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	bodyBuffer, _ := ioutil.ReadAll(res.Body)
-
-	var me MessageError
-	err = json.Unmarshal(bodyBuffer, &me)
-	if err != nil {
-		t.Error(err)
-		return
-	}
-
-	if res.StatusCode != 400 {
-		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
-	}
-
-	if !strings.Contains(me.Err, "pq: role \"aaaaa\" does not exist") {
-		t.Error("Error expected : ", me.Err)
-	}
+	BDErrorHandler(request, t)
 }
 
 // TestGetTokenExpire test la récupération d'un token avec les informations d'authentification d'un administrateur
 // mais ayant un token expiré
 func TestGetTokenExpire(t *testing.T) {
-	acqConf.ConnectionString = "host=localhost user=postgres dbname=tsap_acquisition sslmode=disable password="
 	reader = strings.NewReader(
 		`{
 			"Email": "mauvais@mauvais.ca",
@@ -439,7 +391,6 @@ func TestCreerPartiePourActions(t *testing.T) {
 // TestCreerActionErrBD test la création d'une nouvelle action
 // avec erreur de connexion à la base de données
 func TestCreerActionErrBD(t *testing.T) {
-	acqConf.ConnectionString = "host=localhost user=aaaaa dbname=tsap_acquisition sslmode=disable password="
 	reader = strings.NewReader(
 		`{
 			"ActionTypeID" : 1,
@@ -459,34 +410,17 @@ func TestCreerActionErrBD(t *testing.T) {
 		}`)
 
 	request, err := http.NewRequest("POST", baseURL+"/api/actions", reader)
-	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	bodyBuffer, _ := ioutil.ReadAll(res.Body)
-
-	var me MessageError
-	err = json.Unmarshal(bodyBuffer, &me)
-	if err != nil {
-		t.Error(err)
-		return
-	}
-
-	if res.StatusCode != 400 {
-		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
-	}
-
-	if !strings.Contains(me.Err, "pq: role \"aaaaa\" does not exist") {
-		t.Error("Error expected : ", me.Err)
-	}
+	BDErrorHandler(request, t)
 }
 
 // TestCreerActionErr test la création d'une nouvelle action
 // avec erreur dans le JSON
 func TestCreerActionErr(t *testing.T) {
-	acqConf.ConnectionString = "host=localhost user=postgres dbname=tsap_acquisition sslmode=disable password="
 	reader = strings.NewReader(
 		`{
 			"ActionTypeID 1,
@@ -570,24 +504,12 @@ func TestCreerActionExiste(t *testing.T) {
 		}`)
 
 	request, err := http.NewRequest("POST", baseURL+"/api/actions", reader)
-	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	bodyBuffer, _ := ioutil.ReadAll(res.Body)
-
-	var me MessageError
-	err = json.Unmarshal(bodyBuffer, &me)
-	if err != nil {
-		t.Error(err)
-		return
-	}
-
-	if res.StatusCode != 400 {
-		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
-	}
+	me := BadRequestHandler(request, t)
 
 	if !strings.Contains(me.Err, "Une action existe déjà à ce moment précis de la partie !") {
 		t.Error("Error expected : ", me.Err)
@@ -597,23 +519,18 @@ func TestCreerActionExiste(t *testing.T) {
 // TestGetActionsErrBD test la récupération des actions
 // avec erreur de connexion à la base de données
 func TestGetActionsErrBD(t *testing.T) {
-	acqConf.ConnectionString = "host=localhost user=aaaaa dbname=tsap_acquisition sslmode=disable password="
 	reader = strings.NewReader("")
 	request, err := http.NewRequest("GET", baseURL+"/api/parties/"+rmID+"/actions", reader)
-	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	if res.StatusCode != 400 {
-		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
-	}
+	BDErrorHandler(request, t)
 }
 
 // TestGetActions test la récupération des actions d'une partie
 func TestGetActions(t *testing.T) {
-	acqConf.ConnectionString = "host=localhost user=postgres dbname=tsap_acquisition sslmode=disable password="
 	reader = strings.NewReader("")
 	request, err := http.NewRequest("GET", baseURL+"/api/parties/"+rmID+"/actions", reader)
 	res, err := SecureRequest(request)
@@ -630,27 +547,14 @@ func TestGetActions(t *testing.T) {
 // TestGetActionsErrID test la récupération des actions d'une partie avec un
 // mauvais identifiant de partie
 func TestGetActionsErrID(t *testing.T) {
-	acqConf.ConnectionString = "host=localhost user=postgres dbname=tsap_acquisition sslmode=disable password="
 	reader = strings.NewReader("")
 	request, err := http.NewRequest("GET", baseURL+"/api/parties/0/actions", reader)
-	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	bodyBuffer, _ := ioutil.ReadAll(res.Body)
-
-	var me MessageError
-	err = json.Unmarshal(bodyBuffer, &me)
-	if err != nil {
-		t.Error(err)
-		return
-	}
-
-	if res.StatusCode != 400 {
-		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
-	}
+	me := BadRequestHandler(request, t)
 
 	if !strings.Contains(me.Err, "Aucune partie ne correspond.") {
 		t.Error("Error expected : ", me.Err)
@@ -661,13 +565,11 @@ func TestGetActionsErrID(t *testing.T) {
 func TestSupprimerPartiePourAction(t *testing.T) {
 	reader = strings.NewReader("")
 	request, err := http.NewRequest("DELETE", baseURL+"/api/parties/"+rmID, reader)
-	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
+		return
 	}
 
-	if res.StatusCode != 204 {
-		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
-	}
+	DeleteHandler(request, t)
 }

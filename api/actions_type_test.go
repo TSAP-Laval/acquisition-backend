@@ -46,36 +46,18 @@ func TestGetAllActionsTypesErrToken(t *testing.T) {
 
 // TestGetAllActionsTypesErrBD test la récupération de tous les type d'action
 func TestGetAllActionsTypesErrBD(t *testing.T) {
-	acqConf.ConnectionString = "host=localhost user=aaaaa dbname=tsap_acquisition sslmode=disable password="
 	reader = strings.NewReader("")
 	request, err := http.NewRequest("GET", baseURL+"/api/actions/types", reader)
-	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	bodyBuffer, _ := ioutil.ReadAll(res.Body)
-
-	var me MessageError
-	err = json.Unmarshal(bodyBuffer, &me)
-	if err != nil {
-		t.Error(err)
-		return
-	}
-
-	if res.StatusCode != 400 {
-		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
-	}
-
-	if !strings.Contains(me.Err, "pq: role \"aaaaa\" does not exist") {
-		t.Error("Error expected : ", me.Err)
-	}
+	BDErrorHandler(request, t)
 }
 
 // TestGetAllActionsTypes test la récupération de tous les type d'action
 func TestGetAllActionsTypes(t *testing.T) {
-	acqConf.ConnectionString = "host=localhost user=postgres dbname=tsap_acquisition sslmode=disable password="
 	reader = strings.NewReader("")
 	request, err := http.NewRequest("GET", baseURL+"/api/actions/types", reader)
 	res, err := SecureRequest(request)
@@ -103,42 +85,23 @@ func TestGetAllActionsTypes(t *testing.T) {
 
 // TestCreerActionsType test la création d'un type d'action
 func TestCreerActionsTypeErrBD(t *testing.T) {
-	acqConf.ConnectionString = "host=localhost user=aaaaa dbname=tsap_acquisition sslmode=disable password="
 	reader = strings.NewReader(
 		`{
 			"Name": "Passe", 
 			"Description": "Interceptée", 
 			"TypeAction": "Reception"
 		}`)
-
 	request, err := http.NewRequest("POST", baseURL+"/api/actions/types", reader)
-	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	bodyBuffer, _ := ioutil.ReadAll(res.Body)
-
-	var me MessageError
-	err = json.Unmarshal(bodyBuffer, &me)
-	if err != nil {
-		t.Error(err)
-		return
-	}
-
-	if res.StatusCode != 400 {
-		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
-	}
-
-	if !strings.Contains(me.Err, "pq: role \"aaaaa\" does not exist") {
-		t.Error("Error expected : ", me.Err)
-	}
+	BDErrorHandler(request, t)
 }
 
 // TestCreerActionsType test la création d'un type d'action
 func TestCreerActionsType(t *testing.T) {
-	acqConf.ConnectionString = "host=localhost user=postgres dbname=tsap_acquisition sslmode=disable password="
 	reader = strings.NewReader(
 		`{
 			"Name": "Passe", 
@@ -180,23 +143,12 @@ func TestCreerActionsTypeExisteDeja(t *testing.T) {
 		}`)
 
 	request, err := http.NewRequest("POST", baseURL+"/api/actions/types", reader)
-	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	bodyBuffer, _ := ioutil.ReadAll(res.Body)
-
-	var me MessageError
-	err = json.Unmarshal(bodyBuffer, &me)
-	if err != nil {
-		t.Error(err)
-	}
-
-	if res.StatusCode != 400 {
-		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
-	}
+	me := BadRequestHandler(request, t)
 
 	if !strings.Contains(me.Err, "Un type d'action avec le même nom existe déjà") {
 		t.Errorf("Error expected: %s", me.Err)
@@ -269,28 +221,19 @@ func TestGetActionsTypesExistePas(t *testing.T) {
 // TestGetAllReceptionTypeErrBD test la création d'un type d'action
 // avec erreur de connexion à la base de données
 func TestGetAllReceptionTypeErrBD(t *testing.T) {
-	acqConf.ConnectionString = "host=localhost user=aaaaa dbname=tsap_acquisition sslmode=disable password="
 	reader = strings.NewReader(``)
 	request, err := http.NewRequest("GET", baseURL+"/api/receptions", reader)
-	res, err := SecureRequest(request)
 
-	bodyBuffer, _ := ioutil.ReadAll(res.Body)
-
-	var me MessageError
-	err = json.Unmarshal(bodyBuffer, &me)
 	if err != nil {
 		t.Error(err)
 		return
 	}
 
-	if res.StatusCode != 400 {
-		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
-	}
+	BDErrorHandler(request, t)
 }
 
 // TestGetAllReceptionType test la récupération du tous les types de réceptions
 func TestGetAllReceptionType(t *testing.T) {
-	acqConf.ConnectionString = "host=localhost user=postgres dbname=tsap_acquisition sslmode=disable password="
 	reader = strings.NewReader(``)
 	request, err := http.NewRequest("GET", baseURL+"/api/receptions", reader)
 	res, err := SecureRequest(request)

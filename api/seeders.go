@@ -84,193 +84,123 @@ func (a *AcquisitionService) RemplirBD(w http.ResponseWriter, r *http.Request) {
 	}
 
 	reception := ReceptionType{Name: "Ballon conquis aérien"}
-	if db.NewRecord(reception) {
-		db.Create(&reception)
-	}
+	db.Create(&reception)
 
 	reception2 := ReceptionType{Name: "Ballon conquis sol"}
-	if db.NewRecord(reception2) {
-		db.Create(&reception2)
-	}
+	db.Create(&reception2)
 
 	reception3 := ReceptionType{Name: "Ballon reçu sol"}
-	if db.NewRecord(reception3) {
-		db.Create(&reception3)
-	}
+	db.Create(&reception3)
 
 	reception4 := ReceptionType{Name: "Ballon reçu aérien"}
-	if db.NewRecord(reception4) {
-		db.Create(&reception4)
-	}
+	db.Create(&reception4)
 
 	reception5 := ReceptionType{Name: "Ballon reçu sur faute de l’adversaire"}
-	if db.NewRecord(reception5) {
-		db.Create(&reception5)
-	}
+	db.Create(&reception5)
 
 	reception6 := ReceptionType{Name: "Ballon reçu sur remise en jeu"}
-	if db.NewRecord(reception6) {
-		db.Create(&reception6)
-	}
+	db.Create(&reception6)
 
 	reception7 := ReceptionType{Name: "Passe reçue au sol"}
-	if db.NewRecord(reception7) {
-		db.Create(&reception7)
-	}
+	db.Create(&reception7)
 
 	reception8 := ReceptionType{Name: "Passe aérienne reçue "}
-	if db.NewRecord(reception8) {
-		db.Create(&reception8)
-	}
+	db.Create(&reception8)
 
 	user := ActionsType{Description: "Tir au but cadré", TypeAction: "reception et action", Name: "Tir au but cadré"}
-	if db.NewRecord(user) {
-		db.Create(&user)
-	}
+	db.Create(&user)
+
 	userTirAuBut := ActionsType{Description: "Tir au but non-cadré", TypeAction: "reception et action", Name: "Tir au but non-cadré"}
-	if db.NewRecord(userTirAuBut) {
-		db.Create(&userTirAuBut)
-	}
+	db.Create(&userTirAuBut)
+
 	action := ActionsType{Description: "Perte directe sur contrôle", TypeAction: "balle perdu", Name: "Perte directe sur contrôle"}
-	if db.NewRecord(action) {
-		db.Create(&action)
-	}
+	db.Create(&action)
+
 	action3 := ActionsType{Description: "Perte directe sur passe tentée", TypeAction: "passe incomplete", Name: "Perte directe sur passe tentée"}
-	if db.NewRecord(action3) {
-		db.Create(&action3)
-	}
+	db.Create(&action3)
+
 	action4 := ActionsType{Description: "Perte directe autres(faute, etc)", TypeAction: "balle perdu", Name: "Perte directe autres(faute, etc)"}
-	if db.NewRecord(action4) {
-		db.Create(&action4)
-	}
+	db.Create(&action4)
+
 	action5 := ActionsType{Description: "Passe offensive positive (dans la course du joueur)", TypeAction: "reception et action", Name: "Passe offensive positive (dans la course du joueur)"}
-	if db.NewRecord(action5) {
-		db.Create(&action5)
-	}
+	db.Create(&action5)
+
 	action6 := ActionsType{Description: "Passe offensive négative (joueur doit modifier sa course)", TypeAction: "reception et action", Name: "Passe offensive négative (joueur doit modifier sa course)"}
-	if db.NewRecord(action6) {
-		db.Create(&action6)
-	}
+	db.Create(&action6)
+
 	action7 := ActionsType{Description: "Dégagement réussi", TypeAction: "passe incomplete", Name: "Dégagement réussi"}
-	if db.NewRecord(action7) {
-		db.Create(&action7)
-	}
+	db.Create(&action7)
+
 	action8 := ActionsType{Description: "Passe neutre", TypeAction: "reception et action", Name: "Passe neutre"}
-	if db.NewRecord(action8) {
-		db.Create(&action8)
-	}
+	db.Create(&action8)
+
 	coach := Coaches{Fname: "alex", Lname: "Des", Email: "alex@hotmail.com", PassHash: "test"}
-	if db.NewRecord(coach) {
-		db.Create(&coach)
-	}
+	db.Create(&coach)
 
 	player := Players{Fname: "alex", Lname: "Des", Number: 1, Email: "alex@hotmail.com", PassHash: "test"}
-	if db.NewRecord(player) {
-		db.Create(&player)
-	}
+	db.Create(&player)
 
 	season := Seasons{Years: "2017-2018"}
-	if db.NewRecord(season) {
-		db.Create(&season)
-	}
+	db.Create(&season)
 
 	sport := Sports{Name: "soccer"}
-	if db.NewRecord(sport) {
-		db.Create(&sport)
-	}
+	db.Create(&sport)
 
 	category := Categories{Name: "AA"}
-	if db.NewRecord(category) {
-		db.Create(&category)
-	}
+	db.Create(&category)
 
 	zone := Zones{Name: "off"}
-	if db.NewRecord(zone) {
-		db.Create(&zone)
-	}
+	db.Create(&zone)
 
 	fieldType1 := FieldTypes{Type: "Synthétique", Description: "Terrain synthétique..."}
-	if db.NewRecord(fieldType1) {
-		db.Create(&fieldType1)
-	}
+	db.Create(&fieldType1)
 
 	fieldType2 := FieldTypes{Type: "Gazon", Description: "Terrain extérieur..."}
-	if db.NewRecord(fieldType2) {
-		db.Create(&fieldType2)
-	}
+	db.Create(&fieldType2)
 
 	location1 := Locations{Name: "SSF", City: "Saint-Augustin-de-Desmaures", Address: "4900 Rue Saint-Félix", IsInside: false, FieldTypesID: int(fieldType1.ID)}
-	if db.NewRecord(location1) {
-		db.Create(&location1)
-	}
+	db.Create(&location1)
 
 	location2 := Locations{Name: "Stade Leclerc", City: "Saint-Augustin-de-Desmaures", Address: "QC G3A 0C3", IsInside: true, FieldTypesID: int(fieldType1.ID)}
-	if db.NewRecord(location2) {
-		db.Create(&location2)
-	}
+	db.Create(&location2)
+
 	location3 := Locations{Name: "Terrain univers", City: "Saint-Augustin-de-Desmaures", Address: "QC G3A 0C3", IsInside: true, FieldTypesID: int(fieldType1.ID)}
-	if db.NewRecord(location3) {
-		db.Create(&location3)
-	}
+	db.Create(&location3)
 
 	location4 := Locations{Name: "Stade Bidule", City: "Saint-Augustin-de-Desmaures", Address: "QC G3A 0C3", IsInside: false, FieldTypesID: int(fieldType2.ID)}
-	if db.NewRecord(location4) {
-		db.Create(&location4)
-	}
+	db.Create(&location4)
 
 	location5 := Locations{Name: "Stade Chnoubouc", City: "Saint-Augustin-de-Desmaures", Address: "QC G3A 0C3", IsInside: true, FieldTypesID: int(fieldType1.ID)}
-	if db.NewRecord(location5) {
-		db.Create(&location5)
-	}
+	db.Create(&location5)
 
 	location6 := Locations{Name: "Terrains PGR", City: "Saint-Augustin-de-Desmaures", Address: "QC G3A 0C3", IsInside: true, FieldTypesID: int(fieldType1.ID)}
-	if db.NewRecord(location6) {
-		db.Create(&location6)
-	}
+	db.Create(&location6)
 
 	equipe1 := Teams{Name: "Lions", City: "Quebec", SportID: 1, CategoryID: 1, SeasonID: 1, Sexe: "M"}
-	if db.NewRecord(equipe1) {
-		db.Create(&equipe1)
-	}
+	db.Create(&equipe1)
 
 	equipe2 := Teams{Name: "Loup", City: "Vancouver", SportID: 1, CategoryID: 1, SeasonID: 1, Sexe: "M"}
-	if db.NewRecord(equipe2) {
-		db.Create(&equipe2)
-	}
+	db.Create(&equipe2)
 
 	equipe3 := Teams{Name: "Tigres", City: "Montreal", SportID: 1, CategoryID: 1, SeasonID: 1, Sexe: "F"}
-	if db.NewRecord(equipe3) {
-		db.Create(&equipe3)
-	}
+	db.Create(&equipe3)
 
 	equipe4 := Teams{Name: "Ligres", City: "Trois-Rivières", SportID: 1, CategoryID: 1, SeasonID: 1, Sexe: "M"}
-	if db.NewRecord(equipe4) {
-		db.Create(&equipe4)
-	}
+	db.Create(&equipe4)
 
-	equipe5 := Teams{Name: "Tatoo", City: "Rivière-du-loup", SportID: 1, CategoryID: 1, SeasonID: 1, Sexe: "F"}
-	if db.NewRecord(equipe5) {
-		db.Create(&equipe5)
-	}
+	equipe5 := Teams{Name: "Tattoo", City: "Rivière-du-loup", SportID: 1, CategoryID: 1, SeasonID: 1, Sexe: "F"}
+	db.Create(&equipe5)
 
 	pass, _ := bcrypt.GenerateFromPassword([]byte("aaaaa"), bcrypt.DefaultCost)
-
 	admin := Admins{Email: "admin@admin.ca", PassHash: string(pass)}
-	if db.NewRecord(admin) {
-		db.Create(&admin)
-	}
+	db.Create(&admin)
 
 	// Admin avec un token expiré (pour les tests seulement)
 	pass, _ = bcrypt.GenerateFromPassword([]byte("aaaaa"), bcrypt.DefaultCost)
-
 	badAdmin := Admins{Email: "mauvais@mauvais.ca", PassHash: string(pass),
 		TokenLogin: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbiI6dHJ1ZSwiZXhwIjoxNDk0Njk0OTU0fQ.TBukRueijLUla7hejpR064CERMXJy3CRbWWhPQPQ5fY"}
-	if db.NewRecord(badAdmin) {
-		db.Create(&badAdmin)
-	}
+	db.Create(&badAdmin)
 
 	Uneaction := Actions{ActionTypeID: 1, ZoneID: 1, GameID: 1, X1: 0, Y1: 0, X2: 0, Y2: 0, X3: 0, Y3: 0, Time: 10, HomeScore: 0, GuestScore: 0, PlayerID: 1}
-	if db.NewRecord(Uneaction) {
-		db.Create(&Uneaction)
-	}
+	db.Create(&Uneaction)
 }
