@@ -52,6 +52,7 @@ func (a *AcquisitionService) HandleJoueur(w http.ResponseWriter, r *http.Request
 	var p Players
 	var dat map[string]interface{}
 	err = json.Unmarshal(body, &p)
+	err = json.Unmarshal(body, &dat)
 	if err != nil {
 		a.ErrorHandler(w, err)
 		return
@@ -61,7 +62,7 @@ func (a *AcquisitionService) HandleJoueur(w http.ResponseWriter, r *http.Request
 	case "POST":
 		db.Create(&p)
 		num := dat["EquipeID"]
-		if num != "" {
+		if num != nil && num != "" {
 			Team := Teams{}
 			db.First(&Team, num)
 			p.Teams = append(p.Teams, Team)
