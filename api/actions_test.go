@@ -1,60 +1,45 @@
 //
-// TEST
-//
 // Fichier     : actions_test.go
 // Développeur : Laurent Leclerc Poulin
 //
 // Permet de gérer toutes les interractions nécessaires à la création,
-// la modification, la seppression et la récupération des informations
-// d'un type d'action.
+// la modification, la suppression et la récupération des informations
+// d'une action.
 //
 
 package api_test
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net/http"
+	"strconv"
 	"strings"
 	"testing"
 
 	"github.com/TSAP-Laval/acquisition-backend/api"
 )
 
+// TestStartServerStarted test le démarrage du serveur lorsqu'il est déjà démarré
+func TestStartServerStarted(t *testing.T) {
+	service.Start()
+}
+
 // TestBD test la création de la base de donnée avec erreur de connexion à la base de données
 // avec erreur de connexion à la base de données
 func TestBDErr(t *testing.T) {
-	acqConf.ConnectionString = "host=localhost user=aaaaa dbname=tsap_acquisition sslmode=disable password="
 	reader = strings.NewReader("")
 	request, err := http.NewRequest("POST", baseURL+"/api/bd", reader)
-	res, err := http.DefaultClient.Do(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	bodyBuffer, _ := ioutil.ReadAll(res.Body)
-
-	var me MessageError
-	err = json.Unmarshal(bodyBuffer, &me)
-	if err != nil {
-		t.Error(err)
-		return
-	}
-
-	if res.StatusCode != 400 {
-		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
-	}
-
-	if !strings.Contains(me.Err, "pq: role \"aaaaa\" does not exist") {
-		t.Error("Error expected : ", me.Err)
-	}
+	BDErrorHandler(request, t)
 }
 
 // TestBD test la création de la base de donnée
 func TestBD(t *testing.T) {
-	acqConf.ConnectionString = "host=localhost user=postgres dbname=tsap_acquisition sslmode=disable password="
 	reader = strings.NewReader("")
 	request, err := http.NewRequest("POST", baseURL+"/api/bd", reader)
 	res, err := http.DefaultClient.Do(request)
@@ -71,47 +56,27 @@ func TestBD(t *testing.T) {
 // TestSeedErr test le remplissage de la base de donnée avec des informations bidons
 // et erreur de connexion à la base de données
 func TestSeedErr(t *testing.T) {
-	acqConf.ConnectionString = "host=localhost user=aaaaa dbname=tsap_acquisition sslmode=disable password="
 	reader = strings.NewReader("")
 	request, err := http.NewRequest("POST", baseURL+"/api/seed", reader)
-	res, err := http.DefaultClient.Do(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	bodyBuffer, _ := ioutil.ReadAll(res.Body)
+	BDErrorHandler(request, t)
+}
 
-	var me MessageError
-	err = json.Unmarshal(bodyBuffer, &me)
+// TestSeed test le remplissage de la base de donnée avec des informations bidons
+func TestSeed(t *testing.T) {
+	reader = strings.NewReader("")
+	request, err := http.NewRequest("POST", baseURL+"/api/seed", reader)
+
 	if err != nil {
 		t.Error(err)
 		return
 	}
 
-	if res.StatusCode != 400 {
-		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
-	}
-
-	if !strings.Contains(me.Err, "pq: role \"aaaaa\" does not exist") {
-		t.Error("Error expected : ", me.Err)
-	}
-}
-
-// TestSeed test le remplissage de la base de donnée avec des informations bidons
-func TestSeed(t *testing.T) {
-	acqConf.ConnectionString = "host=localhost user=postgres dbname=tsap_acquisition sslmode=disable password="
-	reader = strings.NewReader("")
-	request, err := http.NewRequest("POST", baseURL+"/api/seed", reader)
-	res, err := http.DefaultClient.Do(request)
-
-	if err != nil {
-		t.Error(err)
-	}
-
-	if res.StatusCode != 200 {
-		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
-	}
+	PostRequestHandler(request, t)
 }
 
 // TestGetTokenErr test la récupération d'un token avec des informations au mauvais format
@@ -214,7 +179,6 @@ func TestGetTokenInvalidEmail(t *testing.T) {
 // TestGetTokenErrBD test la récupération d'un token avec les informations d'authentification d'un administrateur
 // avec erreur de connexion à la base de données
 func TestGetTokenErrBD(t *testing.T) {
-	acqConf.ConnectionString = "host=localhost user=aaaaa dbname=tsap_acquisition sslmode=disable password="
 	reader = strings.NewReader(
 		`{
 			"Email": "admin@admin.ca",
@@ -222,34 +186,17 @@ func TestGetTokenErrBD(t *testing.T) {
 		}`,
 	)
 	request, err := http.NewRequest("POST", baseURL+"/api/auth", reader)
-	res, err := http.DefaultClient.Do(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	bodyBuffer, _ := ioutil.ReadAll(res.Body)
-
-	var me MessageError
-	err = json.Unmarshal(bodyBuffer, &me)
-	if err != nil {
-		t.Error(err)
-		return
-	}
-
-	if res.StatusCode != 400 {
-		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
-	}
-
-	if !strings.Contains(me.Err, "pq: role \"aaaaa\" does not exist") {
-		t.Error("Error expected : ", me.Err)
-	}
+	BDErrorHandler(request, t)
 }
 
 // TestGetTokenExpire test la récupération d'un token avec les informations d'authentification d'un administrateur
 // mais ayant un token expiré
 func TestGetTokenExpire(t *testing.T) {
-	acqConf.ConnectionString = "host=localhost user=postgres dbname=tsap_acquisition sslmode=disable password="
 	reader = strings.NewReader(
 		`{
 			"Email": "mauvais@mauvais.ca",
@@ -360,6 +307,7 @@ func TestGetTokenOptions(t *testing.T) {
 		}`,
 	)
 	request, err := http.NewRequest("OPTIONS", baseURL+"/api/auth", reader)
+	// Je n'utiliserai pas la fonction GetRequestHandler, car la requête doit être non sécurisée
 	res, err := http.DefaultClient.Do(request)
 
 	if err != nil {
@@ -393,246 +341,269 @@ func TestGetAllActionsTypesErrTokenSignature(t *testing.T) {
 	}
 }
 
-// TestGetAllActionsTypesErrToken test la récupération de tous les type d'action avec un token expiré
-func TestGetAllActionsTypesErrToken(t *testing.T) {
-	reader = strings.NewReader("")
-	request, err := http.NewRequest("GET", baseURL+"/api/actions/types", reader)
-	request.Header.Add("Authorization", "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiIiLCJpYXQiOjE0OTQ4MTE4MjMsImV4cCI6MTQ5NDgxMTgyNCwiYXVkIjoiIiwic3ViIjoiIiwiYWRtaW4iOiJ0cnVlIn0.n-eE_AJErTBpbuR78Cb4wCEEeleBEmG_6j0N_DDlVYs")
-	res, err := http.DefaultClient.Do(request)
-
-	if err != nil {
-		t.Error(err)
-	}
-
-	bodyBuffer, _ := ioutil.ReadAll(res.Body)
-
-	if res.StatusCode != 401 {
-		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
-	}
-
-	if !strings.Contains(string(bodyBuffer), "signature is invalid") { // TODO : Token is expired
-		t.Error("Error expected :", string(bodyBuffer))
-	}
-}
-
-// TestGetAllActionsTypesErrBD test la récupération de tous les type d'action
-func TestGetAllActionsTypesErrBD(t *testing.T) {
-	acqConf.ConnectionString = "host=localhost user=aaaaa dbname=tsap_acquisition sslmode=disable password="
-	reader = strings.NewReader("")
-	request, err := http.NewRequest("GET", baseURL+"/api/actions/types", reader)
-	res, err := SecureRequest(request)
-
-	if err != nil {
-		t.Error(err)
-	}
-
-	bodyBuffer, _ := ioutil.ReadAll(res.Body)
-
-	var me MessageError
-	err = json.Unmarshal(bodyBuffer, &me)
-	if err != nil {
-		t.Error(err)
-		return
-	}
-
-	if res.StatusCode != 400 {
-		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
-	}
-
-	if !strings.Contains(me.Err, "pq: role \"aaaaa\" does not exist") {
-		t.Error("Error expected : ", me.Err)
-	}
-}
-
-// TestGetAllActionsTypes test la récupération de tous les type d'action
-func TestGetAllActionsTypes(t *testing.T) {
-	acqConf.ConnectionString = "host=localhost user=postgres dbname=tsap_acquisition sslmode=disable password="
-	reader = strings.NewReader("")
-	request, err := http.NewRequest("GET", baseURL+"/api/actions/types", reader)
-	res, err := SecureRequest(request)
-
-	if err != nil {
-		t.Error(err)
-	}
-
-	bodyBuffer, _ := ioutil.ReadAll(res.Body)
-
-	var at []api.ActionsType
-	err = json.Unmarshal(bodyBuffer, &at)
-	if err != nil {
-		t.Error(err)
-	}
-
-	if res.StatusCode != 200 {
-		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
-	}
-
-	if len(at) < 1 {
-		LogErrors(Messages{t, "Number of action types expected: %d", len(at), true, request, res})
-	}
-}
-
-// TestCreerActionsType test la création d'un type d'action
-func TestCreerActionsTypeErrBD(t *testing.T) {
-	acqConf.ConnectionString = "host=localhost user=aaaaa dbname=tsap_acquisition sslmode=disable password="
+// TestCreerPartiePourActions test la création d'une partie.
+func TestCreerPartiePourActions(t *testing.T) {
 	reader = strings.NewReader(
 		`{
-			"Name": "Passe", 
-			"Description": "Interceptée", 
-			"TypeAction": "Reception"
+			"Date": "2016-06-25 06:02",
+            "FieldCondition": "Correcte",
+            "LocationID": 1,
+            "OpposingTeam": "Team",
+            "SeasonID": 1,
+            "Status": "Local",
+            "TeamID": 1
 		}`)
 
-	request, err := http.NewRequest("POST", baseURL+"/api/actions/types", reader)
+	request, err := http.NewRequest("POST", baseURL+"/api/parties", reader)
 	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
+	// On garde en mémoire l'ID de la partie venant d'être créée
 	bodyBuffer, _ := ioutil.ReadAll(res.Body)
+	defer res.Body.Close()
 
-	var me MessageError
-	err = json.Unmarshal(bodyBuffer, &me)
-	if err != nil {
-		t.Error(err)
-		return
-	}
-
-	if res.StatusCode != 400 {
-		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
-	}
-
-	if !strings.Contains(me.Err, "pq: role \"aaaaa\" does not exist") {
-		t.Error("Error expected : ", me.Err)
-	}
-}
-
-// TestCreerActionsType test la création d'un type d'action
-func TestCreerActionsType(t *testing.T) {
-	acqConf.ConnectionString = "host=localhost user=postgres dbname=tsap_acquisition sslmode=disable password="
-	reader = strings.NewReader(
-		`{
-			"Name": "Passe", 
-			"Description": "Interceptée", 
-			"TypeAction": "Reception"
-		}`)
-
-	request, err := http.NewRequest("POST", baseURL+"/api/actions/types", reader)
-	res, err := SecureRequest(request)
-
+	var ga api.Games
+	err = json.Unmarshal(bodyBuffer, &ga)
 	if err != nil {
 		t.Error(err)
 	}
 
-	bodyBuffer, _ := ioutil.ReadAll(res.Body)
-
-	var at api.ActionsType
-	err = json.Unmarshal(bodyBuffer, &at)
-	if err != nil {
-		t.Error(err)
-	}
-
-	// Ici, rmID est utilisé pour permettre la récupération de
-	// l'élément créé
-	rmID = fmt.Sprintf("%d", at.ID)
+	rmID = strconv.Itoa(int(ga.ID))
 
 	if res.StatusCode != 201 {
 		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
+		var me MessageError
+		responseMapping(&me, res)
+		t.Errorf("Error: %s", me.Err)
 	}
 }
 
-// TestCreerActionsTypeExisteDeja test la création d'un type d'action qui existe déjà
-func TestCreerActionsTypeExisteDeja(t *testing.T) {
+// TestCreerActionErrBD test la création d'une nouvelle action
+// avec erreur de connexion à la base de données
+func TestCreerActionErrBD(t *testing.T) {
 	reader = strings.NewReader(
 		`{
-			"Name": "Passe", 
-			"Description": "Interceptée", 
-			"TypeAction": "Reception"
+			"ActionTypeID" : 1,
+			"ReceptionTypeID" : 1,
+			"ZoneID" : 1,
+			"GameID" : 1,
+			"X1" : 1,
+			"Y1" : 1,
+			"X2" : 1,
+			"Y2" : 1,
+			"X3" : 1,
+			"Y3" : 1,
+			"Time" : 30,
+			"HomeScore" : 0,
+			"GuestScore" : 0,
+			"PlayerID" : 0,
 		}`)
 
-	request, err := http.NewRequest("POST", baseURL+"/api/actions/types", reader)
-	res, err := SecureRequest(request)
+	request, err := http.NewRequest("POST", baseURL+"/api/actions", reader)
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	bodyBuffer, _ := ioutil.ReadAll(res.Body)
-
-	var me MessageError
-	err = json.Unmarshal(bodyBuffer, &me)
-	if err != nil {
-		t.Error(err)
-	}
-
-	if res.StatusCode != 400 {
-		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
-	}
-
-	if !strings.Contains(me.Err, "Un type d'action avec le même nom existe déjà") {
-		t.Errorf("Error expected: %s", me.Err)
-	}
+	BDErrorHandler(request, t)
 }
 
-// TestCreerActionsTypeExisteDeja test la création d'un type d'action qui existe déjà
-func TestCreerActionsTypeErr(t *testing.T) {
+// TestCreerActionErr test la création d'une nouvelle action
+// avec erreur dans le JSON
+func TestCreerActionErr(t *testing.T) {
 	reader = strings.NewReader(
 		`{
-			"Name "Passe", 
-			"Description": "Interceptée", 
-			"TypeAction": "Reception"
+			"ActionTypeID 1,
+			"ReceptionTypeID" : 1,
+			"ZoneID" : 1,
+			"GameID" : 1,
+			"X1" : 1,
+			"Y1" : 1,
+			"X2" : 1,
+			"Y2" : 1,
+			"X3" : 1,
+			"Y3" : 1,
+			"Time" : 30,
+			"HomeScore" : 0,
+			"GuestScore" : 0,
+			"PlayerID" : 0,
 		}`)
 
-	request, err := http.NewRequest("POST", baseURL+"/api/actions/types", reader)
-	res, err := SecureRequest(request)
+	request, err := http.NewRequest("POST", baseURL+"/api/actions", reader)
+
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	BadRequestHandler(request, t)
+}
+
+/// TestCreerAction test la création d'une nouvelle action
+func TestCreerAction(t *testing.T) {
+	reader = strings.NewReader(
+		`{
+			"ActionTypeID" : 1,
+			"ReceptionTypeID" : 1,
+			"ZoneID" : 1,
+			"GameID" : 1,
+			"X1" : 1,
+			"Y1" : 1,
+			"X2" : 1,
+			"Y2" : 1,
+			"X3" : 1,
+			"Y3" : 1,
+			"Time" : 30,
+			"HomeScore" : 0,
+			"GuestScore" : 0,
+			"PlayerID" : 0
+		}`)
+
+	request, err := http.NewRequest("POST", baseURL+"/api/actions", reader)
+
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	PostRequestHandler(request, t)
+}
+
+/// TestCreerActionExiste test la création d'une action existante
+func TestCreerActionExiste(t *testing.T) {
+	reader = strings.NewReader(
+		`{
+			"ActionTypeID" : 1,
+			"ReceptionTypeID" : 1,
+			"ZoneID" : 1,
+			"GameID" : 1,
+			"X1" : 1,
+			"Y1" : 1,
+			"X2" : 1,
+			"Y2" : 1,
+			"X3" : 1,
+			"Y3" : 1,
+			"Time" : 30,
+			"HomeScore" : 0,
+			"GuestScore" : 0,
+			"PlayerID" : 0
+		}`)
+
+	request, err := http.NewRequest("POST", baseURL+"/api/actions", reader)
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	if res.StatusCode != 400 {
-		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
+	me := BadRequestHandler(request, t)
+
+	if !strings.Contains(me.Err, "Une action existe déjà à ce moment précis de la partie !") {
+		t.Error("Error expected : ", me.Err)
 	}
 }
 
-// TestGetActionsTypes test la récupération du type d'action venant d'être créé
-func TestGetActionsTypes(t *testing.T) {
+// TestGetActionsErrBD test la récupération des actions
+// avec erreur de connexion à la base de données
+func TestGetActionsErrBD(t *testing.T) {
 	reader = strings.NewReader("")
-	request, err := http.NewRequest("GET", baseURL+"/api/actions/types/"+rmID, reader)
-	res, err := SecureRequest(request)
+	request, err := http.NewRequest("GET", baseURL+"/api/parties/"+rmID+"/actions", reader)
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	if res.StatusCode != 200 {
-		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
+	BDErrorHandler(request, t)
+}
+
+// TestGetActions test la récupération des actions d'une partie
+func TestGetActions(t *testing.T) {
+	reader = strings.NewReader("")
+	request, err := http.NewRequest("GET", baseURL+"/api/parties/"+rmID+"/actions", reader)
+
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	GetRequestHandler(request, t)
+}
+
+// TestGetActionsErrID test la récupération des actions d'une partie avec un
+// mauvais identifiant de partie
+func TestGetActionsErrID(t *testing.T) {
+	reader = strings.NewReader("")
+	request, err := http.NewRequest("GET", baseURL+"/api/parties/0/actions", reader)
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	me := BadRequestHandler(request, t)
+
+	if !strings.Contains(me.Err, "Aucune partie ne correspond.") {
+		t.Error("Error expected : ", me.Err)
 	}
 }
 
-// TestGetActionsTypesExistePas test la récupération du type d'action n'existant point
-func TestGetActionsTypesExistePas(t *testing.T) {
+// TestSupprimerActionsErrBD test la suppression d'une action
+// avec erreur de connexion à la base de données
+func TestSupprimerActionsErrBD(t *testing.T) {
 	reader = strings.NewReader("")
-	request, err := http.NewRequest("GET", baseURL+"/api/actions/types/100", reader)
-	res, err := SecureRequest(request)
+	request, err := http.NewRequest("DELETE", baseURL+"/api/actions/"+rmID, reader)
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	bodyBuffer, _ := ioutil.ReadAll(res.Body)
+	BDErrorHandler(request, t)
+}
+
+// TestSupprimerActions test la suppression d'une action
+func TestSupprimerActions(t *testing.T) {
+	reader = strings.NewReader("")
+	request, err := http.NewRequest("DELETE", baseURL+"/api/actions/"+rmID, reader)
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	DeleteHandler(request, t)
+}
+
+// TestSupprimerActionsErr test la suppression d'une action déjà supprimée
+func TestSupprimerActionsErr(t *testing.T) {
+	reader = strings.NewReader("")
+	request, err := http.NewRequest("DELETE", baseURL+"/api/actions/"+rmID, reader)
+	res, err := SecureRequest(request)
+
+	if err != nil {
+		t.Error(err)
+	}
 
 	var me MessageError
-	err = json.Unmarshal(bodyBuffer, &me)
-	if err != nil {
-		t.Error(err)
-	}
+	responseMapping(&me, res)
 
 	if res.StatusCode != 404 {
 		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
 	}
 
-	if !strings.Contains(me.Err, "Aucun type d'action ne correspond à celui entré") {
-		t.Errorf("Error expected: %s", me.Err)
+	if !strings.Contains(me.Err, "Aucune action ne correspond. Elle doit déjà avoir été supprimée!") {
+		t.Error("Error expected : ", me.Err)
 	}
+}
+
+// TestSupprimerPartiePourAction test la suppression de la partie préalablement créée
+func TestSupprimerPartiePourAction(t *testing.T) {
+	reader = strings.NewReader("")
+	request, err := http.NewRequest("DELETE", baseURL+"/api/parties/"+rmID, reader)
+
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	DeleteHandler(request, t)
 }

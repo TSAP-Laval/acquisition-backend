@@ -60,13 +60,6 @@ func (a *AcquisitionService) UploadHandler(w http.ResponseWriter, r *http.Reques
 			// Taille limite d'envoie de fichiers
 			r.Body = http.MaxBytesReader(w, r.Body, 10*GB) // 10 Gb
 
-			// 10 Gb
-			if r.ContentLength > 10*GB {
-				msg := map[string]string{"error": "Fichier de trop grande taille. La taille maximal pour un fichier est de 10Gb"}
-				Message(w, msg, http.StatusBadRequest)
-				return
-			}
-
 			// Dans le cas où le dossier de destination des vidéos est inexistant, on le crée
 			if _, err := os.Stat(videoPath); os.IsNotExist(err) {
 				os.MkdirAll(videoPath, 0777)
@@ -123,6 +116,8 @@ func (a *AcquisitionService) UploadHandler(w http.ResponseWriter, r *http.Reques
 
 				var cBytes int
 				if cBytes, err := part.Read(buffer); err != nil || cBytes == 0 {
+					msg := map[string]string{"error": "Le fichier envoyé ne possède aucun contenu!"}
+					Message(w, msg, http.StatusBadRequest)
 					return
 				}
 
@@ -189,7 +184,7 @@ func (a *AcquisitionService) UploadHandler(w http.ResponseWriter, r *http.Reques
 				//    cette partie du formulaire a été
 				//    envoyé entièrement au serveur
 				for {
-					buffer = make([]byte, 4*KO)
+					buffer = make([]byte, 80*KO)
 
 					cBytes, err = part.Read(buffer)
 
@@ -263,9 +258,6 @@ func (a *AcquisitionService) UploadHandler(w http.ResponseWriter, r *http.Reques
 
 			Message(w, "", http.StatusNoContent)
 		}
-	case "OPTIONS":
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.WriteHeader(http.StatusOK)
 	}
 }
 
@@ -286,12 +278,13 @@ func (d creationDates) Swap(i, j int) {
 
 // IndexOf fonction utilisée pour trier les dates
 func (d creationDates) IndexOf(value int) int {
+	var index int
 	for i, date := range d {
 		if date.index == value {
-			return i
+			index = i
 		}
 	}
-	return -1
+	return index
 }
 
 // isMov permet de déterminer si le fichier

@@ -10,10 +10,7 @@
 package api_test
 
 import (
-	"encoding/json"
-	"io/ioutil"
 	"net/http"
-	"os"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -55,48 +52,26 @@ func TestUploadVideoMP4PourEnvoie(t *testing.T) {
 // TestGetVideoErrBD permet d'evoyer une vidéo au client
 // avec erreur de connexion à la base de données
 func TestGetVideoErrBD(t *testing.T) {
-	acqConf.ConnectionString = "host=localhost user=aaaaa dbname=tsap_acquisition sslmode=disable password="
 	reader = strings.NewReader("")
 	request, err := http.NewRequest("GET", baseURL+"/api/parties/"+gameID[0]+"/videos/1", reader)
-	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	bodyBuffer, _ := ioutil.ReadAll(res.Body)
-
-	var me MessageError
-	err = json.Unmarshal(bodyBuffer, &me)
-	if err != nil {
-		t.Error(err)
-		return
-	}
-
-	if res.StatusCode != 400 {
-		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
-	}
-
-	if !strings.Contains(me.Err, "pq: role \"aaaaa\" does not exist") {
-		t.Error("Error expected : ", me.Err)
-	}
+	BDErrorHandler(request, t)
 }
 
 // TestGetVideo permet d'evoyer une vidéo au client
 func TestGetVideo(t *testing.T) {
-	acqConf.ConnectionString = "host=localhost user=postgres dbname=tsap_acquisition sslmode=disable password="
 	reader = strings.NewReader("")
 	request, err := http.NewRequest("GET", baseURL+"/api/parties/"+gameID[0]+"/videos/1", reader)
-	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	if res.StatusCode != 200 {
-		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
-	}
-
+	GetRequestHandler(request, t)
 }
 
 // TestGetVideoInexistante test la récupération d'une vidéo inexistante dans la base de données
@@ -126,34 +101,21 @@ func TestGetVideoInexistante(t *testing.T) {
 func TestUploadDeleteVideoMP4Envoye(t *testing.T) {
 	reader = strings.NewReader("")
 	request, err := http.NewRequest("DELETE", baseURL+"/api/upload/"+gameID[0], reader)
-	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
+		return
 	}
 
-	if res.StatusCode != 204 {
-		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
-		var m MessageError
-		responseMapping(&m, res)
-		t.Errorf("Error: %s", m.Err)
-	}
+	DeleteHandler(request, t)
 }
 
 // Vérifie que le dossier est bel et bien vide
 func TestFolderEmptyEnvoie(t *testing.T) {
-	folder, err := filepath.Abs(videoPath)
-	if err != nil {
-		t.Error(err)
-	}
+	FolderEmpty(t)
+}
 
-	if empty, err := IsDirEmpty(folder); !empty || err != nil {
-		t.Errorf("Folder not empty")
-		t.Error(err)
-		return
-	} else {
-		if err := os.Remove(folder); err != nil {
-			t.Error(err)
-		}
-	}
+// TestFermetureServeur ferme le l'api
+func TestFermetureServeur(t *testing.T) {
+	service.Stop()
 }

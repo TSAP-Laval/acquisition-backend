@@ -58,6 +58,7 @@ func (a *AcquisitionService) TerrainsHandler(w http.ResponseWriter, r *http.Requ
 	switch r.Method {
 	case "PUT":
 		body, err := ioutil.ReadAll(r.Body)
+		defer r.Body.Close()
 		if len(body) > 0 {
 			var l Locations
 			err = json.Unmarshal(body, &l)
@@ -124,6 +125,7 @@ func (a *AcquisitionService) GetTerrainsHandler(w http.ResponseWriter, r *http.R
 // CreerTerrainHandler Gère la création d'un terrain dans la base de données
 func (a *AcquisitionService) CreerTerrainHandler(w http.ResponseWriter, r *http.Request) {
 	body, _ := ioutil.ReadAll(r.Body)
+	defer r.Body.Close()
 	if len(body) > 0 {
 		db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
 		defer db.Close()
@@ -156,7 +158,7 @@ func (a *AcquisitionService) CreerTerrainHandler(w http.ResponseWriter, r *http.
 
 			if len(locations) > 0 {
 				msg := map[string]string{"error": "Un terrain de même nom existe déjà. Veuillez choisir un autre nom."}
-				Message(w, msg, http.StatusUnauthorized)
+				Message(w, msg, http.StatusBadRequest)
 			} else {
 				db.Create(&l)
 				Message(w, l, http.StatusCreated)

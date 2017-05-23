@@ -2,7 +2,9 @@
 // Fichier     : saisons.go
 // Développeur : ?
 //
-// Commentaire expliquant le code, les fonction...
+// Permet de gérer toutes les interractions nécessaires à la création,
+// la modification, la seppression et la récupération des informations
+// d'une saison.
 //
 
 package api
@@ -18,50 +20,41 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
-// TODO: Linter le code... Aucun commentaire pour les fonctions
-// TODO: Enlever tous ce qui est log, print...
-
-func (a *AcquisitionService) PostSaison(w http.ResponseWriter, r *http.Request) {
+// CreerSaisonHandler Gère la création d'une nouvelle saison
+func (a *AcquisitionService) CreerSaisonHandler(w http.ResponseWriter, r *http.Request) {
 	db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
-	w.Header().Set("Access-Control-Allow-Origin", "*")
 	defer db.Close()
-	body, err := ioutil.ReadAll(r.Body)
+
 	if err != nil {
 		a.ErrorHandler(w, err)
 		return
 	}
 
-	var t Seasons
-	err = json.Unmarshal(body, &t)
+	body, _ := ioutil.ReadAll(r.Body)
+	defer r.Body.Close()
+
+	var s Seasons
+	err = json.Unmarshal(body, &s)
 	if err != nil {
 		a.ErrorHandler(w, err)
 		return
 	}
-	switch r.Method {
-	case "POST":
-		if db.NewRecord(t) {
-			db.Create(&t)
-			if db.NewRecord(t) {
-				msg := map[string]string{"error": "Une erreur est survenue lors de la création de la saison. Veuillez réessayer!"}
-				Message(w, msg, http.StatusInternalServerError)
-			} else {
-				Message(w, t, http.StatusCreated)
-			}
 
-		} else {
-			msg := map[string]string{"error": "Une erreur est survenue lors de la création de la saison. Veuillez réessayer!"}
-			Message(w, msg, http.StatusInternalServerError)
-		}
-	case "OPTIONS":
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.WriteHeader(http.StatusOK)
+	var dbSaison Seasons
+	db.Model(&dbSaison).Where("Years = ?", s.Years).First(&dbSaison)
+
+	if dbSaison.ID == 0 {
+		db.Create(&s)
+		Message(w, s, http.StatusCreated)
+	} else {
+		msg := map[string]string{"error": "La saison entrée existe déjà !"}
+		Message(w, msg, http.StatusBadRequest)
 	}
-
 }
 
-func (a *AcquisitionService) GetSeasons(w http.ResponseWriter, r *http.Request) {
+// GetSeasonsHandler Gère la récupération de toutes les saisons
+func (a *AcquisitionService) GetSeasonsHandler(w http.ResponseWriter, r *http.Request) {
 	db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
-	w.Header().Set("Access-Control-Allow-Origin", "*")
 	defer db.Close()
 	if err != nil {
 		a.ErrorHandler(w, err)
