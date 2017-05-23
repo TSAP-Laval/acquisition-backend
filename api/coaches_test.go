@@ -158,15 +158,13 @@ func TestGetCoachsErrBD(t *testing.T) {
 func TestGetCoachs(t *testing.T) {
 	reader = strings.NewReader("")
 	request, err := http.NewRequest("GET", baseURL+"/api/coaches", reader)
-	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
+		return
 	}
 
-	if res.StatusCode != 200 {
-		t.Errorf("Get coachs success: %d", res.StatusCode)
-	}
+	GetRequestHandler(request, t)
 }
 
 // TestUpdateCoachErrBD test l'ajout d'un entraineur dans une équipe
@@ -186,23 +184,13 @@ func TestUpdateCoachErrBD(t *testing.T) {
 func TestUpdateCoach(t *testing.T) {
 	reader = strings.NewReader("")
 	request, err := http.NewRequest("PUT", baseURL+"/api/coaches/"+rmID+"/equipes/1", reader)
-	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
+		return
 	}
 
-	if res.StatusCode != 200 {
-		bodyBuffer, _ := ioutil.ReadAll(res.Body)
-		var me MessageError
-		err = json.Unmarshal(bodyBuffer, &me)
-		if err != nil {
-			t.Error(err)
-			return
-		}
-		t.Error("Error expected : ", me.Err)
-		t.Errorf("Success expected: %d", res.StatusCode)
-	}
+	GetRequestHandler(request, t)
 }
 
 // TestUpdateCoachDeja test l'ajout d'un entraineur dans une équipe dont il fait déjà partie

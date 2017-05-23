@@ -66,16 +66,12 @@ func TestGetVideoErrBD(t *testing.T) {
 func TestGetVideo(t *testing.T) {
 	reader = strings.NewReader("")
 	request, err := http.NewRequest("GET", baseURL+"/api/parties/"+gameID[0]+"/videos/1", reader)
-	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	if res.StatusCode != 200 {
-		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
-	}
-
+	GetRequestHandler(request, t)
 }
 
 // TestGetVideoInexistante test la récupération d'une vidéo inexistante dans la base de données

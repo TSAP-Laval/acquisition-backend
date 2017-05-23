@@ -56,7 +56,6 @@ func TestBD(t *testing.T) {
 // TestSeedErr test le remplissage de la base de donnée avec des informations bidons
 // et erreur de connexion à la base de données
 func TestSeedErr(t *testing.T) {
-	acqConf.ConnectionString = "host=localhost user=aaaaa dbname=tsap_acquisition sslmode=disable password="
 	reader = strings.NewReader("")
 	request, err := http.NewRequest("POST", baseURL+"/api/seed", reader)
 
@@ -64,27 +63,20 @@ func TestSeedErr(t *testing.T) {
 		t.Error(err)
 	}
 
-	me := BadRequestHandler(request, t)
-
-	if !strings.Contains(me.Err, "pq: role \"aaaaa\" does not exist") {
-		t.Error("Error expected : ", me.Err)
-	}
+	BDErrorHandler(request, t)
 }
 
 // TestSeed test le remplissage de la base de donnée avec des informations bidons
 func TestSeed(t *testing.T) {
-	acqConf.ConnectionString = "host=localhost user=postgres dbname=tsap_acquisition sslmode=disable password="
 	reader = strings.NewReader("")
 	request, err := http.NewRequest("POST", baseURL+"/api/seed", reader)
-	res, err := http.DefaultClient.Do(request)
 
 	if err != nil {
 		t.Error(err)
+		return
 	}
 
-	if res.StatusCode != 200 {
-		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
-	}
+	PostRequestHandler(request, t)
 }
 
 // TestGetTokenErr test la récupération d'un token avec des informations au mauvais format
@@ -315,6 +307,7 @@ func TestGetTokenOptions(t *testing.T) {
 		}`,
 	)
 	request, err := http.NewRequest("OPTIONS", baseURL+"/api/auth", reader)
+	// Je n'utiliserai pas la fonction GetRequestHandler, car la requête doit être non sécurisée
 	res, err := http.DefaultClient.Do(request)
 
 	if err != nil {
@@ -350,7 +343,6 @@ func TestGetAllActionsTypesErrTokenSignature(t *testing.T) {
 
 // TestCreerPartiePourActions test la création d'une partie.
 func TestCreerPartiePourActions(t *testing.T) {
-	acqConf.ConnectionString = "host=localhost user=postgres dbname=tsap_acquisition sslmode=disable password="
 	reader = strings.NewReader(
 		`{
 			"Date": "2016-06-25 06:02",
@@ -371,6 +363,7 @@ func TestCreerPartiePourActions(t *testing.T) {
 
 	// On garde en mémoire l'ID de la partie venant d'être créée
 	bodyBuffer, _ := ioutil.ReadAll(res.Body)
+	defer res.Body.Close()
 
 	var ga api.Games
 	err = json.Unmarshal(bodyBuffer, &ga)
@@ -440,15 +433,13 @@ func TestCreerActionErr(t *testing.T) {
 		}`)
 
 	request, err := http.NewRequest("POST", baseURL+"/api/actions", reader)
-	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
+		return
 	}
 
-	if res.StatusCode != 400 {
-		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
-	}
+	BadRequestHandler(request, t)
 }
 
 /// TestCreerAction test la création d'une nouvelle action
@@ -472,15 +463,13 @@ func TestCreerAction(t *testing.T) {
 		}`)
 
 	request, err := http.NewRequest("POST", baseURL+"/api/actions", reader)
-	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
+		return
 	}
 
-	if res.StatusCode != 201 {
-		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
-	}
+	PostRequestHandler(request, t)
 }
 
 /// TestCreerActionExiste test la création d'une action existante
@@ -533,15 +522,13 @@ func TestGetActionsErrBD(t *testing.T) {
 func TestGetActions(t *testing.T) {
 	reader = strings.NewReader("")
 	request, err := http.NewRequest("GET", baseURL+"/api/parties/"+rmID+"/actions", reader)
-	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
+		return
 	}
 
-	if res.StatusCode != 200 {
-		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
-	}
+	GetRequestHandler(request, t)
 }
 
 // TestGetActionsErrID test la récupération des actions d'une partie avec un

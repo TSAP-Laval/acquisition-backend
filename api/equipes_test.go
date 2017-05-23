@@ -167,15 +167,12 @@ func TestCreerEquipeMauvaiseInfo(t *testing.T) {
 		`)
 
 	request, err := http.NewRequest("POST", baseURL+"/api/equipes", reader)
-	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	if res.StatusCode != 400 {
-		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
-	}
+	BadRequestHandler(request, t)
 }
 
 // TestCreerEquipeVide test que créer une équipe sans
@@ -208,18 +205,12 @@ func TestCreerEquipeErrExiste(t *testing.T) {
 		}`)
 
 	request, err := http.NewRequest("POST", baseURL+"/api/equipes", reader)
-	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	if res.StatusCode != 401 {
-		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
-	}
-
-	var me MessageError
-	responseMapping(&me, res)
+	me := BadRequestHandler(request, t)
 
 	if !strings.Contains(me.Err, "Une équipe de même nom existe déjà") {
 		t.Errorf("Error expected: %s", me.Err)
@@ -442,15 +433,12 @@ func TestModifierEquipeMauvaiseInfo(t *testing.T) {
 
 	// rmID est utilisé ici pour permettre la modification de la partie créée plus haut
 	request, err := http.NewRequest("PUT", baseURL+"/api/equipes/"+rmID, reader)
-	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	if res.StatusCode != 400 {
-		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
-	}
+	BadRequestHandler(request, t)
 }
 
 // TestSupprimerEquipe test la suppression de l'équipe préalablement créée

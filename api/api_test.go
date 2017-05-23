@@ -93,6 +93,39 @@ func LogErrors(msg Messages) {
 	msg.Testing.Errorf(msg.Message, msg.Object)
 }
 
+// PostRequestHandler gère le retour des requêtes POST
+func PostRequestHandler(request *http.Request, t *testing.T) {
+	res, err := SecureRequest(request)
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	if res.StatusCode != 201 {
+		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
+		var me MessageError
+		responseMapping(&me, res)
+		t.Errorf("Error: %s", me.Err)
+	}
+}
+
+// BadRequestHandler gère le retour des requêtes GET
+func GetRequestHandler(request *http.Request, t *testing.T) {
+	res, err := SecureRequest(request)
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	if res.StatusCode != 200 {
+		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
+		var me MessageError
+		responseMapping(&me, res)
+		t.Errorf("Error: %s", me.Err)
+	}
+}
+
+// BadRequestHandler gère le retour des requêtes avec une erreur HTTP 400
 func BadRequestHandler(request *http.Request, t *testing.T) (me MessageError) {
 	res, err := SecureRequest(request)
 
@@ -115,6 +148,7 @@ func BadRequestHandler(request *http.Request, t *testing.T) (me MessageError) {
 	return me
 }
 
+// DeleteHandler gère le retour des requêtes DELETE
 func DeleteHandler(request *http.Request, t *testing.T) {
 	res, err := SecureRequest(request)
 
@@ -135,7 +169,15 @@ func BDErrorHandler(request *http.Request, t *testing.T) {
 	acqConf.ConnectionString = "host=localhost user=aaaaa dbname=tsap_acquisition sslmode=disable password="
 	defer goodConnectionString()
 
-	res, err := SecureRequest(request)
+	var res *http.Response
+	var err error
+	// Dans le cas où nous sommes en train de seeder la base de données, aucun token n'est
+	// créé et donc il vaut mieux faire une requête non sécurisée
+	if strings.Contains(request.URL.RequestURI(), "seed") {
+		res, err = http.DefaultClient.Do(request)
+	} else {
+		res, err = SecureRequest(request)
+	}
 
 	if err != nil {
 		t.Error(err)

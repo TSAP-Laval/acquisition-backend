@@ -165,30 +165,25 @@ func TestCreerActionsTypeErr(t *testing.T) {
 		}`)
 
 	request, err := http.NewRequest("POST", baseURL+"/api/actions/types", reader)
-	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	if res.StatusCode != 400 {
-		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
-	}
+	BadRequestHandler(request, t)
 }
 
 // TestGetActionsTypes test la récupération du type d'action venant d'être créé
 func TestGetActionsTypes(t *testing.T) {
 	reader = strings.NewReader("")
 	request, err := http.NewRequest("GET", baseURL+"/api/actions/types/"+rmID, reader)
-	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
+		return
 	}
 
-	if res.StatusCode != 200 {
-		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
-	}
+	GetRequestHandler(request, t)
 }
 
 // TestGetActionsTypesExistePas test la récupération du type d'action n'existant point

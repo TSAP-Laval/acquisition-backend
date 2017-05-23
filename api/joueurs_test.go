@@ -37,15 +37,12 @@ func TestGetJoueursErrBD(t *testing.T) {
 func TestGetJoueurs(t *testing.T) {
 	reader = strings.NewReader("")
 	request, err := http.NewRequest("GET", baseURL+"/api/joueurs", reader)
-	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	if res.StatusCode != 200 {
-		t.Errorf("Success expected: %d", res.StatusCode)
-	}
+	GetRequestHandler(request, t)
 }
 
 // TestCreerJoueur test la création d'un joueur
@@ -120,15 +117,12 @@ func TestModifJoueurErr(t *testing.T) {
 
 	// rmID est utilisé, ici pour permettre la modification du joueur tout juste créé
 	request, err := http.NewRequest("PUT", baseURL+"/api/joueurs/"+rmID, reader)
-	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	if res.StatusCode != 400 {
-		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
-	}
+	BadRequestHandler(request, t)
 }
 
 // TestModifJoueur test la modification d'un joueur
@@ -180,15 +174,12 @@ func TestJoueurOptions(t *testing.T) {
 
 	// rmID est utilisé, ici pour permettre la modification du joueur tout juste créé
 	request, err := http.NewRequest("OPTIONS", baseURL+"/api/joueurs/"+rmID, reader)
-	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	if res.StatusCode != 200 {
-		t.Errorf("Success expected: %d", res.StatusCode)
-	}
+	GetRequestHandler(request, t)
 }
 
 // TestJoueurOptionsAgain test une requête OPTIONS pour un joueur
@@ -196,13 +187,10 @@ func TestJoueurOptionsAgain(t *testing.T) {
 	reader = strings.NewReader("")
 
 	request, err := http.NewRequest("OPTIONS", baseURL+"/api/joueurs", reader)
-	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	if res.StatusCode != 200 {
-		t.Errorf("Success expected: %d", res.StatusCode)
-	}
+	GetRequestHandler(request, t)
 }

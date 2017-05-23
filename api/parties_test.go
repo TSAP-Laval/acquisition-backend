@@ -183,15 +183,12 @@ func TestCreerPartieMauvaiseInfo(t *testing.T) {
 		}`)
 
 	request, err := http.NewRequest("POST", baseURL+"/api/parties", reader)
-	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	if res.StatusCode != 400 {
-		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
-	}
+	BadRequestHandler(request, t)
 }
 
 // TestCreerPartieVide test que créer une partie sans
@@ -225,15 +222,12 @@ func TestCreerPartieErr(t *testing.T) {
 	}`)
 
 	request, err := http.NewRequest("POST", baseURL+"/api/parties", reader)
-	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	if res.StatusCode != 400 {
-		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
-	}
+	BadRequestHandler(request, t)
 }
 
 // TestCreerPartieErrExiste test que de créer une partie qui
@@ -280,23 +274,12 @@ func TestGetPartieErrBD(t *testing.T) {
 func TestGetPartie(t *testing.T) {
 	reader = strings.NewReader("")
 	request, err := http.NewRequest("GET", baseURL+"/api/parties/"+rmID, reader)
-	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	bodyBuffer, _ := ioutil.ReadAll(res.Body)
-
-	var ga api.Games
-	err = json.Unmarshal(bodyBuffer, &ga)
-	if err != nil {
-		t.Error(err)
-	}
-
-	if res.StatusCode != 200 {
-		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
-	}
+	GetRequestHandler(request, t)
 }
 
 // TestModifierPartieErrBD test la modification de la partie créée plus haut
@@ -339,15 +322,12 @@ func TestModifierPartieErrKeyGeodecoder(t *testing.T) {
 
 	// rmID est utilisé ici pour permettre la modification de la partie créée plus haut
 	request, err := http.NewRequest("PUT", baseURL+"/api/parties/"+rmID, reader)
-	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	if res.StatusCode != 400 {
-		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
-	}
+	BadRequestHandler(request, t)
 }
 
 // TestModifierPartieErrKeyWeather test la modification de la partie créée plus haut
@@ -368,15 +348,12 @@ func TestModifierPartieErrKeyWeather(t *testing.T) {
 
 	// rmID est utilisé ici pour permettre la modification de la partie créée plus haut
 	request, err := http.NewRequest("PUT", baseURL+"/api/parties/"+rmID, reader)
-	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	if res.StatusCode != 400 {
-		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
-	}
+	BadRequestHandler(request, t)
 }
 
 // TestModifierPartieErrDate test la modification de la partie créée plus haut
@@ -396,15 +373,12 @@ func TestModifierPartieErrDate(t *testing.T) {
 
 	// rmID est utilisé ici pour permettre la modification de la partie créée plus haut
 	request, err := http.NewRequest("PUT", baseURL+"/api/parties/"+rmID, reader)
-	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	if res.StatusCode != 400 {
-		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
-	}
+	BadRequestHandler(request, t)
 }
 
 // TestModifierPartie test la modification de la partie créée plus haut
@@ -509,15 +483,12 @@ func TestModifierPartieMauvaiseInfo(t *testing.T) {
 
 	// rmID est utilisé ici pour permettre la modification de la partie créée plus haut
 	request, err := http.NewRequest("PUT", baseURL+"/api/parties/"+rmID, reader)
-	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	if res.StatusCode != 400 {
-		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
-	}
+	BadRequestHandler(request, t)
 }
 
 // TestModifierPartieErr test que la modification avec une
@@ -529,15 +500,12 @@ func TestModifierPartieErr(t *testing.T) {
 
 	// rmID est utilisé ici pour permettre la modification de la partie créée plus haut
 	request, err := http.NewRequest("PUT", baseURL+"/api/parties/"+rmID, reader)
-	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	if res.StatusCode != 400 {
-		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
-	}
+	BadRequestHandler(request, t)
 }
 
 // TestModifierPartieCreer test que la modification crée
@@ -548,15 +516,12 @@ func TestModifierPartieCreer(t *testing.T) {
 
 	// rmID est utilisé ici pour permettre la modification de la partie créée plus haut
 	request, err := http.NewRequest("PUT", baseURL+"/api/parties/0", reader)
-	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	if res.StatusCode != 201 {
-		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
-	}
+	PostRequestHandler(request, t)
 }
 
 // TestSupprimerPartieErrBD test la suppression de la partie préalablement créée
@@ -656,13 +621,10 @@ func TestGetPartiesMulti(t *testing.T) {
 func TestSendOptionsParies(t *testing.T) {
 	reader = strings.NewReader("")
 	request, err := http.NewRequest("OPTIONS", baseURL+"/api/upload/0", reader)
-	res, err := http.DefaultClient.Do(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	if res.StatusCode != 200 {
-		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
-	}
+	GetRequestHandler(request, t)
 }

@@ -158,7 +158,7 @@ func (a *AcquisitionService) CreerTerrainHandler(w http.ResponseWriter, r *http.
 
 			if len(locations) > 0 {
 				msg := map[string]string{"error": "Un terrain de même nom existe déjà. Veuillez choisir un autre nom."}
-				Message(w, msg, http.StatusUnauthorized)
+				Message(w, msg, http.StatusBadRequest)
 			} else {
 				db.Create(&l)
 				Message(w, l, http.StatusCreated)

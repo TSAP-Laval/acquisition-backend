@@ -174,7 +174,7 @@ func (a *AcquisitionService) CreerEquipeHandler(w http.ResponseWriter, r *http.R
 
 			if len(team) > 0 {
 				msg := map[string]string{"error": "Une équipe de même nom existe déjà. Veuillez choisir une autre nom."}
-				Message(w, msg, http.StatusUnauthorized)
+				Message(w, msg, http.StatusBadRequest)
 			} else {
 				db.Create(&t)
 				db.Model(&t).Related(&t.Season, "SeasonID")

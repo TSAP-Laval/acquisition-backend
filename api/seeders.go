@@ -203,4 +203,6 @@ func (a *AcquisitionService) RemplirBD(w http.ResponseWriter, r *http.Request) {
 
 	Uneaction := Actions{ActionTypeID: 1, ZoneID: 1, GameID: 1, X1: 0, Y1: 0, X2: 0, Y2: 0, X3: 0, Y3: 0, Time: 10, HomeScore: 0, GuestScore: 0, PlayerID: 1}
 	db.Create(&Uneaction)
+
+	Message(w, "", http.StatusCreated)
 }

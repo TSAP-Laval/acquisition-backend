@@ -4,7 +4,7 @@
 // Fichier     : saisons_test.go
 // Développeur : Laurent Leclerc Poulin
 //
-// Permet de tester les interractions sur un sport.
+// Permet de tester les interractions sur une saison.
 //
 
 package api_test
@@ -85,15 +85,12 @@ func TestCreerSaisonErr(t *testing.T) {
 			"Years "2015-2016"
 		}`)
 	request, err := http.NewRequest("POST", baseURL+"/api/saisons", reader)
-	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	if res.StatusCode != 400 {
-		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
-	}
+	BadRequestHandler(request, t)
 }
 
 // TestCreerSaison test la création d'une saison

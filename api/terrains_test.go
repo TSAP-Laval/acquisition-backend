@@ -181,18 +181,12 @@ func TestCreerTerrainErrExiste(t *testing.T) {
 		}`)
 
 	request, err := http.NewRequest("POST", baseURL+"/api/terrains", reader)
-	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	if res.StatusCode != 401 {
-		t.Errorf("Response code expected: %d", res.StatusCode)
-	}
-
-	var me MessageError
-	responseMapping(&me, res)
+	me := BadRequestHandler(request, t)
 
 	if !strings.Contains(me.Err, "Un terrain de même nom existe déjà.") {
 		t.Errorf("Error expected: %s", me.Err)
@@ -226,15 +220,12 @@ func TestCreerTerrainMauvaiseInfo(t *testing.T) {
 		}`)
 
 	request, err := http.NewRequest("POST", baseURL+"/api/terrains", reader)
-	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	if res.StatusCode != 400 {
-		t.Errorf("Response code expected: %d", res.StatusCode)
-	}
+	BadRequestHandler(request, t)
 }
 
 // TestGetTerrain test la récupération du terrain préalablement créé
@@ -403,16 +394,12 @@ func TestModifierTerrainVide(t *testing.T) {
 
 	// rmID est utilisé ici pour permettre la modification de le terrain créée plus haut
 	request, err := http.NewRequest("PUT", baseURL+"/api/terrains/"+rmID, reader)
-	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	if res.StatusCode != 400 {
-		t.Errorf("Response code expected: %d", res.StatusCode)
-	}
-
+	BadRequestHandler(request, t)
 }
 
 // TestModifierTerrainMauvaiseInfo test que la modification d'un terrain avec de mauvaises
@@ -425,16 +412,12 @@ func TestModifierTerrainMauvaiseInfo(t *testing.T) {
 
 	// rmID est utilisé ici pour permettre la modification de le terrain créée plus haut
 	request, err := http.NewRequest("PUT", baseURL+"/api/terrains/"+rmID, reader)
-	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	if res.StatusCode != 400 {
-		t.Errorf("Response code expected: %d", res.StatusCode)
-	}
-
+	BadRequestHandler(request, t)
 }
 
 // TestSupprimerTerrainErrBD test la suppression du terrain préalablement créé
