@@ -45,11 +45,7 @@ func (a *AcquisitionService) GetEquipeHandler(w http.ResponseWriter, r *http.Req
 		}
 
 		Message(w, teams, http.StatusOK)
-	case "OPTIONS":
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.WriteHeader(http.StatusOK)
 	}
-
 }
 
 // EquipesHandler gère la modification et la suppression des équipes
@@ -124,7 +120,6 @@ func (a *AcquisitionService) EquipesHandler(w http.ResponseWriter, r *http.Reque
 
 // GetEquipesHandler gère la récupération de toutes les équipes de la base de donnée
 func (a *AcquisitionService) GetEquipesHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")
 	db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
 	defer db.Close()
 
@@ -147,8 +142,6 @@ func (a *AcquisitionService) GetEquipesHandler(w http.ResponseWriter, r *http.Re
 
 // CreerEquipeHandler gère la création d'une équipe dans la base de donnée
 func (a *AcquisitionService) CreerEquipeHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-
 	body, _ := ioutil.ReadAll(r.Body)
 	if len(body) > 0 {
 		db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
@@ -181,7 +174,7 @@ func (a *AcquisitionService) CreerEquipeHandler(w http.ResponseWriter, r *http.R
 
 			if len(team) > 0 {
 				msg := map[string]string{"error": "Une équipe de même nom existe déjà. Veuillez choisir une autre nom."}
-				Message(w, msg, http.StatusUnauthorized)
+				Message(w, msg, http.StatusBadRequest)
 			} else {
 				db.Create(&t)
 				db.Model(&t).Related(&t.Season, "SeasonID")

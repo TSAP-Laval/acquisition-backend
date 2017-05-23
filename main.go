@@ -8,7 +8,7 @@ import (
 	"github.com/TSAP-Laval/acquisition-backend/api"
 	"github.com/kelseyhightower/envconfig"
 
-	//Mehdi Fix
+	// Nécessaire pour GORM (Mehdi)
 	_ "github.com/lib/pq"
 )
 

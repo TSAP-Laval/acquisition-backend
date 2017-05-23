@@ -272,7 +272,7 @@ CREATE TABLE "actions" (
   "y2" FLOAT NOT NULL,
   "x3" FLOAT NOT NULL,
   "y3" FLOAT NOT NULL,
-  "time" TIMESTAMP NOT NULL,
+  "time" FLOAT NOT NULL,
   "home_score" INT NOT NULL DEFAULT 0,
   "guest_score" INT NOT NULL DEFAULT 0,
   CONSTRAINT "fk_action_position"

@@ -23,36 +23,18 @@ import (
 // TestGetTerrains permet de récupérer les terrains
 // avec erreur de connexion à la base de données
 func TestGetTerrainsErrBD(t *testing.T) {
-	acqConf.ConnectionString = "host=localhost user=aaaaa dbname=tsap_acquisition sslmode=disable password="
 	reader = strings.NewReader("")
 	request, err := http.NewRequest("GET", baseURL+"/api/terrains", reader)
-	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	bodyBuffer, _ := ioutil.ReadAll(res.Body)
-
-	var me MessageError
-	err = json.Unmarshal(bodyBuffer, &me)
-	if err != nil {
-		t.Error(err)
-		return
-	}
-
-	if res.StatusCode != 400 {
-		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
-	}
-
-	if !strings.Contains(me.Err, "pq: role \"aaaaa\" does not exist") {
-		t.Error("Error expected : ", me.Err)
-	}
+	BDErrorHandler(request, t)
 }
 
 // TestGetTerrains permet de récupérer les terrains
 func TestGetTerrains(t *testing.T) {
-	acqConf.ConnectionString = "host=localhost user=postgres dbname=tsap_acquisition sslmode=disable password="
 	reader = strings.NewReader("")
 	request, err := http.NewRequest("GET", baseURL+"/api/terrains", reader)
 	res, err := SecureRequest(request)
@@ -62,6 +44,7 @@ func TestGetTerrains(t *testing.T) {
 	}
 
 	bodyBuffer, _ := ioutil.ReadAll(res.Body)
+	defer res.Body.Close()
 
 	var lo []api.Locations
 	err = json.Unmarshal(bodyBuffer, &lo)
@@ -82,42 +65,23 @@ func TestGetTerrains(t *testing.T) {
 // TestCreerTerrainErrBD test la création d'un terrain
 // avec erreur de connexion à la base de données
 func TestCreerTerrainErrBD(t *testing.T) {
-	acqConf.ConnectionString = "host=localhost user=aaaaa dbname=tsap_acquisition sslmode=disable password="
 	reader = strings.NewReader(
 		`{
 			"Name": "LE terrain", 
 			"City": "Quebec", 
 			"Address": "1231 une rue"
 		}`)
-
 	request, err := http.NewRequest("POST", baseURL+"/api/terrains", reader)
-	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	bodyBuffer, _ := ioutil.ReadAll(res.Body)
-
-	var me MessageError
-	err = json.Unmarshal(bodyBuffer, &me)
-	if err != nil {
-		t.Error(err)
-		return
-	}
-
-	if res.StatusCode != 400 {
-		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
-	}
-
-	if !strings.Contains(me.Err, "pq: role \"aaaaa\" does not exist") {
-		t.Error("Error expected : ", me.Err)
-	}
+	BDErrorHandler(request, t)
 }
 
 // TestCreerTerrain test la création d'un terrain
 func TestCreerTerrain(t *testing.T) {
-	acqConf.ConnectionString = "host=localhost user=postgres dbname=tsap_acquisition sslmode=disable password="
 	reader = strings.NewReader(
 		`{
 			"Name": "LE terrain", 
@@ -133,6 +97,7 @@ func TestCreerTerrain(t *testing.T) {
 	}
 
 	bodyBuffer, _ := ioutil.ReadAll(res.Body)
+	defer res.Body.Close()
 
 	var l api.Locations
 	err = json.Unmarshal(bodyBuffer, &l)
@@ -172,18 +137,12 @@ func TestCreerTerrainErrEmpty(t *testing.T) {
 		}`)
 
 	request, err := http.NewRequest("POST", baseURL+"/api/terrains", reader)
-	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	if res.StatusCode != 400 {
-		t.Errorf("Response code expected: %d", res.StatusCode)
-	}
-
-	var me MessageError
-	responseMapping(&me, res)
+	me := BadRequestHandler(request, t)
 
 	if !strings.Contains(me.Err, "Veuillez remplir tous les champs.") {
 		t.Errorf("Error expected: %s", me.Err)
@@ -199,18 +158,12 @@ func TestCreerTerrainErrMauvaiseInfos(t *testing.T) {
 		}`)
 
 	request, err := http.NewRequest("POST", baseURL+"/api/terrains", reader)
-	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	if res.StatusCode != 400 {
-		t.Errorf("Response code expected: %d", res.StatusCode)
-	}
-
-	var me MessageError
-	responseMapping(&me, res)
+	me := BadRequestHandler(request, t)
 
 	if !strings.Contains(me.Err, "Veuillez remplir tous les champs.") {
 		t.Errorf("Error expected: %s", me.Err)
@@ -228,18 +181,12 @@ func TestCreerTerrainErrExiste(t *testing.T) {
 		}`)
 
 	request, err := http.NewRequest("POST", baseURL+"/api/terrains", reader)
-	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	if res.StatusCode != 401 {
-		t.Errorf("Response code expected: %d", res.StatusCode)
-	}
-
-	var me MessageError
-	responseMapping(&me, res)
+	me := BadRequestHandler(request, t)
 
 	if !strings.Contains(me.Err, "Un terrain de même nom existe déjà.") {
 		t.Errorf("Error expected: %s", me.Err)
@@ -251,18 +198,12 @@ func TestCreerTerrainErrExiste(t *testing.T) {
 func TestCreerTerrainVide(t *testing.T) {
 	reader = strings.NewReader("")
 	request, err := http.NewRequest("POST", baseURL+"/api/terrains", reader)
-	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	if res.StatusCode != 400 {
-		t.Errorf("Response code expected: %d", res.StatusCode)
-	}
-
-	var me MessageError
-	responseMapping(&me, res)
+	me := BadRequestHandler(request, t)
 
 	if !strings.Contains(me.Err, "Veuillez remplir tous les champs.") {
 		t.Errorf("Error expected: %s", me.Err)
@@ -279,50 +220,29 @@ func TestCreerTerrainMauvaiseInfo(t *testing.T) {
 		}`)
 
 	request, err := http.NewRequest("POST", baseURL+"/api/terrains", reader)
-	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	if res.StatusCode != 400 {
-		t.Errorf("Response code expected: %d", res.StatusCode)
-	}
+	BadRequestHandler(request, t)
 }
 
 // TestGetTerrain test la récupération du terrain préalablement créé
 // avec erreur de connexion à la base de données
 func TestGetTerrainErrBD(t *testing.T) {
-	acqConf.ConnectionString = "host=localhost user=aaaaa dbname=tsap_acquisition sslmode=disable password="
 	reader = strings.NewReader("")
 	request, err := http.NewRequest("GET", baseURL+"/api/terrains/LE", reader)
-	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	bodyBuffer, _ := ioutil.ReadAll(res.Body)
-
-	var me MessageError
-	err = json.Unmarshal(bodyBuffer, &me)
-	if err != nil {
-		t.Error(err)
-		return
-	}
-
-	if res.StatusCode != 400 {
-		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
-	}
-
-	if !strings.Contains(me.Err, "pq: role \"aaaaa\" does not exist") {
-		t.Error("Error expected : ", me.Err)
-	}
+	BDErrorHandler(request, t)
 }
 
 // TestGetTerrain test la récupération du terrain préalablement créé
 func TestGetTerrain(t *testing.T) {
-	acqConf.ConnectionString = "host=localhost user=postgres dbname=tsap_acquisition sslmode=disable password="
 	reader = strings.NewReader("")
 	request, err := http.NewRequest("GET", baseURL+"/api/terrains/LE", reader)
 	res, err := SecureRequest(request)
@@ -332,6 +252,7 @@ func TestGetTerrain(t *testing.T) {
 	}
 
 	bodyBuffer, _ := ioutil.ReadAll(res.Body)
+	defer res.Body.Close()
 
 	var l []api.Locations
 	err = json.Unmarshal(bodyBuffer, &l)
@@ -363,43 +284,24 @@ func TestGetTerrain(t *testing.T) {
 // TestModifierTerrainErrBD test la modification du terrain préalablement créé
 // avec erreur de connexion à la base de données
 func TestModifierTerrainErrBD(t *testing.T) {
-	acqConf.ConnectionString = "host=localhost user=aaaaa dbname=tsap_acquisition sslmode=disable password="
 	reader = strings.NewReader(
 		`{
 			"Name": "LE terrain", 
 			"City": "Montreal", 
 			"Address": ""
 		}`)
-
 	// rmID est utilisé ici pour permettre la modification de le terrain créée plus haut
 	request, err := http.NewRequest("PUT", baseURL+"/api/terrains/"+rmID, reader)
-	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	bodyBuffer, _ := ioutil.ReadAll(res.Body)
-
-	var me MessageError
-	err = json.Unmarshal(bodyBuffer, &me)
-	if err != nil {
-		t.Error(err)
-		return
-	}
-
-	if res.StatusCode != 400 {
-		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
-	}
-
-	if !strings.Contains(me.Err, "pq: role \"aaaaa\" does not exist") {
-		t.Error("Error expected : ", me.Err)
-	}
+	BDErrorHandler(request, t)
 }
 
 // TestModifierTerrain test la modification du terrain préalablement créé
 func TestModifierTerrain(t *testing.T) {
-	acqConf.ConnectionString = "host=localhost user=postgres dbname=tsap_acquisition sslmode=disable password="
 	reader = strings.NewReader(
 		`{
 			"Name": "LE terrain", 
@@ -416,6 +318,7 @@ func TestModifierTerrain(t *testing.T) {
 	}
 
 	bodyBuffer, _ := ioutil.ReadAll(res.Body)
+	defer res.Body.Close()
 
 	var l api.Locations
 	err = json.Unmarshal(bodyBuffer, &l)
@@ -459,6 +362,7 @@ func TestModifierTerrainAutresInfos(t *testing.T) {
 	}
 
 	bodyBuffer, _ := ioutil.ReadAll(res.Body)
+	defer res.Body.Close()
 
 	var l api.Locations
 	err = json.Unmarshal(bodyBuffer, &l)
@@ -490,16 +394,12 @@ func TestModifierTerrainVide(t *testing.T) {
 
 	// rmID est utilisé ici pour permettre la modification de le terrain créée plus haut
 	request, err := http.NewRequest("PUT", baseURL+"/api/terrains/"+rmID, reader)
-	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	if res.StatusCode != 400 {
-		t.Errorf("Response code expected: %d", res.StatusCode)
-	}
-
+	BadRequestHandler(request, t)
 }
 
 // TestModifierTerrainMauvaiseInfo test que la modification d'un terrain avec de mauvaises
@@ -512,65 +412,38 @@ func TestModifierTerrainMauvaiseInfo(t *testing.T) {
 
 	// rmID est utilisé ici pour permettre la modification de le terrain créée plus haut
 	request, err := http.NewRequest("PUT", baseURL+"/api/terrains/"+rmID, reader)
-	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	if res.StatusCode != 400 {
-		t.Errorf("Response code expected: %d", res.StatusCode)
-	}
-
+	BadRequestHandler(request, t)
 }
 
 // TestSupprimerTerrainErrBD test la suppression du terrain préalablement créé
 // avec erreur de connexion à la base de données
 func TestSupprimerTerrainErrBD(t *testing.T) {
-	acqConf.ConnectionString = "host=localhost user=aaaaa dbname=tsap_acquisition sslmode=disable password="
 	reader = strings.NewReader("")
 	request, err := http.NewRequest("DELETE", baseURL+"/api/terrains/"+rmID, reader)
-	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	bodyBuffer, _ := ioutil.ReadAll(res.Body)
+	BDErrorHandler(request, t)
+}
 
-	var me MessageError
-	err = json.Unmarshal(bodyBuffer, &me)
+// TestSupprimerTerrain test la suppression du terrain préalablement créé
+func TestSupprimerTerrain(t *testing.T) {
+	reader = strings.NewReader("")
+	request, err := http.NewRequest("DELETE", baseURL+"/api/terrains/"+rmID, reader)
+
 	if err != nil {
 		t.Error(err)
 		return
 	}
 
-	if res.StatusCode != 400 {
-		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
-	}
-
-	if !strings.Contains(me.Err, "pq: role \"aaaaa\" does not exist") {
-		t.Error("Error expected : ", me.Err)
-	}
-}
-
-// TestSupprimerTerrain test la suppression du terrain préalablement créé
-func TestSupprimerTerrain(t *testing.T) {
-	acqConf.ConnectionString = "host=localhost user=postgres dbname=tsap_acquisition sslmode=disable password="
-	reader = strings.NewReader("")
-	request, err := http.NewRequest("DELETE", baseURL+"/api/terrains/"+rmID, reader)
-	res, err := SecureRequest(request)
-
-	if err != nil {
-		t.Error(err)
-	}
-
-	if res.StatusCode != 204 {
-		t.Errorf("Response code expected: %d", res.StatusCode)
-		var me MessageError
-		responseMapping(&me, res)
-		t.Error("Error expected: ", me.Err)
-	}
+	DeleteHandler(request, t)
 }
 
 // TestGetTerrainErr test que le terrain a bel et bien été supprimé
@@ -588,6 +461,7 @@ func TestGetTerrainErr(t *testing.T) {
 	}
 
 	bodyBuffer, _ := ioutil.ReadAll(res.Body)
+	defer res.Body.Close()
 
 	var lo []api.Locations
 	err = json.Unmarshal(bodyBuffer, &lo)

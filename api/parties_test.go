@@ -22,36 +22,18 @@ import (
 // TestGetPartiesErrBD test la récupération de toutes les parties
 // avec erreur de connexion à la base de données
 func TestGetPartiesErrBD(t *testing.T) {
-	acqConf.ConnectionString = "host=localhost user=aaaaa dbname=tsap_acquisition sslmode=disable password="
 	reader = strings.NewReader("")
 	request, err := http.NewRequest("GET", baseURL+"/api/parties", reader)
-	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	bodyBuffer, _ := ioutil.ReadAll(res.Body)
-
-	var me MessageError
-	err = json.Unmarshal(bodyBuffer, &me)
-	if err != nil {
-		t.Error(err)
-		return
-	}
-
-	if res.StatusCode != 400 {
-		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
-	}
-
-	if !strings.Contains(me.Err, "pq: role \"aaaaa\" does not exist") {
-		t.Error("Error expected : ", me.Err)
-	}
+	BDErrorHandler(request, t)
 }
 
 // TestGetParties test la récupération de toutes les parties
 func TestGetParties(t *testing.T) {
-	acqConf.ConnectionString = "host=localhost user=postgres dbname=tsap_acquisition sslmode=disable password="
 	reader = strings.NewReader("")
 	request, err := http.NewRequest("GET", baseURL+"/api/parties", reader)
 	res, err := SecureRequest(request)
@@ -81,7 +63,6 @@ func TestGetParties(t *testing.T) {
 // TestCreerPartieErrBD test la création d'une partie.
 // avec erreur de connexion à la base de données
 func TestCreerPartieErrBD(t *testing.T) {
-	acqConf.ConnectionString = "host=localhost user=aaaaa dbname=tsap_acquisition sslmode=disable password="
 	reader = strings.NewReader(
 		`{
 			"Date": "2016-06-21 06:02",
@@ -92,37 +73,19 @@ func TestCreerPartieErrBD(t *testing.T) {
             "Status": "Local",
             "TeamID": 1
 		}`)
-
 	request, err := http.NewRequest("POST", baseURL+"/api/parties", reader)
-	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	bodyBuffer, _ := ioutil.ReadAll(res.Body)
-
-	var me MessageError
-	err = json.Unmarshal(bodyBuffer, &me)
-	if err != nil {
-		t.Error(err)
-		return
-	}
-
-	if res.StatusCode != 400 {
-		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
-	}
-
-	if !strings.Contains(me.Err, "pq: role \"aaaaa\" does not exist") {
-		t.Error("Error expected : ", me.Err)
-	}
+	BDErrorHandler(request, t)
 }
 
 // TestCreerPartie test la création d'une partie.
 // Cette partie sera utilisée pour le reste des opérations
 // (modification, suppression)
 func TestCreerPartie(t *testing.T) {
-	acqConf.ConnectionString = "host=localhost user=postgres dbname=tsap_acquisition sslmode=disable password="
 	reader = strings.NewReader(
 		`{
 			"Date": "2016-06-21 06:02",
@@ -133,7 +96,6 @@ func TestCreerPartie(t *testing.T) {
             "Status": "Local",
             "TeamID": 1
 		}`)
-
 	request, err := http.NewRequest("POST", baseURL+"/api/parties", reader)
 	res, err := SecureRequest(request)
 
@@ -200,18 +162,12 @@ func TestCreerPartieErrEmpty(t *testing.T) {
 		}`)
 
 	request, err := http.NewRequest("POST", baseURL+"/api/parties", reader)
-	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	if res.StatusCode != 400 {
-		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
-	}
-
-	var me MessageError
-	responseMapping(&me, res)
+	me := BadRequestHandler(request, t)
 
 	if !strings.Contains(me.Err, "Veuillez remplir tous les champs!") {
 		t.Errorf("Error expected: %s", me.Err)
@@ -227,15 +183,12 @@ func TestCreerPartieMauvaiseInfo(t *testing.T) {
 		}`)
 
 	request, err := http.NewRequest("POST", baseURL+"/api/parties", reader)
-	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	if res.StatusCode != 400 {
-		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
-	}
+	BadRequestHandler(request, t)
 }
 
 // TestCreerPartieVide test que créer une partie sans
@@ -269,15 +222,12 @@ func TestCreerPartieErr(t *testing.T) {
 	}`)
 
 	request, err := http.NewRequest("POST", baseURL+"/api/parties", reader)
-	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	if res.StatusCode != 400 {
-		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
-	}
+	BadRequestHandler(request, t)
 }
 
 // TestCreerPartieErrExiste test que de créer une partie qui
@@ -295,18 +245,12 @@ func TestCreerPartieErrExiste(t *testing.T) {
 		}`)
 
 	request, err := http.NewRequest("POST", baseURL+"/api/parties", reader)
-	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	if res.StatusCode != 400 {
-		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
-	}
-
-	var me MessageError
-	responseMapping(&me, res)
+	me := BadRequestHandler(request, t)
 
 	if !strings.Contains(me.Err, "Une partie de même date avec les mêmes equipes existe déjà!") {
 		t.Errorf("Error expected: %s", me.Err)
@@ -316,61 +260,31 @@ func TestCreerPartieErrExiste(t *testing.T) {
 // TestGetPartieErrBD test la récupération de la partie créée
 // avec erreur de connexion à la base de données
 func TestGetPartieErrBD(t *testing.T) {
-	acqConf.ConnectionString = "host=localhost user=aaaaa dbname=tsap_acquisition sslmode=disable password="
 	reader = strings.NewReader("")
 	request, err := http.NewRequest("GET", baseURL+"/api/parties/"+rmID, reader)
-	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	bodyBuffer, _ := ioutil.ReadAll(res.Body)
-
-	var me MessageError
-	err = json.Unmarshal(bodyBuffer, &me)
-	if err != nil {
-		t.Error(err)
-		return
-	}
-
-	if res.StatusCode != 400 {
-		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
-	}
-
-	if !strings.Contains(me.Err, "pq: role \"aaaaa\" does not exist") {
-		t.Error("Error expected : ", me.Err)
-	}
+	BDErrorHandler(request, t)
 }
 
 // TestGetPartie test la récupération de la partie créée
 func TestGetPartie(t *testing.T) {
-	acqConf.ConnectionString = "host=localhost user=postgres dbname=tsap_acquisition sslmode=disable password="
 	reader = strings.NewReader("")
 	request, err := http.NewRequest("GET", baseURL+"/api/parties/"+rmID, reader)
-	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	bodyBuffer, _ := ioutil.ReadAll(res.Body)
-
-	var ga api.Games
-	err = json.Unmarshal(bodyBuffer, &ga)
-	if err != nil {
-		t.Error(err)
-	}
-
-	if res.StatusCode != 200 {
-		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
-	}
+	GetRequestHandler(request, t)
 }
 
 // TestModifierPartieErrBD test la modification de la partie créée plus haut
 // avec erreur de connexion à la base de données
 func TestModifierPartieErrBD(t *testing.T) {
-	acqConf.ConnectionString = "host=localhost user=aaaaa dbname=tsap_acquisition sslmode=disable password="
 	reader = strings.NewReader(
 		`{
 			"Date": "2016-06-22 06:02",
@@ -381,37 +295,19 @@ func TestModifierPartieErrBD(t *testing.T) {
             "Status": "Local",
             "TeamID": 1
 		}`)
-
 	// rmID est utilisé ici pour permettre la modification de la partie créée plus haut
 	request, err := http.NewRequest("PUT", baseURL+"/api/parties/"+rmID, reader)
-	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	bodyBuffer, _ := ioutil.ReadAll(res.Body)
-
-	var me MessageError
-	err = json.Unmarshal(bodyBuffer, &me)
-	if err != nil {
-		t.Error(err)
-		return
-	}
-
-	if res.StatusCode != 400 {
-		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
-	}
-
-	if !strings.Contains(me.Err, "pq: role \"aaaaa\" does not exist") {
-		t.Error("Error expected : ", me.Err)
-	}
+	BDErrorHandler(request, t)
 }
 
 // TestModifierPartie test la modification de la partie créée plus haut
 // avec une erreur dans la clé du géodécodeur
 func TestModifierPartieErrKeyGeodecoder(t *testing.T) {
-	acqConf.ConnectionString = "host=localhost user=postgres dbname=tsap_acquisition sslmode=disable password="
 	keys.Geodecoder = ""
 	reader = strings.NewReader(
 		`{
@@ -426,15 +322,12 @@ func TestModifierPartieErrKeyGeodecoder(t *testing.T) {
 
 	// rmID est utilisé ici pour permettre la modification de la partie créée plus haut
 	request, err := http.NewRequest("PUT", baseURL+"/api/parties/"+rmID, reader)
-	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	if res.StatusCode != 400 {
-		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
-	}
+	BadRequestHandler(request, t)
 }
 
 // TestModifierPartieErrKeyWeather test la modification de la partie créée plus haut
@@ -455,15 +348,12 @@ func TestModifierPartieErrKeyWeather(t *testing.T) {
 
 	// rmID est utilisé ici pour permettre la modification de la partie créée plus haut
 	request, err := http.NewRequest("PUT", baseURL+"/api/parties/"+rmID, reader)
-	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	if res.StatusCode != 400 {
-		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
-	}
+	BadRequestHandler(request, t)
 }
 
 // TestModifierPartieErrDate test la modification de la partie créée plus haut
@@ -483,15 +373,12 @@ func TestModifierPartieErrDate(t *testing.T) {
 
 	// rmID est utilisé ici pour permettre la modification de la partie créée plus haut
 	request, err := http.NewRequest("PUT", baseURL+"/api/parties/"+rmID, reader)
-	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	if res.StatusCode != 400 {
-		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
-	}
+	BadRequestHandler(request, t)
 }
 
 // TestModifierPartie test la modification de la partie créée plus haut
@@ -575,18 +462,13 @@ func TestModifierPartieVide(t *testing.T) {
 
 	// rmID est utilisé ici pour permettre la modification de la partie créée plus haut
 	request, err := http.NewRequest("PUT", baseURL+"/api/parties/"+rmID, reader)
-	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	if res.StatusCode != 400 {
-		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
-	}
+	me := BadRequestHandler(request, t)
 
-	var me MessageError
-	responseMapping(&me, res)
 	if !strings.Contains(me.Err, "Veuillez remplir tous les champs.") {
 		t.Error("Error expected: ", me.Err)
 	}
@@ -601,15 +483,12 @@ func TestModifierPartieMauvaiseInfo(t *testing.T) {
 
 	// rmID est utilisé ici pour permettre la modification de la partie créée plus haut
 	request, err := http.NewRequest("PUT", baseURL+"/api/parties/"+rmID, reader)
-	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	if res.StatusCode != 400 {
-		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
-	}
+	BadRequestHandler(request, t)
 }
 
 // TestModifierPartieErr test que la modification avec une
@@ -621,15 +500,12 @@ func TestModifierPartieErr(t *testing.T) {
 
 	// rmID est utilisé ici pour permettre la modification de la partie créée plus haut
 	request, err := http.NewRequest("PUT", baseURL+"/api/parties/"+rmID, reader)
-	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	if res.StatusCode != 400 {
-		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
-	}
+	BadRequestHandler(request, t)
 }
 
 // TestModifierPartieCreer test que la modification crée
@@ -640,61 +516,38 @@ func TestModifierPartieCreer(t *testing.T) {
 
 	// rmID est utilisé ici pour permettre la modification de la partie créée plus haut
 	request, err := http.NewRequest("PUT", baseURL+"/api/parties/0", reader)
-	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	if res.StatusCode != 201 {
-		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
-	}
+	PostRequestHandler(request, t)
 }
 
 // TestSupprimerPartieErrBD test la suppression de la partie préalablement créée
 // avec erreur de connexion à la base de données
 func TestSupprimerPartieErrBD(t *testing.T) {
-	acqConf.ConnectionString = "host=localhost user=aaaaa dbname=tsap_acquisition sslmode=disable password="
 	reader = strings.NewReader("")
 	request, err := http.NewRequest("DELETE", baseURL+"/api/parties/"+rmID, reader)
-	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	bodyBuffer, _ := ioutil.ReadAll(res.Body)
+	BDErrorHandler(request, t)
+}
 
-	var me MessageError
-	err = json.Unmarshal(bodyBuffer, &me)
+// TestSupprimerPartie test la suppression de la partie préalablement créée
+func TestSupprimerPartie(t *testing.T) {
+	reader = strings.NewReader("")
+	request, err := http.NewRequest("DELETE", baseURL+"/api/parties/"+rmID, reader)
+
 	if err != nil {
 		t.Error(err)
 		return
 	}
 
-	if res.StatusCode != 400 {
-		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
-	}
-
-	if !strings.Contains(me.Err, "pq: role \"aaaaa\" does not exist") {
-		t.Error("Error expected : ", me.Err)
-	}
-}
-
-// TestSupprimerPartie test la suppression de la partie préalablement créée
-func TestSupprimerPartie(t *testing.T) {
-	acqConf.ConnectionString = "host=localhost user=postgres dbname=tsap_acquisition sslmode=disable password="
-	reader = strings.NewReader("")
-	request, err := http.NewRequest("DELETE", baseURL+"/api/parties/"+rmID, reader)
-	res, err := SecureRequest(request)
-
-	if err != nil {
-		t.Error(err)
-	}
-
-	if res.StatusCode != 204 {
-		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
-	}
+	DeleteHandler(request, t)
 }
 
 // TestGetPartieErr test la récupération de la partie supprimée
@@ -723,18 +576,13 @@ func TestGetPartieErr(t *testing.T) {
 func TestSupprimerPartieSupprime(t *testing.T) {
 	reader = strings.NewReader("")
 	request, err := http.NewRequest("DELETE", baseURL+"/api/parties/"+rmID, reader)
-	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	if res.StatusCode != 400 {
-		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
-	}
+	me := BadRequestHandler(request, t)
 
-	var me MessageError
-	responseMapping(&me, res)
 	if !strings.Contains(me.Err, "Aucune partie ne correspond. Elle doit déjà avoir été supprimée!") {
 		t.Error("Error expected: ", me.Err)
 	}
@@ -773,13 +621,10 @@ func TestGetPartiesMulti(t *testing.T) {
 func TestSendOptionsParies(t *testing.T) {
 	reader = strings.NewReader("")
 	request, err := http.NewRequest("OPTIONS", baseURL+"/api/upload/0", reader)
-	res, err := http.DefaultClient.Do(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	if res.StatusCode != 200 {
-		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
-	}
+	GetRequestHandler(request, t)
 }

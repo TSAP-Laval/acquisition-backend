@@ -1,9 +1,9 @@
 //
 // Fichier     : coachs_test.go
-// Développeur : ?
+// Développeur : Laurent Leclerc Poulin
 //
 // Permet de gérer toutes les interractions nécessaires à la création,
-// la modification, la seppression et la récupération des informations
+// la modification, la suppression et la récupération des informations
 // d'un entraineur.
 //
 
@@ -23,7 +23,6 @@ import (
 // TestCreerCoachErrBD test la création d'un nouvel entraineur
 // avec erreur de connexion à la base de données
 func TestCreerCoachErrBD(t *testing.T) {
-	acqConf.ConnectionString = "host=localhost user=aaaaa dbname=tsap_acquisition sslmode=disable password="
 	reader = strings.NewReader(
 		`{
 			"Fname": "entraineur", 
@@ -31,36 +30,18 @@ func TestCreerCoachErrBD(t *testing.T) {
 			"Email": "entraineur@entraineur.ca",
 			"PassHash": "$2a$10$txBDGNabCC0j.n8wFURChO9KazKeQFOyPtUliyH.V5b7DbTkwsJxe"
 		}`)
-
 	request, err := http.NewRequest("POST", baseURL+"/api/coaches", reader)
-	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	bodyBuffer, _ := ioutil.ReadAll(res.Body)
-
-	var me MessageError
-	err = json.Unmarshal(bodyBuffer, &me)
-	if err != nil {
-		t.Error(err)
-		return
-	}
-
-	if res.StatusCode != 400 {
-		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
-	}
-
-	if !strings.Contains(me.Err, "pq: role \"aaaaa\" does not exist") {
-		t.Error("Error expected : ", me.Err)
-	}
+	BDErrorHandler(request, t)
 }
 
 // TestCreerCoach test la création d'un nouvel entraineur
 // avec des erreurs dans le JSON
 func TestCreerCoachErr(t *testing.T) {
-	acqConf.ConnectionString = "host=localhost user=postgres dbname=tsap_acquisition sslmode=disable password="
 	reader = strings.NewReader(
 		`{
 			"Fname " entraineur", 
@@ -68,26 +49,13 @@ func TestCreerCoachErr(t *testing.T) {
 			"Email": "entraineur@entraineur.ca",
 			"PassHash": "$2a$10$txBDGNabCC0j.n8wFURChO9KazKeQFOyPtUliyH.V5b7DbTkwsJxe"
 		}`)
-
 	request, err := http.NewRequest("POST", baseURL+"/api/coaches", reader)
-	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	bodyBuffer, _ := ioutil.ReadAll(res.Body)
-
-	var me MessageError
-	err = json.Unmarshal(bodyBuffer, &me)
-	if err != nil {
-		t.Error(err)
-		return
-	}
-
-	if res.StatusCode != 400 {
-		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
-	}
+	me := BadRequestHandler(request, t)
 
 	if !strings.Contains(me.Err, "Certaines informations entrées sont invalides!") {
 		t.Error("Error expected : ", me.Err)
@@ -138,24 +106,12 @@ func TestCreerCoachInfosManquantes(t *testing.T) {
 		}`)
 
 	request, err := http.NewRequest("POST", baseURL+"/api/coaches", reader)
-	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	bodyBuffer, _ := ioutil.ReadAll(res.Body)
-
-	var me MessageError
-	err = json.Unmarshal(bodyBuffer, &me)
-	if err != nil {
-		t.Error(err)
-		return
-	}
-
-	if res.StatusCode != 400 {
-		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
-	}
+	me := BadRequestHandler(request, t)
 
 	if !strings.Contains(me.Err, "Certaines informations sont manquantes!") {
 		t.Error("Error expected : ", me.Err)
@@ -173,24 +129,12 @@ func TestCreerCoachCree(t *testing.T) {
 		}`)
 
 	request, err := http.NewRequest("POST", baseURL+"/api/coaches", reader)
-	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	bodyBuffer, _ := ioutil.ReadAll(res.Body)
-
-	var me MessageError
-	err = json.Unmarshal(bodyBuffer, &me)
-	if err != nil {
-		t.Error(err)
-		return
-	}
-
-	if res.StatusCode != 400 {
-		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
-	}
+	me := BadRequestHandler(request, t)
 
 	if !strings.Contains(me.Err, "Un entraineur avec la même adresse courriel existe déjà") {
 		t.Error("Error expected : ", me.Err)
@@ -200,126 +144,65 @@ func TestCreerCoachCree(t *testing.T) {
 // TestGetCoachsErrBD test la récupération des entraineurs
 // avec erreur de connexion à la base de données
 func TestGetCoachsErrBD(t *testing.T) {
-	acqConf.ConnectionString = "host=localhost user=aaaaa dbname=tsap_acquisition sslmode=disable password="
 	reader = strings.NewReader("")
 	request, err := http.NewRequest("GET", baseURL+"/api/coaches", reader)
-	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	bodyBuffer, _ := ioutil.ReadAll(res.Body)
+	BDErrorHandler(request, t)
+}
 
-	var me MessageError
-	err = json.Unmarshal(bodyBuffer, &me)
+// TestGetCoachs test la récupération des entraineurs
+func TestGetCoachs(t *testing.T) {
+	reader = strings.NewReader("")
+	request, err := http.NewRequest("GET", baseURL+"/api/coaches", reader)
+
 	if err != nil {
 		t.Error(err)
 		return
 	}
 
-	if res.StatusCode != 400 {
-		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
-	}
-
-	if !strings.Contains(me.Err, "pq: role \"aaaaa\" does not exist") {
-		t.Error("Error expected : ", me.Err)
-	}
-}
-
-// TestGetCoachs test la récupération des entraineurs
-func TestGetCoachs(t *testing.T) {
-	acqConf.ConnectionString = "host=localhost user=postgres dbname=tsap_acquisition sslmode=disable password="
-	reader = strings.NewReader("")
-	request, err := http.NewRequest("GET", baseURL+"/api/coaches", reader)
-	res, err := SecureRequest(request)
-
-	if err != nil {
-		t.Error(err)
-	}
-
-	if res.StatusCode != 200 {
-		t.Errorf("Get coachs success: %d", res.StatusCode)
-	}
+	GetRequestHandler(request, t)
 }
 
 // TestUpdateCoachErrBD test l'ajout d'un entraineur dans une équipe
 // avec erreur de connexion dans la base de données
 func TestUpdateCoachErrBD(t *testing.T) {
-	acqConf.ConnectionString = "host=localhost user=aaaaa dbname=tsap_acquisition sslmode=disable password="
 	reader = strings.NewReader("")
 	request, err := http.NewRequest("PUT", baseURL+"/api/coaches/"+rmID+"/equipes/1", reader)
-	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	bodyBuffer, _ := ioutil.ReadAll(res.Body)
-
-	var me MessageError
-	err = json.Unmarshal(bodyBuffer, &me)
-	if err != nil {
-		t.Error(err)
-		return
-	}
-
-	if res.StatusCode != 400 {
-		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
-	}
-
-	if !strings.Contains(me.Err, "pq: role \"aaaaa\" does not exist") {
-		t.Error("Error expected : ", me.Err)
-	}
+	BDErrorHandler(request, t)
 }
 
 // TestUpdateCoach test l'ajout d'un entraineur dans une équipe
 func TestUpdateCoach(t *testing.T) {
-	acqConf.ConnectionString = "host=localhost user=postgres dbname=tsap_acquisition sslmode=disable password="
 	reader = strings.NewReader("")
 	request, err := http.NewRequest("PUT", baseURL+"/api/coaches/"+rmID+"/equipes/1", reader)
-	res, err := SecureRequest(request)
 
-	if err != nil {
-		t.Error(err)
-	}
-
-	if res.StatusCode != 200 {
-		bodyBuffer, _ := ioutil.ReadAll(res.Body)
-		var me MessageError
-		err = json.Unmarshal(bodyBuffer, &me)
-		if err != nil {
-			t.Error(err)
-			return
-		}
-		t.Error("Error expected : ", me.Err)
-		t.Errorf("Success expected: %d", res.StatusCode)
-	}
-}
-
-// TestUpdateCoachDeja test l'ajout d'un entraineur dans une équipe dont il fait déjà partie
-func TestUpdateCoachDeja(t *testing.T) {
-	acqConf.ConnectionString = "host=localhost user=postgres dbname=tsap_acquisition sslmode=disable password="
-	reader = strings.NewReader("")
-	request, err := http.NewRequest("PUT", baseURL+"/api/coaches/"+rmID+"/equipes/1", reader)
-	res, err := SecureRequest(request)
-
-	if err != nil {
-		t.Error(err)
-	}
-
-	bodyBuffer, _ := ioutil.ReadAll(res.Body)
-
-	var me MessageError
-	err = json.Unmarshal(bodyBuffer, &me)
 	if err != nil {
 		t.Error(err)
 		return
 	}
 
-	if res.StatusCode != 400 {
-		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
+	GetRequestHandler(request, t)
+}
+
+// TestUpdateCoachDeja test l'ajout d'un entraineur dans une équipe dont il fait déjà partie
+func TestUpdateCoachDeja(t *testing.T) {
+	reader = strings.NewReader("")
+	request, err := http.NewRequest("PUT", baseURL+"/api/coaches/"+rmID+"/equipes/1", reader)
+
+	if err != nil {
+		t.Error(err)
 	}
+
+	me := BadRequestHandler(request, t)
 
 	if !strings.Contains(me.Err, "L'entraineur fait déjà parti de l'équipe") {
 		t.Error("Error expected : ", me.Err)
@@ -330,24 +213,12 @@ func TestUpdateCoachDeja(t *testing.T) {
 func TestUpdateCoachExistePas(t *testing.T) {
 	reader = strings.NewReader("")
 	request, err := http.NewRequest("PUT", baseURL+"/api/coaches/100/equipes/1", reader)
-	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	bodyBuffer, _ := ioutil.ReadAll(res.Body)
-
-	var me MessageError
-	err = json.Unmarshal(bodyBuffer, &me)
-	if err != nil {
-		t.Error(err)
-		return
-	}
-
-	if res.StatusCode != 400 {
-		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
-	}
+	me := BadRequestHandler(request, t)
 
 	if !strings.Contains(me.Err, "Aucun entraineur ne correspond") {
 		t.Error("Error expected : ", me.Err)
@@ -358,24 +229,12 @@ func TestUpdateCoachExistePas(t *testing.T) {
 func TestUpdateCoachTeamExistePas(t *testing.T) {
 	reader = strings.NewReader("")
 	request, err := http.NewRequest("PUT", baseURL+"/api/coaches/1/equipes/100", reader)
-	res, err := SecureRequest(request)
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	bodyBuffer, _ := ioutil.ReadAll(res.Body)
-
-	var me MessageError
-	err = json.Unmarshal(bodyBuffer, &me)
-	if err != nil {
-		t.Error(err)
-		return
-	}
-
-	if res.StatusCode != 400 {
-		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
-	}
+	me := BadRequestHandler(request, t)
 
 	if !strings.Contains(me.Err, "Aucune équipe ne correspond") {
 		t.Error("Error expected : ", me.Err)

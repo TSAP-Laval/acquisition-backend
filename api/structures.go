@@ -1,10 +1,6 @@
 package api
 
-import (
-	"time"
-
-	"github.com/jinzhu/gorm"
-)
+import "github.com/jinzhu/gorm"
 
 // Admins les administrateurs
 type Admins struct {
@@ -170,10 +166,10 @@ type Actions struct {
 	Y2              float64
 	X3              float64
 	Y3              float64
-	Time            time.Duration
+	Time            float64
 	HomeScore       int
 	GuestScore      int
-	PLayer          Players
+	Player          Players
 	PlayerID        int
 }
 
@@ -208,7 +204,7 @@ type CoachTeam struct {
 	TeamID  int
 }
 
-// Reception du ballon
+// ReceptionType Reception du ballon
 type ReceptionType struct {
 	gorm.Model
 	Name string
@@ -224,7 +220,7 @@ type Metrics struct {
 
 // Expand effectue un fetch de tous les children de l'action
 // (has-many, has-one, pas belongs-to)
-func (a *Actions) Expand(db *gorm.DB) {
+/*func (a *Actions) Expand(db *gorm.DB) {
 	db.Model(a).Related(&(a.ActionType))
 	db.Model(a).Related(&(a.Zone))
 }
@@ -235,4 +231,4 @@ func (g *Games) Expand(db *gorm.DB) {
 	db.Model(g).Related(&(g.Action))
 	db.Model(g).Related(&(g.Team), "TeamID")
 	db.Model(g).Related(&(g.OpposingTeam), "OpposingTeamID")
-}
+}*/

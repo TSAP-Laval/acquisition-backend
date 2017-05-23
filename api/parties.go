@@ -206,9 +206,6 @@ func (a *AcquisitionService) PartieHandler(w http.ResponseWriter, r *http.Reques
 			msg := map[string]string{"error": "Veuillez remplir tous les champs."}
 			Message(w, msg, http.StatusBadRequest)
 		}
-	case "OPTIONS":
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.WriteHeader(http.StatusOK)
 	}
 }
 
