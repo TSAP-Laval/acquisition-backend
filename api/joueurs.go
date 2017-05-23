@@ -39,10 +39,6 @@ func (a *AcquisitionService) GetJoueursHandler(w http.ResponseWriter, r *http.Re
 func (a *AcquisitionService) HandleJoueur(w http.ResponseWriter, r *http.Request) {
 	db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
 	defer db.Close()
-	if err != nil {
-		a.ErrorHandler(w, err)
-		return
-	}
 
 	id := mux.Vars(r)["id"]
 
