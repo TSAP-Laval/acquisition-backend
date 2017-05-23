@@ -80,29 +80,6 @@ func TestCreerJoueur(t *testing.T) {
 	}
 }
 
-// TestModifJoueurErrBD test la modification d'un joueur avec erreur
-// de connexion à la base de données
-func TestModifJoueurErrBD(t *testing.T) {
-	reader = strings.NewReader(
-		`{
-			"Lname": "Test",
-			"Fname": "Test",
-			"Number": 8,
-			"Email": "test@test.com",
-			"PassHash": "test123",
-			"EquipeID": "2"
-		}`)
-
-	// rmID est utilisé, ici pour permettre la modification du joueur tout juste créé
-	request, err := http.NewRequest("PUT", baseURL+"/api/joueurs/"+rmID, reader)
-
-	if err != nil {
-		t.Error(err)
-	}
-
-	BDErrorHandler(request, t)
-}
-
 // TestModifJoueurErr test la modification d'un joueur avec une erreur dans le JSON
 func TestModifJoueurErr(t *testing.T) {
 	reader = strings.NewReader(
@@ -166,6 +143,29 @@ func TestModifJoueur(t *testing.T) {
 	if p.Number != 8 {
 		t.Errorf("Success expected: %d", p.Number)
 	}
+}
+
+// TestModifJoueurErrBD test la modification d'un joueur avec erreur
+// de connexion à la base de données
+func TestModifJoueurErrBD(t *testing.T) {
+	reader = strings.NewReader(
+		`{
+			"Lname": "Test",
+			"Fname": "Test",
+			"Number": 8,
+			"Email": "test@test.com",
+			"PassHash": "test123",
+			"EquipeID": "2"
+		}`)
+
+	// rmID est utilisé, ici pour permettre la modification du joueur tout juste créé
+	request, err := http.NewRequest("PUT", baseURL+"/api/joueurs/"+rmID, reader)
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	BDErrorHandler(request, t)
 }
 
 // TestJoueurOptions test une requête OPTIONS pour un joueur
