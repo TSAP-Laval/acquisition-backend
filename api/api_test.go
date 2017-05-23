@@ -10,7 +10,6 @@
 package api_test
 
 import (
-	"encoding/json"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -133,13 +132,7 @@ func BadRequestHandler(request *http.Request, t *testing.T) (me MessageError) {
 		t.Error(err)
 	}
 
-	bodyBuffer, _ := ioutil.ReadAll(res.Body)
-
-	err = json.Unmarshal(bodyBuffer, &me)
-	if err != nil {
-		t.Error(err)
-		return MessageError{}
-	}
+	responseMapping(&me, res)
 
 	if res.StatusCode != 400 {
 		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
@@ -183,15 +176,8 @@ func BDErrorHandler(request *http.Request, t *testing.T) {
 		t.Error(err)
 	}
 
-	bodyBuffer, _ := ioutil.ReadAll(res.Body)
-	defer res.Body.Close()
-
 	var me MessageError
-	err = json.Unmarshal(bodyBuffer, &me)
-	if err != nil {
-		t.Error(err)
-		return
-	}
+	responseMapping(&me, res)
 
 	if res.StatusCode != 400 {
 		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})

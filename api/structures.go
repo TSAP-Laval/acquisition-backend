@@ -1,10 +1,6 @@
 package api
 
-import (
-	"time"
-
-	"github.com/jinzhu/gorm"
-)
+import "github.com/jinzhu/gorm"
 
 // Admins les administrateurs
 type Admins struct {
@@ -170,7 +166,7 @@ type Actions struct {
 	Y2              float64
 	X3              float64
 	Y3              float64
-	Time            time.Duration
+	Time            float64
 	HomeScore       int
 	GuestScore      int
 	Player          Players

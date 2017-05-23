@@ -78,3 +78,27 @@ func (a *AcquisitionService) CreerActionHandler(w http.ResponseWriter, r *http.R
 	}
 
 }
+
+// SupprimerActionHandler Gère la suppression d'une action
+func (a *AcquisitionService) SupprimerActionHandler(w http.ResponseWriter, r *http.Request) {
+	db, err := gorm.Open(a.config.DatabaseDriver, a.config.ConnectionString)
+	defer db.Close()
+	if err != nil {
+		a.ErrorHandler(w, err)
+		return
+	}
+
+	id := mux.Vars(r)["id"]
+
+	var ac Actions
+	db.Model(&ac).Where("ID = ?", id).First(&ac)
+
+	if ac.ID == 0 {
+		msg := map[string]string{"error": "Aucune action ne correspond. Elle doit déjà avoir été supprimée!"}
+		Message(w, msg, http.StatusNotFound)
+	} else {
+		db.Where("ID = ?", ac.ID).Delete(&ac)
+		Message(w, "", http.StatusNoContent)
+	}
+
+}

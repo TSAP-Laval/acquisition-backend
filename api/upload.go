@@ -258,9 +258,6 @@ func (a *AcquisitionService) UploadHandler(w http.ResponseWriter, r *http.Reques
 
 			Message(w, "", http.StatusNoContent)
 		}
-	case "OPTIONS":
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.WriteHeader(http.StatusOK)
 	}
 }
 

@@ -201,7 +201,7 @@ func (a *AcquisitionService) RemplirBD(w http.ResponseWriter, r *http.Request) {
 		TokenLogin: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbiI6dHJ1ZSwiZXhwIjoxNDk0Njk0OTU0fQ.TBukRueijLUla7hejpR064CERMXJy3CRbWWhPQPQ5fY"}
 	db.Create(&badAdmin)
 
-	Uneaction := Actions{ActionTypeID: 1, ZoneID: 1, GameID: 1, X1: 0, Y1: 0, X2: 0, Y2: 0, X3: 0, Y3: 0, Time: 10, HomeScore: 0, GuestScore: 0, PlayerID: 1}
+	Uneaction := Actions{ActionTypeID: 1, ZoneID: 1, GameID: 1, X1: 0, Y1: 0, X2: 0, Y2: 0, X3: 0, Y3: 0, Time: 10.5, HomeScore: 0, GuestScore: 0, PlayerID: 1}
 	db.Create(&Uneaction)
 
 	Message(w, "", http.StatusCreated)

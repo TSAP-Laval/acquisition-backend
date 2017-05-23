@@ -548,6 +548,53 @@ func TestGetActionsErrID(t *testing.T) {
 	}
 }
 
+// TestSupprimerActionsErrBD test la suppression d'une action
+// avec erreur de connexion à la base de données
+func TestSupprimerActionsErrBD(t *testing.T) {
+	reader = strings.NewReader("")
+	request, err := http.NewRequest("DELETE", baseURL+"/api/actions/"+rmID, reader)
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	BDErrorHandler(request, t)
+}
+
+// TestSupprimerActions test la suppression d'une action
+func TestSupprimerActions(t *testing.T) {
+	reader = strings.NewReader("")
+	request, err := http.NewRequest("DELETE", baseURL+"/api/actions/"+rmID, reader)
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	DeleteHandler(request, t)
+}
+
+// TestSupprimerActionsErr test la suppression d'une action déjà supprimée
+func TestSupprimerActionsErr(t *testing.T) {
+	reader = strings.NewReader("")
+	request, err := http.NewRequest("DELETE", baseURL+"/api/actions/"+rmID, reader)
+	res, err := SecureRequest(request)
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	var me MessageError
+	responseMapping(&me, res)
+
+	if res.StatusCode != 404 {
+		LogErrors(Messages{t, "Response code expected: %d", res.StatusCode, true, request, res})
+	}
+
+	if !strings.Contains(me.Err, "Aucune action ne correspond. Elle doit déjà avoir été supprimée!") {
+		t.Error("Error expected : ", me.Err)
+	}
+}
+
 // TestSupprimerPartiePourAction test la suppression de la partie préalablement créée
 func TestSupprimerPartiePourAction(t *testing.T) {
 	reader = strings.NewReader("")
